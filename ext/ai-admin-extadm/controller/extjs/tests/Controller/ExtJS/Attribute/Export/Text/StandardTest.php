@@ -6,9 +6,9 @@ namespace Aimeos\Controller\ExtJS\Attribute\Export\Text;
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
@@ -43,7 +43,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$manager = \Aimeos\MShop\Attribute\Manager\Factory::createManager( $this->context );
 
-		$ids = array();
+		$ids = [];
 		foreach( $manager->searchItems( $manager->createSearch() ) as $item ) {
 			$ids[] = $item->getId();
 		}
@@ -80,7 +80,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue( file_exists( $deCSV ) );
 		$fh = fopen( $deCSV, 'r' );
-		$lines = array();
+		$lines = [];
 
 		while( ( $data = fgetcsv( $fh ) ) != false ) {
 			$lines[] = $data;
@@ -107,10 +107,10 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertEquals( '', $lines[163][0] );
 		$this->assertEquals( 'width', $lines[163][1] );
-		$this->assertEquals( '29', $lines[163][2] );
+		$this->assertEquals( '30', $lines[163][2] );
 		$this->assertEquals( 'default', $lines[163][3] );
 		$this->assertEquals( 'name', $lines[163][4] );
-		$this->assertEquals( '29', $lines[163][6] );
+		$this->assertEquals( '30', $lines[163][6] );
 	}
 
 

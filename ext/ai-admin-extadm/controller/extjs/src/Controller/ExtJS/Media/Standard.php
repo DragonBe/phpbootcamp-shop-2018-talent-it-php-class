@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -47,7 +47,7 @@ class Standard
 		$this->checkParams( $params, array( 'site', 'items' ) );
 		$this->setLocale( $params->site );
 
-		$idList = array();
+		$idList = [];
 		$context = $this->getContext();
 		$manager = \Aimeos\MShop\Factory::createManager( $context, 'media' );
 		$cntl = \Aimeos\Controller\Common\Media\Factory::createController( $context );
@@ -117,16 +117,16 @@ class Standard
 		$typeManager = \Aimeos\MShop\Factory::createManager( $context, 'media/type' );
 
 		$item = $manager->createItem();
-		$item->setTypeId( $typeManager->findItem( 'default', array(), 'product' )->getId() );
+		$item->setTypeId( $typeManager->findItem( 'default', [], 'product' )->getId() );
 		$item->setDomain( 'product' );
 		$item->setStatus( 1 );
 
 		$file = $this->getUploadedFile();
 
 		\Aimeos\Controller\Common\Media\Factory::createController( $context )->add( $item, $file );
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
-		return (object) $item->toArray();
+		return (object) $item->toArray( true );
 	}
 
 

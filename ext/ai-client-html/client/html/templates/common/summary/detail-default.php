@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 /* Available data:
@@ -21,7 +21,7 @@ $enc = $this->encoder();
 $basketTarget = $this->config( 'client/html/basket/standard/url/target' );
 $basketController = $this->config( 'client/html/basket/standard/url/controller', 'basket' );
 $basketAction = $this->config( 'client/html/basket/standard/url/action', 'index' );
-$basketConfig = $this->config( 'client/html/basket/standard/url/config', array() );
+$basketConfig = $this->config( 'client/html/basket/standard/url/config', [] );
 
 $detailTarget = $this->config( 'client/html/catalog/detail/url/target' );
 $detailController = $this->config( 'client/html/catalog/detail/url/controller', 'catalog' );
@@ -173,7 +173,7 @@ $priceFormat = $this->translate( 'client', '%1$s %2$s' );
 
 $unhide = $this->get( 'summaryShowDownloadAttributes', false );
 $modify = $this->get( 'summaryEnableModify', false );
-$errors = $this->get( 'summaryErrorCodes', array() );
+$errors = $this->get( 'summaryErrorCodes', [] );
 
 
 ?>
@@ -182,9 +182,9 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 	<thead>
 		<tr>
 			<th class="details"></th>
-			<th class="quantity"><?php echo $enc->html( $this->translate( 'client', 'Quantity' ), $enc::TRUST ); ?></th>
-			<th class="unitprice"><?php echo $enc->html( $this->translate( 'client', 'Price' ), $enc::TRUST ); ?></th>
-			<th class="price"><?php echo $enc->html( $this->translate( 'client', 'Sum' ), $enc::TRUST ); ?></th>
+			<th class="quantity"><?= $enc->html( $this->translate( 'client', 'Quantity' ), $enc::TRUST ); ?></th>
+			<th class="unitprice"><?= $enc->html( $this->translate( 'client', 'Price' ), $enc::TRUST ); ?></th>
+			<th class="price"><?= $enc->html( $this->translate( 'client', 'Sum' ), $enc::TRUST ); ?></th>
 			<?php if( $modify ) : ?>
 				<th class="action"></th>
 			<?php endif; ?>
@@ -194,50 +194,50 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 	<tbody>
 
 		<?php foreach( $this->summaryBasket->getProducts() as $position => $product ) : $totalQuantity += $product->getQuantity(); ?>
-			<tr class="product <?php echo ( isset( $errors['product'][$position] ) ? 'error' : '' ); ?>">
+			<tr class="product <?= ( isset( $errors['product'][$position] ) ? 'error' : '' ); ?>">
 
 				<td class="details">
 
 					<?php if( ( $url = $product->getMediaUrl() ) != '' ) : ?>
-						<img src="<?php echo $enc->attr( $this->content( $url ) ); ?>" />
+						<img src="<?= $enc->attr( $this->content( $url ) ); ?>" />
 					<?php endif; ?>
 
-					<?php $params = array( 'd_prodid' => $product->getProductId(), 'd_name' => $product->getName( 'url' ) ); ?>
-					<a class="product-name" href="<?php echo $enc->attr( $this->url( $detailTarget, $detailController, $detailAction, $params, array(), $detailConfig ) ); ?>">
-						<?php echo $enc->html( $product->getName(), $enc::TRUST ); ?>
+					<?php $params = array_merge( $this->param(), ['d_prodid' => $product->getProductId(), 'd_name' => $product->getName( 'url' )] ); ?>
+					<a class="product-name" href="<?= $enc->attr( $this->url( ( $product->getTarget() ?: $detailTarget ), $detailController, $detailAction, $params, [], $detailConfig ) ); ?>">
+						<?= $enc->html( $product->getName(), $enc::TRUST ); ?>
 					</a>
 
 					<p class="code">
-						<span class="name"><?php echo $enc->html( $this->translate( 'client', 'Article no.:' ), $enc::TRUST ); ?></span>
-						<span class="value"><?php echo $product->getProductCode(); ?></span>
+						<span class="name"><?= $enc->html( $this->translate( 'client', 'Article no.:' ), $enc::TRUST ); ?></span>
+						<span class="value"><?= $product->getProductCode(); ?></span>
 					</p>
 
 					<?php foreach( $attrTypes as $attrType ) : ?>
-						<ul class="attr-list <?php echo $enc->attr( 'attr-list-' . $attrType ); ?>">
+						<ul class="attr-list attr-type-<?= $enc->attr( $attrType ); ?>">
 							<?php foreach( $product->getAttributes( $attrType ) as $attribute ) : ?>
-								<li class="attr-item">
-									<span class="name"><?php echo $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
-									<span class="value"><?php echo $enc->html( ( $attribute->getName() != '' ? $attribute->getName() : $attribute->getValue() ) ); ?></span>
+								<li class="attr-item attr-code-<?= $enc->attr( $attribute->getCode() ); ?>">
+									<span class="name"><?= $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
+									<span class="value"><?= $enc->html( ( $attribute->getName() != '' ? $attribute->getName() : $attribute->getValue() ) ); ?></span>
 								</li>
 							<?php endforeach; ?>
 						</ul>
 					<?php endforeach; ?>
 
 
-					<?php if( ( $attributes = $product->getAttributes( 'config' ) ) !== array() ) : ?>
+					<?php if( ( $attributes = $product->getAttributes( 'config' ) ) !== [] ) : ?>
 						<ul class="attr-list attr-list-config">
 
 							<?php foreach( $attributes as $attribute ) : ?>
-								<li class="attr-item">
+								<li class="attr-item attr-code-<?= $enc->attr( $attribute->getCode() ); ?>">
 
 									<?php if( $modify ) : ?>
 										<?php $params = array( 'b_action' => 'edit', 'b_position' => $position, 'b_quantity' => $product->getQuantity(), 'b_attrconfcode' => $attribute->getCode() ); ?>
-										<a class="change" href="<?php echo $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $params, array(), $basketConfig ) ); ?>">
+										<a class="change" href="<?= $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $params, [], $basketConfig ) ); ?>">
 									<?php endif; ?>
 
 									<span class="sign">−</span>
-									<span class="name"><?php echo $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
-									<span class="value"><?php echo $enc->html( ( $attribute->getName() != '' ? $attribute->getName() : $attribute->getValue() ) ); ?></span>
+									<span class="name"><?= $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
+									<span class="value"><?= $enc->html( ( $attribute->getName() != '' ? $attribute->getName() : $attribute->getValue() ) ); ?></span>
 
 									<?php if( $modify ) : ?>
 										</a>
@@ -250,13 +250,13 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 					<?php endif; ?>
 
 
-					<?php if( ( $attributes = $product->getAttributes( 'custom' ) ) !== array() ) : ?>
+					<?php if( ( $attributes = $product->getAttributes( 'custom' ) ) !== [] ) : ?>
 						<ul class="attr-list attr-list-custom">
 
 							<?php foreach( $attributes as $attribute ) : ?>
-								<li class="attr-item">
-									<span class="name"><?php echo $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
-									<span class="value"><?php echo $enc->html( $attribute->getValue() ); ?></span>
+								<li class="attr-item attr-code-<?= $enc->attr( $attribute->getCode() ); ?>">
+									<span class="name"><?= $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
+									<span class="value"><?= $enc->html( $attribute->getValue() ); ?></span>
 								</li>
 							<?php endforeach; ?>
 
@@ -264,16 +264,16 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 					<?php endif; ?>
 
 
-					<?php if( $unhide && ( $attributes = $product->getAttributes( 'hidden' ) ) !== array() ) : ?>
+					<?php if( $unhide && ( $attributes = $product->getAttributes( 'hidden' ) ) !== [] ) : ?>
 						<ul class="attr-list attr-list-hidden">
 
 							<?php foreach( $attributes as $attribute ) : ?>
 								<?php if( $attribute->getCode() === 'download' ) : ?>
-									<li class="attr-item">
-										<span class="name"><?php echo $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
+									<li class="attr-item attr-code-<?= $enc->attr( $attribute->getCode() ); ?>">
+										<span class="name"><?= $enc->html( $this->translate( 'client/code', $attribute->getCode() ) ); ?></span>
 										<span class="value">
-											<a href="<?php echo $enc->attr( $this->url( $dlTarget, $dlController, $dlAction, array( 'dl_id' => $attribute->getId() ), array(), $dlConfig ) ); ?>" >
-												<?php echo $enc->html( $attribute->getName() ); ?>
+											<a href="<?= $enc->attr( $this->url( $dlTarget, $dlController, $dlAction, array( 'dl_id' => $attribute->getId() ), [], $dlConfig ) ); ?>" >
+												<?= $enc->html( $attribute->getName() ); ?>
 											</a>
 										</span>
 									</li>
@@ -291,39 +291,39 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 						<?php if( $product->getQuantity() > 1 ) : ?>
 							<?php $basketParams = array( 'b_action' => 'edit', 'b_position' => $position, 'b_quantity' => $product->getQuantity() - 1 ); ?>
-							<a class="minibutton change" href="<?php echo $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $basketParams, array(), $basketConfig ) ); ?>">−</a>
+							<a class="minibutton change" href="<?= $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $basketParams, [], $basketConfig ) ); ?>">−</a>
 						<?php else : ?>
 							&nbsp;
 						<?php endif; ?>
 
 						<input class="value" type="text"
-							name="<?php echo $enc->attr( $this->formparam( array( 'b_prod', $position, 'quantity' ) ) ); ?>"
-							value="<?php echo $enc->attr( $product->getQuantity() ); ?>" maxlength="10" required="required"
+							name="<?= $enc->attr( $this->formparam( array( 'b_prod', $position, 'quantity' ) ) ); ?>"
+							value="<?= $enc->attr( $product->getQuantity() ); ?>" maxlength="10" required="required"
 						/>
 						<input type="hidden" type="text"
-							name="<?php echo $enc->attr( $this->formparam( array( 'b_prod', $position, 'position' ) ) ); ?>"
-							value="<?php echo $enc->attr( $position ); ?>"
+							name="<?= $enc->attr( $this->formparam( array( 'b_prod', $position, 'position' ) ) ); ?>"
+							value="<?= $enc->attr( $position ); ?>"
 						/>
 
 						<?php $basketParams = array( 'b_action' => 'edit', 'b_position' => $position, 'b_quantity' => $product->getQuantity() + 1 ); ?>
-						<a class="minibutton change" href="<?php echo $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $basketParams, array(), $basketConfig ) ); ?>">+</a>
+						<a class="minibutton change" href="<?= $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $basketParams, [], $basketConfig ) ); ?>">+</a>
 
 					<?php else : ?>
-						<?php echo $enc->html( $product->getQuantity() ); ?>
+						<?= $enc->html( $product->getQuantity() ); ?>
 					<?php endif; ?>
 				</td>
 
 
-				<td class="unitprice"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $product->getPrice()->getValue() ), $priceCurrency ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $product->getPrice()->getValue() * $product->getQuantity() ), $priceCurrency ) ); ?></td>
+				<td class="unitprice"><?= $enc->html( sprintf( $priceFormat, $this->number( $product->getPrice()->getValue() ), $priceCurrency ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $product->getPrice()->getValue() * $product->getQuantity() ), $priceCurrency ) ); ?></td>
 
 
-				<?php if( $modify && ( $product->getFlags() & \Aimeos\MShop\Order\Item\Base\Product\Base::FLAG_IMMUTABLE ) == 0 ) : ?>
+				<?php if( $modify ) : ?>
 					<td class="action">
-						<?php $basketParams = array( 'b_action' => 'delete', 'b_position' => $position ); ?>
-						<a class="minibutton change" href="<?php echo $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $basketParams, array(), $basketConfig ) ); ?>">
-							<?php echo $this->translate( 'client', 'X' ); ?>
-						</a>
+						<?php if( ( $product->getFlags() & \Aimeos\MShop\Order\Item\Base\Product\Base::FLAG_IMMUTABLE ) == 0 ) : ?>
+							<?php $basketParams = array( 'b_action' => 'delete', 'b_position' => $position ); ?>
+							<a class="minibutton delete" href="<?= $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, $basketParams, [], $basketConfig ) ); ?>"></a>
+						<?php endif; ?>
 					</td>
 				<?php endif; ?>
 
@@ -333,10 +333,10 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 		<?php if( $deliveryPriceValue > 0 ) : ?>
 			<tr class="delivery">
-				<td class="details"><?php echo $enc->html( $deliveryName ); ?></td>
+				<td class="details"><?= $enc->html( $deliveryName ); ?></td>
 				<td class="quantity">1</td>
-				<td class="unitprice"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $deliveryPriceValue ), $priceCurrency ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $deliveryPriceValue ), $priceCurrency ) ); ?></td>
+				<td class="unitprice"><?= $enc->html( sprintf( $priceFormat, $this->number( $deliveryPriceValue ), $priceCurrency ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $deliveryPriceValue ), $priceCurrency ) ); ?></td>
 				<?php if( $modify ) : ?>
 					<td class="action"></td>
 				<?php endif; ?>
@@ -346,10 +346,10 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 		<?php if( $paymentPriceValue > 0 ) : ?>
 			<tr class="payment">
-				<td class="details"><?php echo $enc->html( $paymentName ); ?></td>
+				<td class="details"><?= $enc->html( $paymentName ); ?></td>
 				<td class="quantity">1</td>
-				<td class="unitprice"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $paymentPriceValue ), $priceCurrency ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $paymentPriceValue ), $priceCurrency ) ); ?></td>
+				<td class="unitprice"><?= $enc->html( sprintf( $priceFormat, $this->number( $paymentPriceValue ), $priceCurrency ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $paymentPriceValue ), $priceCurrency ) ); ?></td>
 				<?php if( $modify ) : ?>
 					<td class="action"></td>
 				<?php endif; ?>
@@ -361,18 +361,20 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 	<tfoot>
 
-		<tr class="subtotal">
-			<td colspan="3"><?php echo $enc->html( $this->translate( 'client', 'Sub-total' ) ); ?></td>
-			<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $priceValue ), $priceCurrency ) ); ?></td>
-			<?php if( $modify ) : ?>
-				<td class="action"></td>
-			<?php endif; ?>
-		</tr>
+		<?php if( $priceService > 0 || $paymentPriceService > 0 ) : ?>
+			<tr class="subtotal">
+				<td colspan="3"><?= $enc->html( $this->translate( 'client', 'Sub-total' ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $priceValue ), $priceCurrency ) ); ?></td>
+				<?php if( $modify ) : ?>
+					<td class="action"></td>
+				<?php endif; ?>
+			</tr>
+		<?php endif; ?>
 
 		<?php if( $priceService - $paymentPriceService > 0 ) : ?>
 			<tr class="delivery">
-				<td colspan="3"><?php echo $enc->html( $this->translate( 'client', 'Shipping' ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $priceService - $paymentPriceService ), $priceCurrency ) ); ?></td>
+				<td colspan="3"><?= $enc->html( $this->translate( 'client', 'Shipping' ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $priceService - $paymentPriceService ), $priceCurrency ) ); ?></td>
 				<?php if( $modify ) : ?>
 					<td class="action"></td>
 				<?php endif; ?>
@@ -381,8 +383,8 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 		<?php if( $paymentPriceService > 0 ) : ?>
 			<tr class="payment">
-				<td colspan="3"><?php echo $enc->html( $this->translate( 'client', 'Payment costs' ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $paymentPriceService ), $priceCurrency ) ); ?></td>
+				<td colspan="3"><?= $enc->html( $this->translate( 'client', 'Payment costs' ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $paymentPriceService ), $priceCurrency ) ); ?></td>
 				<?php if( $modify ) : ?>
 					<td class="action"></td>
 				<?php endif; ?>
@@ -391,23 +393,23 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 		<?php if( $priceTaxflag === true ) : ?>
 			<tr class="total">
-				<td colspan="3"><?php echo $enc->html( $this->translate( 'client', 'Total' ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $priceValue + $priceService ), $priceCurrency ) ); ?></td>
+				<td colspan="3"><?= $enc->html( $this->translate( 'client', 'Total' ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $priceValue + $priceService ), $priceCurrency ) ); ?></td>
 				<?php if( $modify ) : ?>
 					<td class="action"></td>
 				<?php endif; ?>
 			</tr>
 		<?php endif; ?>
 
-		<?php foreach( $this->get( 'summaryTaxRates', array() ) as $taxRate => $priceItem ) : $taxValue = $priceItem->getTaxValue(); ?>
+		<?php foreach( $this->get( 'summaryTaxRates', [] ) as $taxRate => $priceItem ) : $taxValue = $priceItem->getTaxValue(); ?>
 			<?php if( $taxRate > '0.00' && $taxValue > '0.00' ) : $priceTaxvalue += $taxValue; ?>
 				<tr class="tax">
 					<?php if( $priceItem->getTaxFlag() ) : ?>
-						<td colspan="3"><?php echo $enc->html( sprintf( $this->translate( 'client', 'Incl. %1$s%% VAT' ), $this->number( $taxRate ) ) ); ?></td>
+						<td colspan="3"><?= $enc->html( sprintf( $this->translate( 'client', 'Incl. %1$s%% VAT' ), $this->number( $taxRate ) ) ); ?></td>
 					<?php else : ?>
-						<td colspan="3"><?php echo $enc->html( sprintf( $this->translate( 'client', '+ %1$s%% VAT' ), $this->number( $taxRate ) ) ); ?></td>
+						<td colspan="3"><?= $enc->html( sprintf( $this->translate( 'client', '+ %1$s%% VAT' ), $this->number( $taxRate ) ) ); ?></td>
 					<?php endif; ?>
-						<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $taxValue ), $priceCurrency ) ); ?></td>
+						<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $taxValue ), $priceCurrency ) ); ?></td>
 					<?php if( $modify ) : ?>
 						<td class="action"></td>
 					<?php endif; ?>
@@ -417,8 +419,8 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 		<?php if( $priceTaxflag === false ) : ?>
 			<tr class="total">
-				<td colspan="3"><?php echo $enc->html( $this->translate( 'client', 'Total' ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $priceValue + $priceService + $priceTaxvalue ), $priceCurrency ) ); ?></td>
+				<td colspan="3"><?= $enc->html( $this->translate( 'client', 'Total' ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $priceValue + $priceService + $priceTaxvalue ), $priceCurrency ) ); ?></td>
 				<?php if( $modify ) : ?>
 					<td class="action"></td>
 				<?php endif; ?>
@@ -427,8 +429,8 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 
 		<?php if( $priceRebate > '0.00' ) : ?>
 			<tr class="rebate">
-				<td colspan="3"><?php echo $enc->html( $this->translate( 'client', 'Included rebates' ) ); ?></td>
-				<td class="price"><?php echo $enc->html( sprintf( $priceFormat, $this->number( $priceRebate ), $priceCurrency ) ); ?></td>
+				<td colspan="3"><?= $enc->html( $this->translate( 'client', 'Included rebates' ) ); ?></td>
+				<td class="price"><?= $enc->html( sprintf( $priceFormat, $this->number( $priceRebate ), $priceCurrency ) ); ?></td>
 				<?php if( $modify ) : ?>
 					<td class="action"></td>
 				<?php endif; ?>
@@ -436,8 +438,8 @@ $errors = $this->get( 'summaryErrorCodes', array() );
 		<?php endif; ?>
 
 		<tr class="quantity">
-			<td colspan="3"><?php echo $enc->html( $this->translate( 'client', 'Total quantity' ) ); ?></td>
-			<td class="value"><?php echo $enc->html( sprintf( $this->translate( 'client', '%1$d article', '%1$d articles', $totalQuantity ), $totalQuantity ) ); ?></td>
+			<td colspan="3"><?= $enc->html( $this->translate( 'client', 'Total quantity' ) ); ?></td>
+			<td class="value"><?= $enc->html( sprintf( $this->translate( 'client', '%1$d article', '%1$d articles', $totalQuantity ), $totalQuantity ) ); ?></td>
 			<?php if( $modify ) : ?>
 				<td class="action"></td>
 			<?php endif; ?>

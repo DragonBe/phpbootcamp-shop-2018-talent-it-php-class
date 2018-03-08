@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -24,6 +24,48 @@ $enc = $this->encoder();
  */
 $contentUrl = $this->config( 'client/html/common/content/baseurl' );
 
+/** client/html/catalog/filter/attribute/types-option
+ * List of attribute types whose IDs should be used in a global "OR" condition
+ *
+ * The attribute section in the catalog filter component can display all
+ * attributes a visitor can use to filter the listed products to those that
+ * contains one or more attributes.
+ *
+ * This configuration setting lists the attribute types where at least one of
+ * all attributes must be referenced by the found products. Only one attribute
+ * of all listed attributes types (whatever matches) in enough. This setting is
+ * different from "client/html/catalog/filter/attribute/types-oneof" because
+ * it's not limited within the same attribute type
+ *
+ * @param array List of attribute type codes
+ * @since 2016.10
+ * @category User
+ * @category Developer
+ * @see client/html/catalog/filter/attribute/types
+ * @see client/html/catalog/filter/attribute/types-oneof
+ */
+$options = $this->config( 'client/html/catalog/filter/attribute/types-option', [] );
+
+/** client/html/catalog/filter/attribute/types-oneof
+ * List of attribute types whose values should be used in a type specific "OR" condition
+ *
+ * The attribute section in the catalog filter component can display all
+ * attributes a visitor can use to filter the listed products to those that
+ * contains one or more attributes.
+ *
+ * This configuration setting lists the attribute types where at least one of
+ * the attributes within the same attribute type must be referenced by the found
+ * products.
+ *
+ * @param array List of attribute type codes
+ * @since 2016.10
+ * @category User
+ * @category Developer
+ * @see client/html/catalog/filter/attribute/types
+ * @see client/html/catalog/filter/attribute/types-option
+ */
+$oneof = $this->config( 'client/html/catalog/filter/attribute/types-oneof', [] );
+
 /** client/html/catalog/filter/standard/button
  * Displays the "Search" button in the catalog filter if Javascript is disabled
  *
@@ -43,10 +85,12 @@ $button = $this->config( 'client/html/catalog/filter/standard/button', true );
 $listTarget = $this->config( 'client/html/catalog/lists/url/target' );
 $listController = $this->config( 'client/html/catalog/lists/url/controller', 'catalog' );
 $listAction = $this->config( 'client/html/catalog/lists/url/action', 'list' );
-$listConfig = $this->config( 'client/html/catalog/lists/url/config', array() );
+$listConfig = $this->config( 'client/html/catalog/lists/url/config', [] );
 
-$attrMap = $this->get( 'attributeMap', array() );
-$attrIds = $this->param( 'f_attrid', array() );
+$attrMap = $this->get( 'attributeMap', [] );
+$attrIds = $this->param( 'f_attrid', [] );
+$oneIds = $this->param( 'f_oneid', [] );
+$optIds = $this->param( 'f_optid', [] );
 $params = $this->param();
 
 
@@ -56,32 +100,38 @@ $params = $this->param();
 
 	<?php if( !empty( $attrMap ) ) : ?>
 
-		<h2><?php echo $enc->html( $this->translate( 'client', 'Attributes' ), $enc::TRUST ); ?></h2>
+		<h2><?= $enc->html( $this->translate( 'client', 'Attributes' ), $enc::TRUST ); ?></h2>
 
 
-		<?php if( !empty( $attrIds ) ) : ?>
+		<?php if( !empty( $attrIds ) || !empty( $optIds ) ) : ?>
 
 			<div class="attribute-selected">
-				<span class="selected-intro"><?php echo $enc->html( $this->translate( 'client', 'Your choice' ), $enc::TRUST ); ?></span>
+				<span class="selected-intro"><?= $enc->html( $this->translate( 'client', 'Your choice' ), $enc::TRUST ); ?></span>
 
 				<ul class="attr-list">
 					<?php foreach( $attrMap as $attrType => $attributes ) : ?>
 						<?php foreach( $attributes as $id => $attribute ) : ?>
 							<?php if( ( $key = array_search( $id, $attrIds ) ) !== false ) : ?>
 								<?php $current = $params; if( is_array( $current['f_attrid'] ) ) { unset( $current['f_attrid'][$key] ); } ?>
-								<li class="attr-item">
-									<a class="attr-name" href="<?php echo $enc->attr( $this->url( $listTarget, $listController, $listAction, $current, array(), $listConfig ) ); ?>">
-										<?php echo $enc->html( $attribute->getName(), $enc::TRUST ); ?>
-									</a>
-								</li>
+							<?php elseif( ( $key = array_search( $id, $optIds ) ) !== false ) : ?>
+								<?php $current = $params; if( is_array( $current['f_optid'] ) ) { unset( $current['f_optid'][$key] ); } ?>
+							<?php elseif( isset( $oneIds[$attrType] ) && ( $key = array_search( $id, (array) $oneIds[$attrType] ) ) !== false ) : ?>
+								<?php $current = $params; if( is_array( $current['f_oneid'][$attrType] ) ) { unset( $current['f_oneid'][$attrType][$key] ); } ?>
+							<?php else : continue; ?>
 							<?php endif; ?>
+							<li class="attr-item">
+								<a class="attr-name" href="<?= $enc->attr( $this->url( $listTarget, $listController, $listAction, $current, [], $listConfig ) ); ?>">
+									<?= $enc->html( $attribute->getName(), $enc::TRUST ); ?>
+								</a>
+							</li>
 						<?php endforeach; ?>
 					<?php endforeach; ?>
 				</ul>
 
-				<?php if( count( $attrIds ) > 1 ) : $current = $params; unset( $current['f_attrid'] ); ?>
-					<a class="selected-all" href="<?php echo $enc->attr( $this->url( $listTarget, $listController, $listAction, $current, array(), $listConfig ) ); ?>">
-						<?php echo $enc->html( $this->translate( 'client', 'clear all' ), $enc::TRUST ); ?>
+				<?php if( count( $attrIds ) > 1 || count( $optIds ) > 1 || count( $oneIds ) > 1 ) : ?>
+					<?php $current = $params; unset( $current['f_attrid'],  $current['f_optid'],  $current['f_oneid'] ); ?>
+					<a class="selected-all" href="<?= $enc->attr( $this->url( $listTarget, $listController, $listAction, $current, [], $listConfig ) ); ?>">
+						<?= $enc->html( $this->translate( 'client', 'clear all' ), $enc::TRUST ); ?>
 					</a>
 				<?php endif; ?>
 			</div>
@@ -94,27 +144,28 @@ $params = $this->param();
 			<?php foreach( $attrMap as $attrType => $attributes ) : ?>
 				<?php if( !empty( $attributes ) ) : ?>
 
-					--><fieldset class="attr-<?php echo $enc->attr( $attrType, $enc::TAINT, '-' ); ?>">
-						<legend><?php echo $enc->html( $this->translate( 'client/code', $attrType ), $enc::TRUST ); ?></legend>
+					--><fieldset class="attr-<?= $enc->attr( $attrType, $enc::TAINT, '-' ); ?>">
+						<legend><?= $enc->html( $this->translate( 'client/code', $attrType ), $enc::TRUST ); ?></legend>
 						<ul class="attr-list"><!--
 
+							<?php $fparam = ( in_array( $attrType, $oneof ) ? array( 'f_oneid', $attrType, '' ) : ( in_array( $attrType, $options ) ? array( 'f_optid', '' ) : array( 'f_attrid', '' ) ) ); ?>
 							<?php foreach( $attributes as $id => $attribute ) : ?>
 
-								--><li class="attr-item" data-id="<?php echo $enc->attr( $id ); ?>">
+								--><li class="attr-item" data-id="<?= $enc->attr( $id ); ?>">
 
 									<input class="attr-item" type="checkbox"
-										id="attr-<?php echo $enc->attr( $id ); ?>"
-										name="<?php echo $enc->attr( $this->formparam( array( 'f_attrid', '' ) ) ); ?>"
-										value="<?php echo $enc->attr( $id ); ?>"
-										<?php echo ( in_array( $id, $attrIds ) ? 'checked="checked"' : '' ); ?>
+										id="attr-<?= $enc->attr( $id ); ?>"
+										name="<?= $enc->attr( $this->formparam( $fparam ) ); ?>"
+										value="<?= $enc->attr( $id ); ?>"
+										<?= ( in_array( $id, $attrIds ) || in_array( $id, $optIds ) || isset( $oneIds[$attrType] ) && in_array( $id, (array) $oneIds[$attrType] ) ? 'checked="checked"' : '' ); ?>
 									/>
 
-									<label class="attr-name" for="attr-<?php echo $enc->attr( $id ); ?>"><!--
+									<label class="attr-name" for="attr-<?= $enc->attr( $id ); ?>"><!--
 										--><div class="media-list"><!--
 
 											<?php foreach( $attribute->getListItems( 'media', 'icon' ) as $listItem ) : ?>
 												<?php if( ( $item = $listItem->getRefItem() ) !== null ) : ?>
-													<?php echo '-->' . $this->partial(
+													<?= '-->' . $this->partial(
 														$this->config( 'client/html/common/partials/media', 'common/partials/media-default.php' ),
 														array( 'item' => $item, 'boxAttributes' => array( 'class' => 'media-item' ) )
 													) . '<!--'; ?>
@@ -122,7 +173,7 @@ $params = $this->param();
 											<?php endforeach; ?>
 
 										--></div>
-										<span><?php echo $enc->html( $attribute->getName(), $enc::TRUST ); ?></span><!--
+										<span><?= $enc->html( $attribute->getName(), $enc::TRUST ); ?></span><!--
 									--></label>
 								</li><!--
 
@@ -141,11 +192,11 @@ $params = $this->param();
 	<?php if( $button ) : ?>
 		<noscript>
 			<button class="filter standardbutton btn-action" type="submit">
-				<?php echo $enc->html( $this->translate( 'client', 'Show' ), $enc::TRUST ); ?>
+				<?= $enc->html( $this->translate( 'client', 'Show' ), $enc::TRUST ); ?>
 			</button>
 		</noscript>
 	<?php endif; ?>
 
 </section>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'catalog/filter/attribute' ); ?>
+<?= $this->block()->get( 'catalog/filter/attribute' ); ?>

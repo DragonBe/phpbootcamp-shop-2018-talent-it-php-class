@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product\Characteristic;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -23,13 +23,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$templatePaths = \TestHelperJqadm::getTemplatePaths();
 
 		$this->object = new \Aimeos\Admin\JQAdm\Product\Characteristic\Standard( $this->context, $templatePaths );
+		$this->object->setAimeos( \TestHelperJqadm::getAimeos() );
 		$this->object->setView( $this->view );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object );
+		unset( $this->object, $this->view, $this->context );
 	}
 
 
@@ -87,14 +88,15 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setCode( 'jqadm-test-characteristic' );
 		$item->setId( null );
 
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
 
 		$param = array(
+			'site' => 'unittest',
 			'characteristic' => array(
 				'attribute' => array(
 					'product.lists.id' => array( '' ),
-					'product.lists.refid' => array( $attrManager->findItem( 'xs', array(), 'product', 'size' )->getId() ),
+					'product.lists.refid' => array( $attrManager->findItem( 'xs', [], 'product', 'size' )->getId() ),
 				),
 			),
 		);
@@ -108,40 +110,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertNull( $this->view->get( 'errors' ) );
 		$this->assertNull( $result );
-	}
-
-
-	public function testSaveException()
-	{
-		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Characteristic\Standard' )
-			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'getSubClients' ) )
-			->getMock();
-
-		$object->expects( $this->once() )->method( 'getSubClients' )
-			->will( $this->throwException( new \RuntimeException() ) );
-
-		$object->setView( \TestHelperJqadm::getView() );
-
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$object->save();
-	}
-
-
-	public function testSaveMShopException()
-	{
-		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Characteristic\Standard' )
-			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'getSubClients' ) )
-			->getMock();
-
-		$object->expects( $this->once() )->method( 'getSubClients' )
-			->will( $this->throwException( new \Aimeos\MShop\Exception() ) );
-
-		$object->setView( \TestHelperJqadm::getView() );
-
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$object->save();
 	}
 
 

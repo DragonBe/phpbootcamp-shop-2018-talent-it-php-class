@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JsonAdm
  */
@@ -17,7 +17,7 @@ namespace Aimeos\Admin\JsonAdm;
  * @package Admin
  * @subpackage JsonAdm
  */
-class Base
+abstract class Base
 {
 	private $view;
 	private $context;
@@ -43,6 +43,19 @@ class Base
 
 
 	/**
+	 * Catch unknown methods
+	 *
+	 * @param string $name Name of the method
+	 * @param array $param List of method parameter
+	 * @throws \Aimeos\Admin\JsonAdm\Exception If method call failed
+	 */
+	public function __call( $name, array $param )
+	{
+		throw new \Aimeos\Admin\JsonAdm\Exception( sprintf( 'Unable to call method "%1$s"', $name ) );
+	}
+
+
+	/**
 	 * Returns the items with parent/child relationships
 	 *
 	 * @param array $items List of items implementing \Aimeos\MShop\Common\Item\Iface
@@ -51,7 +64,7 @@ class Base
 	 */
 	protected function getChildItems( array $items, array $include )
 	{
-		return array();
+		return [];
 	}
 
 
@@ -91,10 +104,11 @@ class Base
 			 * @param array List of domain names
 			 * @since 2016.01
 			 * @category Developer
+			 * @see admin/jsonadm/resources
 			 */
 			$default = array(
-				'attribute', 'catalog', 'coupon', 'customer', 'locale', 'media',
-				'order', 'plugin', 'price', 'product', 'service', 'supplier', 'tag', 'text'
+				'attribute', 'catalog', 'coupon', 'customer', 'locale', 'media', 'order',
+				'plugin', 'price', 'product', 'service', 'supplier', 'stock', 'tag', 'text'
 			);
 			$domains = $this->getContext()->getConfig()->get( 'admin/jsonadm/domains', $default );
 		}
@@ -111,7 +125,7 @@ class Base
 	 */
 	protected function getIds( $request )
 	{
-		$ids = array();
+		$ids = [];
 
 		if( isset( $request->data ) )
 		{
@@ -136,7 +150,7 @@ class Base
 	 */
 	protected function getListItems( array $items, array $include )
 	{
-		return array();
+		return [];
 	}
 
 
@@ -159,7 +173,7 @@ class Base
 	 */
 	protected function getRefItems( array $listItems )
 	{
-		$list = $map = array();
+		$list = $map = [];
 		$context = $this->getContext();
 
 		foreach( $listItems as $listItem ) {
@@ -177,6 +191,34 @@ class Base
 		}
 
 		return $list;
+	}
+
+
+	/**
+	 * Returns the list of additional resources
+	 *
+	 * @param \Aimeos\MW\View\Iface $view View object with "resource" parameter
+	 * @return array List of domain names
+	 */
+	protected function getResources( \Aimeos\MW\View\Iface $view )
+	{
+		/** admin/jsonadm/resources
+		 * A list of additional resources name whose clients are available for the JSON API
+		 *
+		 * The HTTP OPTIONS method returns a list of resources known by the
+		 * JSON API including their URLs. The list of available resources
+		 * can be exteded dynamically be implementing a new Jsonadm client
+		 * class handling request for this new domain.
+		 *
+		 * The resource config lists the resources that are not automatically
+		 * derived from the admin/jsonadm/domains configuration.
+		 *
+		 * @param array List of domain names
+		 * @since 2017.07
+		 * @category Developer
+		 * @see admin/jsonadm/domains
+		 */
+		return (array) $view->config( 'admin/jsonadm/resources', ['coupon/config', 'plugin/config', 'service/config'] );
 	}
 
 
@@ -266,7 +308,7 @@ class Base
 			return;
 		}
 
-		$sortation = array();
+		$sortation = [];
 
 		foreach( explode( ',', $params['sort'] ) as $sort )
 		{
@@ -290,7 +332,7 @@ class Base
 	 */
 	protected function saveData( \Aimeos\MShop\Common\Manager\Iface $manager, \stdClass $request )
 	{
-		$data = array();
+		$data = [];
 
 		if( isset( $request->data ) )
 		{
@@ -319,7 +361,7 @@ class Base
 		}
 
 		$item = $this->addItemData( $manager, $item, $entry, $item->getResourceType() );
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
 		if( isset( $entry->relationships ) ) {
 			$this->saveRelationships( $manager, $item, $entry->relationships );
@@ -383,7 +425,7 @@ class Base
 
 			if( isset( $attr[$key.'.type'] ) )
 			{
-				$typeItem = $manager->getSubManager( 'type' )->findItem( $attr[$key.'.type'], array(), $domain );
+				$typeItem = $manager->getSubManager( 'type' )->findItem( $attr[$key.'.type'], [], $domain );
 				$attr[$key.'.typeid'] = $typeItem->getId();
 			}
 

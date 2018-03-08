@@ -3,13 +3,13 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 namespace Aimeos\Client\Html\Checkout\Standard\Address\Delivery;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
@@ -209,7 +209,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		}
 
 		$item->setId( null );
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
 		$view = \TestHelperHtml::getView();
 		$this->context->setUserId( $item->getParentId() );
@@ -260,7 +260,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->object->setView( $view );
 
-		$this->setExpectedException( '\\Aimeos\\Client\\Html\\Exception' );
+		$this->setExpectedException( '\Aimeos\Controller\Frontend\Customer\Exception' );
 		$this->object->process();
 	}
 
@@ -307,7 +307,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$view = \TestHelperHtml::getView();
 
-		$param = array( 'ca_deliveryoption' => -1 );
+		$param = array( 'ca_deliveryoption' => 0 );
 		$helper = new \Aimeos\MW\View\Helper\Param\Standard( $view, $param );
 		$view->addHelper( 'param', $helper );
 

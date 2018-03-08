@@ -3,14 +3,14 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Client\Html\Basket\Standard;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
@@ -60,7 +60,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$output = $this->object->getBody();
 
-		$this->assertStringStartsWith( '<section class="aimeos basket-standard">', $output );
+		$this->assertStringStartsWith( '<section class="aimeos basket-standard"', $output );
 		$this->assertContains( '<div class="common-summary-detail', $output );
 		$this->assertContains( '<div class="basket-standard-coupon', $output );
 	}
@@ -206,13 +206,13 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			) ),
 		);
 		$search->setConditions( $search->combine( '&&', $expr ) );
-		$attributes = $attrManager->searchItems( $search, array() );
+		$attributes = $attrManager->searchItems( $search, [] );
 
 		$view = $this->object->getView();
 		$param = array(
 			'b_action' => 'add',
 			'b_prodid' => $this->getProductItem( 'U:TEST' )->getId(),
-			'b_quantity' => 1,
+			'b_quantity' => 2,
 			'b_attrvarid' => array_keys( $attributes ),
 		);
 
@@ -222,7 +222,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->object->process();
 		$output = $this->object->getBody();
 
-		$this->assertRegExp( '#<li class="attr-item">.*<span class="value">30</span>.*</li>.*<li class="attr-item">.*<span class="value">30</span>.*</li>#smU', $output );
+		$this->assertRegExp( '#<li class="attr-item.*<span class="value">30</span>.*</li>.*<li class="attr-item.*<span class="value">30</span>.*</li>#smU', $output );
 	}
 
 
@@ -237,7 +237,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			$search->compare( '==', 'attribute.type.code', 'color' ),
 		);
 		$search->setConditions( $search->combine( '&&', $expr ) );
-		$result = $attrManager->searchItems( $search, array() );
+		$result = $attrManager->searchItems( $search, [] );
 
 		if( ( $attribute = reset( $result ) ) === false ) {
 			throw new \RuntimeException( 'No attribute' );
@@ -247,7 +247,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$param = array(
 			'b_action' => 'add',
 			'b_prodid' => $this->getProductItem( 'CNE' )->getId(),
-			'b_quantity' => 1,
+			'b_quantity' => 2,
 			'b_attrconfid' => $attribute->getId(),
 			'b_stocktype' => 'default',
 		);
@@ -258,7 +258,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->object->process();
 		$output = $this->object->getBody();
 
-		$this->assertRegExp( '#<li class="attr-item">.*<a class="change" href=[^>]*>.*<span class="value">weiß</span>.*</a>.*</li>#smU', $output );
+		$this->assertRegExp( '#<li class="attr-item.*<a class="change" href=[^>]*>.*<span class="value">weiß</span>.*</a>.*</li>#smU', $output );
 	}
 
 
@@ -273,7 +273,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			$search->compare( '==', 'attribute.type.code', 'size' ),
 		);
 		$search->setConditions( $search->combine( '&&', $expr ) );
-		$result = $attrManager->searchItems( $search, array() );
+		$result = $attrManager->searchItems( $search, [] );
 
 		if( ( $attribute = reset( $result ) ) === false ) {
 			throw new \RuntimeException( 'No attribute' );
@@ -283,7 +283,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$param = array(
 			'b_action' => 'add',
 			'b_prodid' => $this->getProductItem( 'CNE' )->getId(),
-			'b_quantity' => 1,
+			'b_quantity' => 2,
 			'b_attrhideid' => $attribute->getId(),
 			'b_stocktype' => 'default',
 		);
@@ -294,7 +294,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->object->process();
 		$output = $this->object->getBody();
 
-		$this->assertNotRegExp( '#<li class="attr-item">.*<span class="value">m</span>.*</li>#smU', $output );
+		$this->assertNotRegExp( '#<li class="attr-item.*<span class="value">m</span>.*</li>#smU', $output );
 	}
 
 
@@ -309,7 +309,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 				$search->compare( '==', 'attribute.type.code', 'date' ),
 		);
 		$search->setConditions( $search->combine( '&&', $expr ) );
-		$result = $attrManager->searchItems( $search, array() );
+		$result = $attrManager->searchItems( $search, [] );
 
 		if( ( $attribute = reset( $result ) ) === false ) {
 			throw new \RuntimeException( 'No attribute' );
@@ -319,7 +319,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$param = array(
 				'b_action' => 'add',
 				'b_prodid' => $this->getProductItem( 'U:TESTP' )->getId(),
-				'b_quantity' => 1,
+				'b_quantity' => 2,
 				'b_attrcustid' => array( $attribute->getId() => '2000-01-01' ),
 				'b_stocktype' => 'default',
 		);
@@ -330,7 +330,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->object->process();
 		$output = $this->object->getBody();
 
-		$this->assertRegExp( '#<li class="attr-item">.*<span class="value">2000-01-01</span>.*</li>#smU', $output );
+		$this->assertRegExp( '#<li class="attr-item.*<span class="value">2000-01-01</span>.*</li>#smU', $output );
 	}
 
 
@@ -433,7 +433,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->object->process();
 		$output = $this->object->getBody();
 
-		$this->assertRegExp( '#<tfoot>.*<tr class="subtotal">.*<td class="price">0.00 .+</td>.*</tfoot>#smU', $output );
 		$this->assertRegExp( '#<tfoot>.*<tr class="total">.*<td class="price">0.00 .+</td>.*</tfoot>#smU', $output );
 	}
 
@@ -451,14 +450,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->object->process();
 
-		$this->assertEquals( 1, count( $view->get( 'standardErrorList', array() ) ) );
+		$this->assertEquals( 1, count( $view->get( 'standardErrorList', [] ) ) );
 	}
 
 
 	public function testGetBodyAddCoupon()
 	{
 		$controller = \Aimeos\Controller\Frontend\Basket\Factory::createController( $this->context );
-		$controller->addProduct( $this->getProductItem( 'CNC' )->getId(), 1, array(), array(), array(), array(), array(), 'default' );
+		$controller->addProduct( $this->getProductItem( 'CNC' )->getId(), 1, [], [], [], [], [], 'default' );
 
 		$view = $this->object->getView();
 
@@ -479,7 +478,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	public function testGetBodyDeleteCoupon()
 	{
 		$controller = \Aimeos\Controller\Frontend\Basket\Factory::createController( $this->context );
-		$controller->addProduct( $this->getProductItem( 'CNC' )->getId(), 1, array(), array(), array(), array(), array(), 'default' );
+		$controller->addProduct( $this->getProductItem( 'CNC' )->getId(), 1, [], [], [], [], [], 'default' );
 
 		$view = $this->object->getView();
 

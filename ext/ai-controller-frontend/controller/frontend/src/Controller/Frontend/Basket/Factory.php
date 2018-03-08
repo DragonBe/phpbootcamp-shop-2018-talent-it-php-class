@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -27,7 +27,7 @@ class Factory
 	 *
 	 * @param \Aimeos\MShop\Context\Item\Iface $context Context instance with necessary objects
 	 * @param string|null $name Name of the controller implementaton (default: "Standard")
-	 * @return \Aimeos\Controller\Frontend\Iface Controller object
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Controller object
 	 */
 	public static function createController( \Aimeos\MShop\Context\Item\Iface $context, $name = null )
 	{

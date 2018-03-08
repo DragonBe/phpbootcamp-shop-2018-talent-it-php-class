@@ -1,24 +1,20 @@
 <?php
 
-namespace Aimeos\Controller\Jobs\Order\Service\Async;
-
-
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+
+
+namespace Aimeos\Controller\Jobs\Order\Service\Async;
+
+
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 
 
-	/**
-	 * Sets up the fixture, for example, opens a network connection.
-	 * This method is called before a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function setUp()
 	{
 		$context = \TestHelperJobs::getContext();
@@ -28,12 +24,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function tearDown()
 	{
 		$this->object = null;
@@ -79,7 +69,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 
 		$serviceManagerStub->expects( $this->once() )->method( 'searchItems' )
-			->will( $this->onConsecutiveCalls( array( $serviceItem ), array() ) );
+			->will( $this->onConsecutiveCalls( array( $serviceItem ), [] ) );
 
 		$serviceManagerStub->expects( $this->once() )->method( 'getProvider' )
 			->will( $this->returnValue( $serviceProviderStub ) );
@@ -113,7 +103,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$serviceItem = $serviceManagerStub->createItem();
 
 		$serviceManagerStub->expects( $this->once() )->method( 'searchItems' )
-			->will( $this->onConsecutiveCalls( array( $serviceItem ), array() ) );
+			->will( $this->onConsecutiveCalls( array( $serviceItem ), [] ) );
 
 		$serviceManagerStub->expects( $this->once() )->method( 'getProvider' )
 			->will( $this->throwException( new \Aimeos\MShop\Service\Exception() ) );

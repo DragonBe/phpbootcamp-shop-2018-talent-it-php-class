@@ -5,9 +5,9 @@ namespace Aimeos\Controller\Common\Product\Import\Csv;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class BaseTest extends \PHPUnit_Framework_TestCase
+class BaseTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 
@@ -61,7 +61,7 @@ class BaseTest extends \PHPUnit_Framework_TestCase
 
 	public function testGetProcessors()
 	{
-		$processor = $this->object->getProcessorsPublic( array( 'attribute' => array() ) );
+		$processor = $this->object->getProcessorsPublic( array( 'attribute' => [] ) );
 
 		$this->assertInstanceOf( '\\Aimeos\\Controller\\Common\\Product\\Import\\Csv\\Processor\\Iface', $processor );
 	}
@@ -70,21 +70,21 @@ class BaseTest extends \PHPUnit_Framework_TestCase
 	public function testGetProcessorsInvalidType()
 	{
 		$this->setExpectedException( '\\Aimeos\\Controller\\Jobs\\Exception' );
-		$this->object->getProcessorsPublic( array( '$' => array() ) );
+		$this->object->getProcessorsPublic( array( '$' => [] ) );
 	}
 
 
 	public function testGetProcessorsInvalidClass()
 	{
 		$this->setExpectedException( '\\Aimeos\\Controller\\Jobs\\Exception' );
-		$this->object->getProcessorsPublic( array( 'unknown' => array() ) );
+		$this->object->getProcessorsPublic( array( 'unknown' => [] ) );
 	}
 
 
 	public function testGetProcessorsInvalidInterface()
 	{
 		$this->setExpectedException( '\\Aimeos\\Controller\\Jobs\\Exception' );
-		$this->object->getProcessorsPublic( array( 'unknown' => array() ) );
+		$this->object->getProcessorsPublic( array( 'unknown' => [] ) );
 	}
 
 

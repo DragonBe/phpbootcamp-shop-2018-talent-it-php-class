@@ -1,9 +1,15 @@
 <?php
 
+/**
+ * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
+ * @copyright Aimeos (aimeos.org), 2017
+ */
+
+
 namespace Aimeos\Controller\Frontend\Basket\Decorator;
 
 
-class CategoryTest extends \PHPUnit_Framework_TestCase
+class CategoryTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
@@ -20,7 +26,7 @@ class CategoryTest extends \PHPUnit_Framework_TestCase
 	protected function tearDown()
 	{
 		$this->object->clear();
-		$this->context->getSession()->set( 'aimeos', array() );
+		$this->context->getSession()->set( 'aimeos', [] );
 
 		unset( $this->object );
 	}

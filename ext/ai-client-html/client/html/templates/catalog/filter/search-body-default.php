@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -96,27 +96,27 @@ $suggestAction = $this->config( 'client/html/catalog/suggest/url/action', 'sugge
  * @see client/html/url/config
  * @see client/html/catalog/listsimple/url/config
  */
-$suggestConfig = $this->config( 'client/html/catalog/suggest/url/config', array() );
+$suggestConfig = $this->config( 'client/html/catalog/suggest/url/config', [] );
 
-$suggestUrl = $enc->attr( $this->url( $suggestTarget, $suggestController, $suggestAction, array(), array(), $suggestConfig ) );
+$suggestUrl = $enc->attr( $this->url( $suggestTarget, $suggestController, $suggestAction, [], [], $suggestConfig ) );
 
 
 ?>
 <?php $this->block()->start( 'catalog/filter/search' ); ?>
 <section class="catalog-filter-search">
 
-	<h2><?php echo $enc->html( $this->translate( 'client', 'Search' ), $enc::TRUST ); ?></h2>
+	<h2><?= $enc->html( $this->translate( 'client', 'Search' ), $enc::TRUST ); ?></h2>
 	<input class="value" type="text"
-		name="<?php echo $name; ?>" value="<?php echo $phrase; ?>"
-		data-url="<?php echo $suggestUrl; ?>" data-hint="<?php echo $hint; ?>"
+		name="<?= $name; ?>" value="<?= $phrase; ?>"
+		data-url="<?= $suggestUrl; ?>" data-hint="<?= $hint; ?>"
 	/><!--
 	--><button class="reset" type="reset">
 		<span class="symbol"/>
 	</button><!--
 	--><button class="standardbutton" type="submit">
-		<?php echo $enc->html( $this->translate( 'client', 'Go' ), $enc::TRUST ); ?>
+		<?= $enc->html( $this->translate( 'client', 'Go' ), $enc::TRUST ); ?>
 	</button>
 
 </section>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'catalog/filter/search' ); ?>
+<?= $this->block()->get( 'catalog/filter/search' ); ?>

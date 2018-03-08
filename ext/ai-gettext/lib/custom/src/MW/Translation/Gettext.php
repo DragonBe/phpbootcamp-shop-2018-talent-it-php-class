@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package MW
  * @subpackage Translation
  */
@@ -100,7 +100,7 @@ class Gettext
 	 */
 	public function getAll( $domain )
 	{
-		$messages = array();
+		$messages = [];
 
 		foreach( $this->getTranslations( $domain ) as $object ) {
 			$messages = $messages + $object->all();
@@ -135,7 +135,7 @@ class Gettext
 			}
 		}
 
-		return ( isset( $this->files[$domain] ) ? $this->files[$domain] : array() );
+		return ( isset( $this->files[$domain] ) ? $this->files[$domain] : [] );
 	}
 
 }

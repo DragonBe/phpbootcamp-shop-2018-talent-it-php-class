@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -59,7 +59,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/catalog/suggest/standard/subparts';
-	private $subPartNames = array();
+	private $subPartNames = [];
 	private $cache;
 
 
@@ -71,7 +71,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		try
 		{
@@ -128,7 +128,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		try
 		{
@@ -302,18 +302,14 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
-			$codes = array();
+			$types = ['name'];
 			$context = $this->getContext();
 			$input = $view->param( 'f_search' );
-
-			$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'catalog' );
-
-			$filter = $controller->createTextFilter( $input, null, '+', 0, 25, 'default', 'name' );
-			$texts = $controller->getTextList( $filter );
+			$langid = $context->getLocale()->getLanguageId();
 
 
 			/** client/html/catalog/suggest/usecode
@@ -328,12 +324,9 @@ class Standard
 			 * @category Developer
 			 */
 
-			if( $context->getConfig()->get( 'client/html/catalog/suggest/usecode', false ) )
-			{
-				$filter = $controller->createTextFilter( $input, null, '+', 0, 25, 'default', 'code' );
-				$codes = $controller->getTextList( $filter );
+			if( $context->getConfig()->get( 'client/html/catalog/suggest/usecode', false ) ) {
+				$types[] = 'code';
 			}
-
 
 			/** client/html/catalog/suggest/domains
 			 * List of domain items that should be fetched along with the products
@@ -351,27 +344,19 @@ class Standard
 			 * @category Developer
 			 * @see client/html/catalog/suggest/standard/template-body
 			 */
-			$domains = $context->getConfig()->get( 'client/html/catalog/suggest/domains', array() );
+			$domains = $context->getConfig()->get( 'client/html/catalog/suggest/domains', array( 'text' ) );
 
-			$manager = $controller->createManager( 'product' );
-			$search = $manager->createSearch( true );
+
+			$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'product' );
+
+			$filter = $controller->createFilter( null, '+', 0, 24, 'default' );
 			$expr = array(
-				$search->compare( '==', 'product.id', array_merge( array_keys( $texts ), array_keys( $codes ) ) ),
-				$search->getConditions(),
+				$filter->compare( '>', $filter->createFunction( 'index.text.relevance', array( 'default', $langid, $input ) ), 0 ),
+				$filter->compare( '>', $filter->createFunction( 'index.text.value', array( 'default', $langid, $types, 'product' ) ), '' ),
 			);
-			$search->setConditions( $search->combine( '&&', $expr ) );
-			$result = $manager->searchItems( $search, $domains );
+			$filter->setConditions( $filter->combine( '&&', $expr ) );
 
-
-			// shortcut to avoid having to fetch the text items to get the the localized name
-			foreach( $result as $id => $item )
-			{
-				if( isset( $texts[$id] ) ) {
-					$item->setLabel( $texts[$id] );
-				}
-			}
-
-			$view->suggestItems = $result;
+			$view->suggestItems = $controller->searchItems( $filter, $domains );
 
 			$this->cache = $view;
 		}

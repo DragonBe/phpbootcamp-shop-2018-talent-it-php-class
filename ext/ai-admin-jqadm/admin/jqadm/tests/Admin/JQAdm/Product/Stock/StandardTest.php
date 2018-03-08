@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product\Stock;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -23,13 +23,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$templatePaths = \TestHelperJqadm::getTemplatePaths();
 
 		$this->object = new \Aimeos\Admin\JQAdm\Product\Stock\Standard( $this->context, $templatePaths );
+		$this->object->setAimeos( \TestHelperJqadm::getAimeos() );
 		$this->object->setView( $this->view );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object );
+		unset( $this->object, $this->view, $this->context );
 	}
 
 
@@ -41,7 +42,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$result = $this->object->create();
 
 		$this->assertNull( $this->view->get( 'errors' ) );
-		$this->assertStringStartsWith( '<div class="product-item-stock', $result );
+		$this->assertContains( 'item-stock', $result );
 	}
 
 
@@ -72,16 +73,18 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	public function testSave()
 	{
 		$manager = \Aimeos\MShop\Factory::createManager( $this->context, 'product' );
+		$stockManager = \Aimeos\MShop\Factory::createManager( $this->context, 'stock' );
 		$typeManager = \Aimeos\MShop\Factory::createManager( $this->context, 'stock/type' );
 
 		$item = $manager->findItem( 'CNC' );
 		$item->setCode( 'jqadm-test-stock' );
 		$item->setId( null );
 
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
 
 		$param = array(
+			'site' => 'unittest',
 			'stock' => array(
 				'stock.id' => array( '' ),
 				'stock.typeid' => array( $typeManager->findItem( 'default' )->getId() ),
@@ -96,6 +99,9 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$result = $this->object->save();
 
+		$search = $stockManager->createSearch();
+		$search->setConditions( $search->compare( '==', 'stock.productcode', 'jqadm-test-stock' ) );
+		$stockManager->deleteItems( array_keys( $stockManager->searchItems( $search ) ) );
 		$manager->deleteItem( $item->getId() );
 
 		$this->assertNull( $this->view->get( 'errors' ) );
@@ -107,13 +113,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Stock\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \RuntimeException() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$this->view = \TestHelperJqadm::getView();
+		$this->view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $this->view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();
@@ -124,13 +133,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Stock\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \Aimeos\MShop\Exception() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$this->view = \TestHelperJqadm::getView();
+		$this->view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $this->view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();

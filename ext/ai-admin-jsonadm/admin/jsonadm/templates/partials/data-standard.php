@@ -1,22 +1,37 @@
 <?php
 
+/**
+ * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
+ * @copyright Aimeos (aimeos.org), 2016-2017
+ * @package Admin
+ * @subpackage Jsonadm
+ */
+
+
 $options = 0;
 if( defined( 'JSON_PRETTY_PRINT' ) ) {
 	$options = JSON_PRETTY_PRINT;
 }
 
 
-$build = function( \Aimeos\MW\View\Iface $view, \Aimeos\MShop\Common\Item\Iface $item, array $fields, array $childItems, array $listItems )
-{
-	$id = $item->getId();
-	$attributes = $item->toArray();
-	$type = $item->getResourceType();
-	$params = array( 'resource' => $item->getResourceType(), 'id' => $id );
+$fields = $this->param( 'fields', [] );
 
-	$target = $view->config( 'admin/jsonadm/url/target' );
-	$cntl = $view->config( 'admin/jsonadm/url/controller', 'jsonadm' );
-	$action = $view->config( 'admin/jsonadm/url/action', 'get' );
-	$config = $view->config( 'admin/jsonadm/url/config', array() );
+foreach( (array) $fields as $resource => $list ) {
+	$fields[$resource] = array_flip( explode( ',', $list ) );
+}
+
+
+$build = function( \Aimeos\MShop\Common\Item\Iface $item, array $childItems, array $listItems ) use ( $fields )
+{
+	$id = strtoupper( $item->getId() );
+	$type = $item->getResourceType();
+	$params = array( 'resource' => $type, 'id' => $id );
+	$attributes = $item->toArray( true );
+
+	$target = $this->config( 'admin/jsonadm/url/target' );
+	$cntl = $this->config( 'admin/jsonadm/url/controller', 'jsonadm' );
+	$action = $this->config( 'admin/jsonadm/url/action', 'get' );
+	$config = $this->config( 'admin/jsonadm/url/config', [] );
 
 	if( isset( $fields[$type] ) ) {
 		$attributes = array_intersect_key( $attributes, $fields[$type] );
@@ -27,9 +42,9 @@ $build = function( \Aimeos\MW\View\Iface $view, \Aimeos\MShop\Common\Item\Iface 
 		'type' => $type,
 		'attributes' => $attributes,
 		'links' => array(
-			'self' => $view->url( $target, $cntl, $action, $params, array(), $config )
+			'self' => $this->url( $target, $cntl, $action, $params, [], $config )
 		),
-		'relationships' => array()
+		'relationships' => []
 	);
 
 	foreach( $childItems as $childItem )
@@ -49,9 +64,11 @@ $build = function( \Aimeos\MW\View\Iface $view, \Aimeos\MShop\Common\Item\Iface 
 			$params = array( 'resource' => $listItem->getResourceType(), 'id' => $listId );
 
 			$result['relationships'][$type][] = array( 'data' => array(
-				'id' => $listItem->getRefId(), 'type' => $type,
-				'attributes' => $listItem->toArray(), 'links' => array(
-					'self' => $view->url( $target, $cntl, $action, $params, array(), $config )
+				'id' => $listItem->getRefId(),
+				'type' => $type,
+				'attributes' => $listItem->toArray( true ),
+				'links' => array(
+					'self' => $this->url( $target, $cntl, $action, $params, [], $config )
 				)
 			) );
 		}
@@ -61,28 +78,21 @@ $build = function( \Aimeos\MW\View\Iface $view, \Aimeos\MShop\Common\Item\Iface 
 };
 
 
-$fields = $this->param( 'fields', array() );
-
-foreach( (array) $fields as $resource => $list ) {
-	$fields[$resource] = array_flip( explode( ',', $list ) );
-}
-
-
-$data = $this->get( 'data', array() );
-$childItems = $this->get( 'childItems', array() );
-$listItems = $this->get( 'listItems', array() );
+$data = $this->get( 'data', [] );
+$childItems = $this->get( 'childItems', [] );
+$listItems = $this->get( 'listItems', [] );
 
 if( is_array( $data ) )
 {
-	$response = array();
+	$response = [];
 
 	foreach( $data as $item ) {
-		$response[] = $build( $this, $item, $fields, $childItems, $listItems );
+		$response[] = $build( $item, $childItems, $listItems );
 	}
 }
 elseif( $data !== null )
 {
-	$response = $build( $this, $data, $fields, $childItems, $listItems );
+	$response = $build( $data, $childItems, $listItems );
 }
 else
 {

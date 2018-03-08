@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -56,25 +56,25 @@ class Standard
 			$listManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), $params->domain . '/lists' );
 			$criteria = $listManager->createSearch();
 
-			$expr = array();
+			$expr = [];
 			$expr[] = $criteria->compare( '==', $params->domain . '.lists.parentid', $params->parentid );
 			$expr[] = $criteria->compare( '==', $params->domain . '.lists.domain', 'price' );
 			$criteria->setConditions( $criteria->combine( '&&', $expr ) );
 
 			$result = $listManager->searchItems( $criteria );
 
-			$ids = array();
+			$ids = [];
 			foreach( $result as $items ) {
 				$ids[] = $items->getRefId();
 			}
 
-			$expr = array();
+			$expr = [];
 			$expr[] = $search->compare( '==', 'price.id', $ids );
 			$expr[] = $search->getConditions();
 			$search->setConditions( $search->combine( '&&', $expr ) );
 		}
 
-		$items = $this->getManager()->searchItems( $search, array(), $total );
+		$items = $this->getManager()->searchItems( $search, [], $total );
 
 		return array(
 			'items' => $this->toArray( $items ),
@@ -164,7 +164,7 @@ class Standard
 		$this->checkParams( $params, array( 'site', 'items' ) );
 		$this->setLocale( $params->site );
 
-		$idList = array();
+		$idList = [];
 		$ids = (array) $params->items;
 		$context = $this->getContext();
 		$manager = $this->getManager();

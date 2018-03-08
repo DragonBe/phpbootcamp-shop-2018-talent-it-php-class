@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -32,7 +32,7 @@ class Exception
 	 * @param \Exception $previous The previous exception used for the exception chaining.
 	 * @param array $list The associative list of errors and their messages when several errors occured
 	 */
-	public function __construct( $msg = '', $code = 0, \Exception $previous = null, array $list = array() )
+	public function __construct( $msg = '', $code = 0, \Exception $previous = null, array $list = [] )
 	{
 		parent::__construct( $msg, $code, $previous );
 

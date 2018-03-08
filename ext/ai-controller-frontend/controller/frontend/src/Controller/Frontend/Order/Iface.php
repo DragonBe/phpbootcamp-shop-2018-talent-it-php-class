@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -21,16 +21,50 @@ namespace Aimeos\Controller\Frontend\Order;
 interface Iface
 {
 	/**
-	 * Creates a new order from the given basket.
+	 * Creates and adds a new order for the given order base ID
 	 *
-	 * Saves the given basket to the storage including the addresses, coupons,
-	 * products, services, etc. and creates/stores a new order item for that
-	 * order.
-	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object to be stored
-	 * @return \Aimeos\MShop\Order\Item\Iface Order item that belongs to the stored basket
+	 * @param string $baseId Unique ID of the saved basket
+	 * @param string $type Arbitrary order type (max. eight chars)
+	 * @return \Aimeos\MShop\Order\Item\Iface Created order object
 	 */
-	public function store( \Aimeos\MShop\Order\Item\Base\Iface $basket );
+	public function addItem( $baseId, $type );
+
+
+	/**
+	 * Returns the filter for searching items
+	 *
+	 * @return \Aimeos\MW\Criteria\Iface Filter object
+	 */
+	public function createFilter();
+
+
+	/**
+	 * Returns the order item for the given ID
+	 *
+	 * @param string $id Unique order ID
+	 * @param boolean $default Use default criteria to limit orders
+	 * @return \Aimeos\MShop\Order\Item\Iface Order object
+	 */
+	public function getItem( $id, $default = true );
+
+
+	/**
+	 * Saves the modified order item
+	 *
+	 * @param \Aimeos\MShop\Order\Item\Iface $item Order object
+	 * @return \Aimeos\MShop\Order\Item\Iface Saved order item
+	 */
+	public function saveItem( \Aimeos\MShop\Order\Item\Iface $item );
+
+
+	/**
+	 * Returns the order items based on the given filter that belong to the current user
+	 *
+	 * @param \Aimeos\MW\Criteria\Iface Filter object
+	 * @param integer &$total|null Variable that will contain the total number of available items
+	 * @return \Aimeos\MShop\Order\Item\Iface[] Associative list of IDs as keys and order objects as values
+	 */
+	public function searchItems( \Aimeos\MW\Criteria\Iface $filter, &$total = null );
 
 
 	/**
@@ -93,4 +127,18 @@ interface Iface
 	 * @return void
 	 */
 	public function update( \Aimeos\MShop\Order\Item\Iface $orderItem );
+
+
+	/**
+	 * Creates a new order from the given basket.
+	 *
+	 * Saves the given basket to the storage including the addresses, coupons,
+	 * products, services, etc. and creates/stores a new order item for that
+	 * order.
+	 *
+	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object to be stored
+	 * @return \Aimeos\MShop\Order\Item\Iface Order item that belongs to the stored basket
+	 * @deprecated 2017.04 Use store() from basket controller instead
+	 */
+	public function store( \Aimeos\MShop\Order\Item\Base\Iface $basket );
 }

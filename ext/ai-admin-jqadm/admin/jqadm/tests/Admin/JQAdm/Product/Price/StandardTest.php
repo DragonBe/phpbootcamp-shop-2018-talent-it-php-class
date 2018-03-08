@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product\Price;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -23,13 +23,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$templatePaths = \TestHelperJqadm::getTemplatePaths();
 
 		$this->object = new \Aimeos\Admin\JQAdm\Product\Price\Standard( $this->context, $templatePaths );
+		$this->object->setAimeos( \TestHelperJqadm::getAimeos() );
 		$this->object->setView( $this->view );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object );
+		unset( $this->object, $this->view, $this->context );
 	}
 
 
@@ -40,7 +41,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->view->item = $manager->createItem();
 		$result = $this->object->create();
 
-		$this->assertContains( 'Prices', $result );
+		$this->assertContains( 'item-price', $result );
 		$this->assertNull( $this->view->get( 'errors' ) );
 	}
 
@@ -53,12 +54,20 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$result = $this->object->copy();
 
 		$this->assertNull( $this->view->get( 'errors' ) );
-		$this->assertContains( 'value="for 1 product"', $result );
+		$this->assertContains( 'value="19.00"', $result );
+		$this->assertContains( 'value="600.00"', $result );
+		$this->assertContains( 'value="0.00"', $result );
+		$this->assertContains( 'value="30.00"', $result );
+		$this->assertContains( 'value="EUR" selected="selected"', $result );
+		$this->assertContains( 'value="1"', $result );
 	}
 
 
 	public function testDelete()
 	{
+		$manager = \Aimeos\MShop\Factory::createManager( $this->context, 'product' );
+
+		$this->view->item = $manager->createItem();
 		$result = $this->object->delete();
 
 		$this->assertNull( $this->view->get( 'errors' ) );
@@ -74,7 +83,12 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$result = $this->object->get();
 
 		$this->assertNull( $this->view->get( 'errors' ) );
-		$this->assertContains( 'value="for 1 product"', $result );
+		$this->assertContains( 'value="19.00"', $result );
+		$this->assertContains( 'value="600.00"', $result );
+		$this->assertContains( 'value="0.00"', $result );
+		$this->assertContains( 'value="30.00"', $result );
+		$this->assertContains( 'value="EUR" selected="selected"', $result );
+		$this->assertContains( 'value="1"', $result );
 	}
 
 
@@ -87,15 +101,15 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setCode( 'jqadm-test-price' );
 		$item->setId( null );
 
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
 
 		$param = array(
+			'site' => 'unittest',
 			'price' => array(
 				'product.lists.id' => array( '' ),
-				'price.typeid' => array( $typeManager->findItem( 'default', array(), 'product' )->getId() ),
+				'price.typeid' => array( $typeManager->findItem( 'default', [], 'product' )->getId() ),
 				'price.currencyid' => array( 'EUR' ),
-				'price.label' => array( 'test' ),
 				'price.quantity' => array( '2' ),
 				'price.value' => array( '10.00' ),
 				'price.costs' => array( '1.00' ),
@@ -125,12 +139,12 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			$refItem = $listItem->getRefItem();
 			$this->assertEquals( 'default', $refItem->getType() );
 			$this->assertEquals( 'EUR', $refItem->getCurrencyId() );
-			$this->assertEquals( 'test', $refItem->getLabel() );
 			$this->assertEquals( '2', $refItem->getQuantity() );
 			$this->assertEquals( '10.00', $refItem->getValue() );
 			$this->assertEquals( '1.00', $refItem->getCosts() );
 			$this->assertEquals( '5.00', $refItem->getRebate() );
 			$this->assertEquals( '20.00', $refItem->getTaxRate() );
+			$this->assertNotEmpty( $refItem->getLabel() );
 		}
 	}
 
@@ -139,13 +153,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Price\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \RuntimeException() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$view = \TestHelperJqadm::getView();
+		$view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();
@@ -156,13 +173,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Price\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \Aimeos\MShop\Exception() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$this->view = \TestHelperJqadm::getView();
+		$this->view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $this->view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();

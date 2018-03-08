@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -31,7 +31,7 @@ $disablenew = (bool) $this->config( 'client/html/common/address/billing/disable-
 try {
 	$addrArray = $this->standardBasket->getAddress( \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_PAYMENT )->toArray();
 } catch( Exception $e ) {
-	$addrArray = array();
+	$addrArray = [];
 }
 
 
@@ -42,23 +42,23 @@ if( !isset( $addrArray['order.base.address.addressid'] ) || $addrArray['order.ba
 }
 
 $billingOption = $this->param( 'ca_billingoption', $billingDefault );
-$billingSalutations = $this->get( 'billingSalutations', array() );
-$billingCountries = $this->get( 'addressCountries', array() );
-$billingStates = $this->get( 'addressStates', array() );
-$billingLanguages = $this->get( 'addressLanguages', array() );
+$billingSalutations = $this->get( 'billingSalutations', [] );
+$billingCountries = $this->get( 'addressCountries', [] );
+$billingStates = $this->get( 'addressStates', [] );
+$billingLanguages = $this->get( 'addressLanguages', [] );
 
 
-$paymentCssAll = array();
+$paymentCssAll = [];
 
-foreach( $this->get( 'billingMandatory', array() ) as $name ) {
+foreach( $this->get( 'billingMandatory', [] ) as $name ) {
 	$paymentCssAll[$name][] = 'mandatory';
 }
 
-foreach( $this->get( 'billingOptional', array() ) as $name ) {
+foreach( $this->get( 'billingOptional', [] ) as $name ) {
 	$paymentCssAll[$name][] = 'optional';
 }
 
-foreach( $this->get( 'billingHidden', array() ) as $name ) {
+foreach( $this->get( 'billingHidden', [] ) as $name ) {
 	$paymentCssAll[$name][] = 'hidden';
 }
 
@@ -66,22 +66,21 @@ foreach( $this->get( 'billingHidden', array() ) as $name ) {
 ?>
 <?php $this->block()->start( 'checkout/standard/address/billing' ); ?>
 <div class="checkout-standard-address-billing">
-	<h2><?php echo $enc->html( $this->translate( 'client', 'Billing address' ), $enc::TRUST ); ?></h2>
+	<h2><?= $enc->html( $this->translate( 'client', 'Billing address' ), $enc::TRUST ); ?></h2>
 
 
 	<?php if( isset( $this->addressPaymentItem )  ) : ?>
 		<div class="item-address">
 			<div class="header">
 
-				<input type="radio"
-					name="<?php echo $enc->attr( $this->formparam( array( 'ca_billingoption' ) ) ); ?>"
-					value="<?php echo $enc->attr( $this->addressPaymentItem->getAddressId() ); ?>"
-					<?php echo ( $billingOption == $this->addressPaymentItem->getAddressId() ? 'checked="checked"' : '' ); ?>
+				<input id="ca_billingoption-<?= $enc->attr( $this->addressPaymentItem->getAddressId() ); ?>" type="radio"
+					name="<?= $enc->attr( $this->formparam( array( 'ca_billingoption' ) ) ); ?>"
+					value="<?= $enc->attr( $this->addressPaymentItem->getAddressId() ); ?>"
+					<?= ( $billingOption == $this->addressPaymentItem->getAddressId() ? 'checked="checked"' : '' ); ?>
 				/>
-				<div class="values">
+				<label for="ca_billingoption-<?= $enc->attr( $this->addressPaymentItem->getAddressId() ); ?>" class="values">
 <?php
 	$addr = $this->addressPaymentItem;
-	$id = $this->addressPaymentItem->getAddressId();
 
 	echo preg_replace( "/\n+/m", "<br/>", trim( $enc->html( sprintf(
 		/// Address format with company (%1$s), salutation (%2$s), title (%3$s), first name (%4$s), last name (%5$s),
@@ -123,14 +122,14 @@ foreach( $this->get( 'billingHidden', array() ) as $name ) {
 		$addr->getVatID()
 	) ) ) );
 ?>
-				</div>
+				</label>
 			</div>
 
 <?php
 	$paymentCss = $paymentCssAll;
-	if( $billingOption == $id )
+	if( $billingOption == $addr->getAddressId() )
 	{
-		foreach( $this->get( 'billingError', array() ) as $name => $msg ) {
+		foreach( $this->get( 'billingError', [] ) as $name => $msg ) {
 			$paymentCss[$name][] = 'error';
 		}
 	}
@@ -142,7 +141,7 @@ foreach( $this->get( 'billingHidden', array() ) as $name ) {
 	}
 ?>
 			<ul class="form-list">
-				<?php echo $this->partial(
+				<?= $this->partial(
 					/** client/html/checkout/standard/partials/address
 					 * Relative path to the address partial template file
 					 *
@@ -164,7 +163,7 @@ foreach( $this->get( 'billingHidden', array() ) as $name ) {
 						'states' => $billingStates,
 						'type' => 'billing',
 						'css' => $paymentCss,
-						'id' => $id,
+						'id' => $addr->getAddressId(),
 					)
 				); ?>
 			</ul>
@@ -175,29 +174,27 @@ foreach( $this->get( 'billingHidden', array() ) as $name ) {
 
 	<?php if( $disablenew === false ) : ?>
 
-		<div class="item-address item-new" data-option="<?php echo $enc->attr( $billingOption ); ?>">
+		<div class="item-address item-new" data-option="<?= $enc->attr( $billingOption ); ?>">
 			<div class="header">
-				<input type="radio"
-					name="<?php echo $enc->attr( $this->formparam( array( 'ca_billingoption' ) ) ); ?>"
+				<input id="ca_billingoption-new" type="radio"
+					name="<?= $enc->attr( $this->formparam( array( 'ca_billingoption' ) ) ); ?>"
 					value="null"
-					<?php echo ( $billingOption == 'null' ? 'checked="checked"' : '' ); ?>
+					<?= ( $billingOption == 'null' ? 'checked="checked"' : '' ); ?>
 				/>
-				<div class="values">
-					<span class="value value-new">
-						<?php echo $enc->html( $this->translate( 'client', 'new address' ), $enc::TRUST ); ?>
-					</span>
-				</div>
+				<label for="ca_billingoption-new" class="values value-new">
+					<?= $enc->html( $this->translate( 'client', 'new address' ), $enc::TRUST ); ?>
+				</label>
 			</div>
 <?php
 	$paymentCss = $paymentCssAll;
 	if( $billingOption == 'null' )
 	{
-		foreach( $this->get( 'billingError', array() ) as $name => $msg ) {
+		foreach( $this->get( 'billingError', [] ) as $name => $msg ) {
 			$paymentCss[$name][] = 'error';
 		}
 	}
 
-	$addrValues = array_merge( $addrArray, $this->param( 'ca_billing', array() ) );
+	$addrValues = array_merge( $addrArray, $this->param( 'ca_billing', [] ) );
 
 	if( !isset( $addrValues['order.base.address.languageid'] ) || $addrValues['order.base.address.languageid'] == '' ) {
 		$addrValues['order.base.address.languageid'] = $this->get( 'billingLanguage', 'en' );
@@ -215,19 +212,19 @@ foreach( $this->get( 'billingHidden', array() ) as $name ) {
 ?>
 			<ul class="form-list">
 
-				<?php echo $this->partial(
+				<?= $this->partial(
 					$this->config( 'client/html/checkout/standard/partials/address', 'checkout/standard/address-partial-default.php' ),
 					$values
 				); ?>
 
 				<li class="form-item birthday">
 					<label for="customer-birthday">
-						<?php echo $enc->html( $this->translate( 'client', 'Birthday' ), $enc::TRUST ); ?>
+						<?= $enc->html( $this->translate( 'client', 'Birthday' ), $enc::TRUST ); ?>
 					</label><!--
 					--><input type="date" class="birthday"
 						id="customer-birthday"
-						name="<?php echo $enc->attr( $this->formparam( array( 'ca_extra', 'customer.birthday' ) ) ); ?>"
-						value="<?php echo $enc->attr( $this->get( 'addressExtra/customer.birthday' ) ); ?>"
+						name="<?= $enc->attr( $this->formparam( array( 'ca_extra', 'customer.birthday' ) ) ); ?>"
+						value="<?= $enc->attr( $this->get( 'addressExtra/customer.birthday' ) ); ?>"
 					/>
 				</li>
 			</ul>
@@ -237,4 +234,4 @@ foreach( $this->get( 'billingHidden', array() ) as $name ) {
 
 </div>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'checkout/standard/address/billing' ); ?>
+<?= $this->block()->get( 'checkout/standard/address/billing' ); ?>

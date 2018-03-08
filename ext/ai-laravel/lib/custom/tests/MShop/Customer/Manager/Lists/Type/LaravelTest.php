@@ -5,20 +5,14 @@ namespace Aimeos\MShop\Customer\Manager\Lists\Type;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class LaravelTest extends \PHPUnit_Framework_TestCase
+class LaravelTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $editor = 'ai-laravel:unittest';
 
 
-	/**
-	 * Sets up the fixture.
-	 * This method is called before a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function setUp()
 	{
 		$this->editor = \TestHelper::getContext()->getEditor();
@@ -29,12 +23,6 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function tearDown()
 	{
 		unset( $this->object );
@@ -87,12 +75,12 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 
 		$item->setId(null);
 		$item->setCode( 'unitTestInit' );
-		$this->object->saveItem( $item );
+		$resultSaved = $this->object->saveItem( $item );
 		$itemSaved = $this->object->getItem( $item->getId() );
 
 		$itemExp = clone $itemSaved;
 		$itemExp->setCode( 'unitTestSave' );
-		$this->object->saveItem( $itemExp );
+		$resultUpd = $this->object->saveItem( $itemExp );
 		$itemUpd = $this->object->getItem( $itemExp->getId() );
 
 		$this->object->deleteItem( $itemSaved->getId() );
@@ -121,6 +109,9 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals( $itemExp->getTimeCreated(), $itemUpd->getTimeCreated() );
 		$this->assertRegExp( '/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $itemUpd->getTimeModified() );
 
+		$this->assertInstanceOf( '\Aimeos\MShop\Common\Item\Iface', $resultSaved );
+		$this->assertInstanceOf( '\Aimeos\MShop\Common\Item\Iface', $resultUpd );
+
 		$this->setExpectedException('\\Aimeos\\MShop\\Exception');
 		$this->object->getItem( $itemSaved->getId() );
 	}
@@ -131,7 +122,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$total = 0;
 		$search = $this->object->createSearch();
 
-		$expr = array();
+		$expr = [];
 		$expr[] = $search->compare( '!=', 'customer.lists.type.id', 0 );
 		$expr[] = $search->compare( '!=', 'customer.lists.type.siteid', null );
 		$expr[] = $search->compare( '==', 'customer.lists.type.code', 'default' );
@@ -145,7 +136,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$search->setConditions( $search->combine( '&&', $expr ) );
 		$search->setSlice(0, 1);
 
-		$results = $this->object->searchItems( $search, array(), $total );
+		$results = $this->object->searchItems( $search, [], $total );
 		$this->assertEquals( 1, count( $results ) );
 		$this->assertEquals( 1, $total );
 

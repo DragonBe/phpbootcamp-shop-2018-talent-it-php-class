@@ -3,13 +3,16 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
 
 
 namespace Aimeos\Controller\Frontend\Service;
+
+use \Psr\Http\Message\ServerRequestInterface;
+use \Psr\Http\Message\ResponseInterface;
 
 
 /**
@@ -21,49 +24,55 @@ namespace Aimeos\Controller\Frontend\Service;
 interface Iface
 {
 	/**
-	 * Returns the service items that are available for the service type and the content of the basket.
+	 * Returns a list of attributes that are invalid
 	 *
-	 * @param string $type Service type, e.g. "delivery" (shipping related) or "payment" (payment related)
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket of the user
+	 * @param string $serviceId Unique service ID
+	 * @param string[] $attributes List of attribute codes as keys and strings entered by the customer as value
+	 * @return string[] List of attributes codes as keys and error messages as values for invalid or missing values
+	 */
+	public function checkAttributes( $serviceId, array $attributes );
+
+	/**
+	 * Returns the service item for the given ID
+	 *
+	 * @param string $serviceId Unique service ID
 	 * @param array $ref List of domains for which the items referenced by the services should be fetched too
-	 * @return array List of service items implementing \Aimeos\MShop\Service\Item\Iface with referenced items
+	 * @return \Aimeos\MShop\Service\Provider\Iface Service provider object
 	 */
-	public function getServices( $type, \Aimeos\MShop\Order\Item\Base\Iface $basket,
-		$ref = array( 'media', 'price', 'text' ) );
+	public function getProvider( $serviceId, $ref = ['media', 'price', 'text'] );
 
 	/**
-	 * Returns the list of attribute definitions which must be used to render the input form where the customer can
-	 * enter or chose the required data necessary by the service provider.
+	 * Returns the service providers for the given type
 	 *
-	 * @param string $type Service type, e.g. "delivery" (shipping related) or "payment" (payment related)
-	 * @param string $serviceId Identifier of one of the service option returned by getService()
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
-	 * @return array List of attribute definitions implementing \Aimeos\MW\Criteria\Attribute\Iface
+	 * @param string|null $type Service type, e.g. "delivery" (shipping related), "payment" (payment related) or null for all
+	 * @param array $ref List of domains for which the items referenced by the services should be fetched too
+	 * @return \Aimeos\MShop\Service\Provider\Iface[] List of service IDs as keys and service provider objects as values
 	 */
-	public function getServiceAttributes( $type, $serviceId, \Aimeos\MShop\Order\Item\Base\Iface $basket );
+	public function getProviders( $type = null, $ref = ['media', 'price', 'text'] );
 
 	/**
-	 * Returns the price of the service.
+	 * Processes the service for the given order, e.g. payment and delivery services
 	 *
-	 * @param string $type Service type, e.g. "delivery" (shipping related) or "payment" (payment related)
-	 * @param string $serviceId Identifier of one of the service option returned by getService()
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket with products
-	 * @return \Aimeos\MShop\Price\Item\Iface Price item
-	 * @throws \Aimeos\Controller\Frontend\Service\Exception If no active service provider for this ID is available
-	 * @throws \Aimeos\MShop\Exception If service provider isn't available
-	 * @throws \Exception If an error occurs
+	 * @param \Aimeos\MShop\Order\Item\Iface $orderItem Order which should be processed
+	 * @param string $serviceId Unique service item ID
+	 * @param array $urls Associative list of keys and the corresponding URLs
+	 * 	(keys are <type>.url-self, <type>.url-success, <type>.url-update where type can be "delivery" or "payment")
+	 * @param array $params Request parameters and order service attributes
+	 * @return \Aimeos\MShop\Common\Item\Helper\Form\Iface|null Form object with URL, parameters, etc.
+	 * 	or null if no form data is required
 	 */
-	public function getServicePrice( $type, $serviceId, \Aimeos\MShop\Order\Item\Base\Iface $basket );
+	public function process( \Aimeos\MShop\Order\Item\Iface $orderItem, $serviceId, array $urls, array $params );
 
 	/**
-	 * Returns a list of attributes that are invalid.
+	 * Updates the payment or delivery status for the given request
 	 *
-	 * @param string $type Service type, e.g. "delivery" (shipping related) or "payment" (payment related)
-	 * @param string $serviceId Identifier of the service option chosen by the customer
-	 * @param array $attributes List of key/value pairs with name of the attribute from attribute definition object as
-	 * 	key and the string entered by the customer as value
-	 * @return array List of key/value pairs of attributes keys and an error message for values that are invalid or
-	 * 	missing
+	 * @param ServerRequestInterface $request Request object with parameters and request body
+	 * @param ResponseInterface $response Response object that will contain HTTP status and response body
+	 * @param array $urls Associative list of keys and the corresponding URLs
+	 * 	(keys are <type>.url-self, <type>.url-success, <type>.url-update where type can be "delivery" or "payment")
+	 * @param string $code Unique code of the service used for the current order
+	 * @param string $orderid Unique ID of the order whose payment status should be updated
+	 * @return \Aimeos\MShop\Order\Item\Iface $orderItem Order item that has been updated
 	 */
-	public function checkServiceAttributes( $type, $serviceId, array $attributes );
+	public function updateSync( ServerRequestInterface $request, ResponseInterface $response, array $urls, $code, $orderid );
 }

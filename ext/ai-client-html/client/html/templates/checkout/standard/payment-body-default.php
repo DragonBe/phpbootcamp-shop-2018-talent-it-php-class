@@ -3,14 +3,14 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
 
-$services = $this->get( 'paymentServices', array() );
-$servicePrices = $this->get( 'paymentServicePrices', array() );
-$serviceAttributes = $this->get( 'paymentServiceAttributes', array() );
+$services = $this->get( 'paymentServices', [] );
+$servicePrices = $this->get( 'paymentServicePrices', [] );
+$serviceAttributes = $this->get( 'paymentServiceAttributes', [] );
 
 try
 {
@@ -29,8 +29,8 @@ catch( Exception $e )
 
 $serviceOption = $this->param( 'c_paymentoption', $orderServiceId );
 
-$paymentCss = array();
-foreach( $this->get( 'paymentError', array() ) as $name => $msg ) {
+$paymentCss = [];
+foreach( $this->get( 'paymentError', [] ) as $name => $msg ) {
 	$paymentCss[$name][] = 'error';
 }
 
@@ -42,25 +42,25 @@ $priceFormat = $this->translate( 'client', '%1$s %2$s' );
 <?php $this->block()->start( 'checkout/standard/payment' ); ?>
 <section class="checkout-standard-payment">
 
-	<h1><?php echo $enc->html( $this->translate( 'client', 'payment' ), $enc::TRUST ); ?></h1>
-	<p class="note"><?php echo $enc->html( $this->translate( 'client', 'Please choose your payment method' ), $enc::TRUST ); ?></p>
+	<h1><?= $enc->html( $this->translate( 'client', 'payment' ), $enc::TRUST ); ?></h1>
+	<p class="note"><?= $enc->html( $this->translate( 'client', 'Please choose your payment method' ), $enc::TRUST ); ?></p>
 
 	<?php foreach( $services as $id => $service ) : ?>
-		<div id="c_payment-<?php echo $enc->attr( $id ); ?>" class="item item-service">
-			<label class="description" for="c_paymentoption-<?php echo $enc->attr( $id ); ?>">
+		<div id="c_payment-<?= $enc->attr( $id ); ?>" class="item item-service">
+			<label class="description" for="c_paymentoption-<?= $enc->attr( $id ); ?>">
 
 				<input class="option" type="radio"
-					id="c_paymentoption-<?php echo $enc->attr( $id ); ?>"
-					name="<?php echo $enc->attr( $this->formparam( array( 'c_paymentoption' ) ) ); ?>"
-					value="<?php echo $enc->attr( $id ); ?>"
-					<?php echo ( $id == $serviceOption ? 'checked="checked"' : '' ); ?>
+					id="c_paymentoption-<?= $enc->attr( $id ); ?>"
+					name="<?= $enc->attr( $this->formparam( array( 'c_paymentoption' ) ) ); ?>"
+					value="<?= $enc->attr( $id ); ?>"
+					<?= ( $id == $serviceOption ? 'checked="checked"' : '' ); ?>
 				/>
 
 				<?php if( isset( $servicePrices[$id] ) ) : ?>
 					<?php $currency = $this->translate( 'client/currency', $servicePrices[$id]->getCurrencyId() ); ?>
 					<?php if( $servicePrices[$id]->getValue() > 0 ) : ?>
 						<span class="price-value">
-							<?php echo $enc->html( sprintf( /// Service fee value (%1$s) and shipping cost value (%2$s) with currency (%3$s)
+							<?= $enc->html( sprintf( /// Service fee value (%1$s) and shipping cost value (%2$s) with currency (%3$s)
 								$this->translate( 'client', '%1$s%3$s + %2$s%3$s' ),
 								$this->number( $servicePrices[$id]->getValue() ),
 								$this->number( $servicePrices[$id]->getCosts() ),
@@ -69,7 +69,7 @@ $priceFormat = $this->translate( 'client', '%1$s %2$s' );
 						</span>
 					<?php elseif( $servicePrices[$id]->getCosts() > 0 ) : ?>
 						<span class="price-value">
-							<?php echo $enc->html( sprintf(
+							<?= $enc->html( sprintf(
 								$priceFormat,
 								$this->number( $servicePrices[$id]->getCosts() ),
 								$currency )
@@ -80,99 +80,82 @@ $priceFormat = $this->translate( 'client', '%1$s %2$s' );
 
 				<div class="icons">
 					<?php foreach( $service->getRefItems( 'media', 'default', 'default' ) as $mediaItem ) : ?>
-						<?php echo $this->partial(
+						<?= $this->partial(
 							$this->config( 'client/html/common/partials/media', 'common/partials/media-default.php' ),
 							array( 'item' => $mediaItem, 'boxAttributes' => array( 'class' => 'icon' ) )
 						); ?>
 					<?php endforeach; ?>
 				</div>
 
-				<h2><?php echo $enc->html( $service->getName() ); ?></h2>
+				<h2><?= $enc->html( $service->getName() ); ?></h2>
 
 				<?php foreach( $service->getRefItems( 'text', null, 'default' ) as $textItem ) : ?>
 					<?php if( ( $type = $textItem->getType() ) !== 'name' ) : ?>
-						<p class="<?php echo $enc->attr( $type ); ?>"><?php echo $enc->html( $textItem->getContent(), $enc::TRUST ); ?></p>
+						<p class="<?= $enc->attr( $type ); ?>"><?= $enc->html( $textItem->getContent(), $enc::TRUST ); ?></p>
 					<?php endif; ?>
 				<?php endforeach; ?>
 
 			</label><!--
 
 
-			--><?php if( isset( $serviceAttributes[$id] ) && !empty( $serviceAttributes[$id] ) ) : ?><!--
-				--><ul class="form-list">
-
-					<?php foreach( $serviceAttributes[$id] as $key => $attribute ) : ?>
-						<?php
-							if( !isset( $orderService ) || (
-								( $value = $orderService->getAttribute( $key . '/hidden' ) ) === null
-								&& ( $value = $orderService->getAttribute( $key ) ) === null )
-							) {
-								$value = $attribute->getDefault();
-							}
-						?>
-						<?php $css = ( isset( $paymentCss[$key] ) ? ' ' . join( ' ', $paymentCss[$key] ) : '' ) . ( $attribute->isRequired() ? ' mandatory' : '' ); ?>
-
-						<li class="form-item <?php echo $enc->attr( $key ) . $css; ?>">
-							<label for="payment-<?php echo $enc->attr( $key ); ?>"><?php echo $enc->html( $this->translate( 'client/code', $key ) ); ?></label><!--
-
-							--><?php switch( $attribute->getType() ) : case 'select': ?><!--
-
-									--><select id="payment-<?php echo $enc->attr( $key ); ?>"
-										name="<?php echo $enc->attr( $this->formparam( array( 'c_payment', $id, $key ) ) ); ?>">
-
-										<?php foreach( (array) $attribute->getDefault() as $option ) : $code = $key . ':' . $option; ?>
-											<?php $string = ( !is_numeric( $option ) ? $this->translate( 'client/code', $code ) : $option ); ?>
-											<option value="<?php echo $enc->attr( $option ); ?>">
-												<?php echo $enc->html( $string ); ?>
-											</option>
-										<?php endforeach; ?>
-									</select><!--
-
-								--><?php break; case 'boolean': ?><!--
-									--><input type="checkbox" id="payment-<?php echo $enc->attr( $key ); ?>"
-										name="<?php echo $enc->attr( $this->formparam( array( 'c_payment', $id, $key ) ) ); ?>"
-										value="<?php echo $enc->attr( $this->param( 'c_payment/' . $id . '/' . $key, $value ) ); ?>"
-									/><!--
-
-								--><?php break; case 'integer': case 'number': ?><!--
-									--><input type="number" id="payment-<?php echo $enc->attr( $key ); ?>"
-										name="<?php echo $enc->attr( $this->formparam( array( 'c_payment', $id, $key ) ) ); ?>"
-										value="<?php echo $enc->attr( $this->param( 'c_payment/' . $id . '/' . $key, $value ) ); ?>"
-									/><!--
-
-								--><?php break; case 'date': case 'datetime': case 'time': ?><!--
-									--><input type="<?php echo $attribute->getType(); ?>" id="payment-<?php echo $enc->attr( $key ); ?>"
-										name="<?php echo $enc->attr( $this->formparam( array( 'c_payment', $id, $key ) ) ); ?>"
-										value="<?php echo $enc->attr( $this->param( 'c_payment/' . $id . '/' . $key, $value ) ); ?>"
-									/><!--
-
-								--><?php break; default: ?><!--
-									--><input type="text" id="payment-<?php echo $enc->attr( $key ); ?>"
-										name="<?php echo $enc->attr( $this->formparam( array( 'c_payment', $id, $key ) ) ); ?>"
-										value="<?php echo $enc->attr( $this->param( 'c_payment/' . $id . '/' . $key, $value ) ); ?>"
-									/><!--
-
-							--><?php endswitch; ?>
-
-						</li>
-					<?php endforeach; ?>
-
-				</ul>
+			<?php if( isset( $serviceAttributes[$id] ) && !empty( $serviceAttributes[$id] ) ) : ?>
+				--><?= $this->partial(
+					/** client/html/checkout/standard/partials/serviceattr
+					 * Relative path to the checkout service attribute partial template file
+					 *
+					 * Partials are templates which are reused in other templates and generate reoccuring
+					 * blocks filled with data from the assigned values. The service attribute partial creates
+					 * an HTML block for the checkout delivery/payment option input/select fields.
+					 *
+					 * This is a very generic way to generate the list of service attribute pairs that will be
+					 * added as order service attributes in the basket. Depending on the type of the attribute,
+					 * it will create an input field, a select box or a list of selectable items. What attributes
+					 * are available to the customer depends on the definitions in the service providers and the
+					 * decorators wrapped around them.
+					 *
+					 * If you want to adapt the output to your own project and you know you only have a specific
+					 * list of attributes, you can create the input and selections in a non-generic, straight
+					 * forward way. The $serviceAttributes[$id] array contains an associative list of codes as
+					 * keys (e.g. "directdebit.bankcode") and items implementing \Aimeos\MW\Criteria\Attribute\Iface
+					 * as values, e.g.
+					 *   directdebit.bankcode => \Aimeos\MW\Criteria\Attribute\Iface (
+					 *	   code => 'directdebit.bankcode',
+					 *	   internalcode => 'bankcode',
+					 *	   label => 'Bank code',
+					 *	   type => 'string',
+					 *	   internaltype => 'string',
+					 *	   default => '',
+					 *	   required => true
+					 *   )
+					 *
+					 * @param string Relative path to the template file
+					 * @since 2017.07
+					 * @category Developer
+					 */
+					$this->config( 'client/html/checkout/standard/partials/serviceattr', 'checkout/standard/serviceattr-partial-default.php' ),
+					array(
+						'attributes' => $serviceAttributes[$id],
+						'orderService' => $orderService,
+						'css' => $paymentCss,
+						'type' => 'payment',
+						'id' => $id,
+					)
+				); ?><!--
 			<?php endif; ?>
 
-		</div>
+		--></div>
 	<?php endforeach; ?>
 
 
 	<div class="button-group">
-		<a class="standardbutton btn-back" href="<?php echo $enc->attr( $this->get( 'standardUrlBack' ) ); ?>">
-			<?php echo $enc->html( $this->translate( 'client', 'Previous' ), $enc::TRUST ); ?>
+		<a class="standardbutton btn-back" href="<?= $enc->attr( $this->get( 'standardUrlBack' ) ); ?>">
+			<?= $enc->html( $this->translate( 'client', 'Previous' ), $enc::TRUST ); ?>
 		</a>
 		<button class="standardbutton btn-action">
-			<?php echo $enc->html( $this->translate( 'client', 'Next' ), $enc::TRUST ); ?>
+			<?= $enc->html( $this->translate( 'client', 'Next' ), $enc::TRUST ); ?>
 		</button>
 	</div>
 
 </section>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'checkout/standard/payment' ); ?>
+<?= $this->block()->get( 'checkout/standard/payment' ); ?>

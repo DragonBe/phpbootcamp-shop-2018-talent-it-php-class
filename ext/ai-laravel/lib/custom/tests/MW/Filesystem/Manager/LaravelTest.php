@@ -1,9 +1,15 @@
 <?php
 
+/**
+ * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
+ * @copyright Aimeos (aimeos.org), 2015-2017
+ */
+
+
 namespace Aimeos\MW\Filesystem\Manager;
 
 
-class LaravelTest extends \PHPUnit_Framework_TestCase
+class LaravelTest extends \PHPUnit\Framework\TestCase
 {
 	private $config;
 	private $object;
@@ -21,7 +27,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 			->disableOriginalConstructor()
 			->getMock();
 
-		$this->config = new \Aimeos\MW\Config\Decorator\Memory( new \Aimeos\MW\Config\PHPArray( array(), array() ) );
+		$this->config = new \Aimeos\MW\Config\Decorator\Memory( new \Aimeos\MW\Config\PHPArray( [], [] ) );
 		$this->object = new \Aimeos\MW\Filesystem\Manager\Laravel( $this->storage, $this->config, sys_get_temp_dir() );
 	}
 

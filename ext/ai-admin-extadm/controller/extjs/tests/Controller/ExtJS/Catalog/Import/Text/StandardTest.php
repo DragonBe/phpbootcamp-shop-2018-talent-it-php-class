@@ -6,9 +6,9 @@ namespace Aimeos\Controller\ExtJS\Catalog\Import\Text;
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $testdir;
@@ -71,7 +71,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		}
 		$id = $root->getId();
 
-		$data = array();
+		$data = [];
 		$data[] = '"Language ID","Catalog code","Catalog ID","List type","Text type","Text ID","Text"' . "\n";
 		$data[] = '"en","Root","' . $id . '","default","name","","Root: long"' . "\n";
 		$data[] = '"en","Root","' . $id . '","default","name","","Root: meta desc"' . "\n";
@@ -108,7 +108,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$textManager = \Aimeos\MShop\Text\Manager\Factory::createManager( $this->context );
 		$criteria = $textManager->createSearch();
 
-		$expr = array();
+		$expr = [];
 		$expr[] = $criteria->compare( '==', 'text.domain', 'catalog' );
 		$expr[] = $criteria->compare( '==', 'text.languageid', 'en' );
 		$expr[] = $criteria->compare( '==', 'text.status', 1 );
@@ -117,7 +117,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$textItems = $textManager->searchItems( $criteria );
 
-		$textIds = array();
+		$textIds = [];
 		foreach( $textItems as $item )
 		{
 			$textManager->deleteItem( $item->getId() );
@@ -128,7 +128,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$listManager = $catalogManager->getSubManager( 'lists' );
 		$criteria = $listManager->createSearch();
 
-		$expr = array();
+		$expr = [];
 		$expr[] = $criteria->compare( '==', 'catalog.lists.domain', 'text' );
 		$expr[] = $criteria->compare( '==', 'catalog.lists.refid', $textIds );
 		$criteria->setConditions( $criteria->combine( '&&', $expr ) );
@@ -205,7 +205,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			->setMethods( array( 'getUploadedFiles' ) )
 			->disableOriginalConstructor()
 			->getMock();
-		$helper->expects( $this->once() )->method( 'getUploadedFiles' )->will( $this->returnValue( array() ) );
+		$helper->expects( $this->once() )->method( 'getUploadedFiles' )->will( $this->returnValue( [] ) );
 
 		$view = new \Aimeos\MW\View\Standard();
 		$view->addHelper( 'request', $helper );

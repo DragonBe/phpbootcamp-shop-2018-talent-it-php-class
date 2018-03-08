@@ -5,9 +5,9 @@ namespace Aimeos\MW\Mail\Message;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2014-2016
+ * @copyright Aimeos (aimeos.org), 2014-2017
  */
-class SwiftTest extends \PHPUnit_Framework_TestCase
+class SwiftTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $mock;
@@ -125,7 +125,7 @@ class SwiftTest extends \PHPUnit_Framework_TestCase
 
 	public function testSetBody()
 	{
-		$this->mock->expects( $this->once() )->method( 'setBody' )
+		$this->mock->expects( $this->once() )->method( 'addPart' )
 			->with( $this->stringContains( 'test' ) );
 
 		$result = $this->object->setBody( 'test' );
@@ -135,7 +135,7 @@ class SwiftTest extends \PHPUnit_Framework_TestCase
 
 	public function testSetBodyHtml()
 	{
-		$this->mock->expects( $this->once() )->method( 'addPart' )
+		$this->mock->expects( $this->once() )->method( 'setBody' )
 			->with( $this->stringContains( 'test' ) );
 
 		$result = $this->object->setBodyHtml( 'test' );

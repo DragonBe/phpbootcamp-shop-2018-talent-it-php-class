@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -56,7 +56,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/catalog/stock/standard/subparts';
-	private $subPartNames = array();
+	private $subPartNames = [];
 	private $cache;
 
 
@@ -68,7 +68,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		try
 		{
@@ -120,7 +120,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		try
 		{
@@ -289,17 +289,14 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
-			$stockItemsByProducts = array();
-			$productCodes = (array) $view->param( 's_prodcode', array() );
+			$stockItemsByProducts = [];
+			$productCodes = (array) $view->param( 's_prodcode', [] );
 
-			$siteConfig = $this->getContext()->getLocale()->getSite()->getConfig();
-			$stockType = ( isset( $siteConfig['stocktype'] ) ? $siteConfig['stocktype'] : null );
-
-			foreach( $this->getStockItems( $productCodes, $stockType ) as $stockItem ){
+			foreach( $this->getStockItems( $productCodes ) as $stockItem ){
 				$stockItemsByProducts[ $stockItem->getProductCode() ][] = $stockItem;
 			}
 
@@ -317,10 +314,9 @@ class Standard
 	 * Returns the list of stock items for the given product codes and the stock type
 	 *
 	 * @param array $productCodes List of product codes
-	 * @param string|null $stockType Stock type code
 	 * @return \Aimeos\MShop\Stock\Item\Iface[] Associative list stock IDs as keys and stock items as values
 	 */
-	protected function getStockItems( array $productCodes, $stockType )
+	protected function getStockItems( array $productCodes )
 	{
 		$context = $this->getContext();
 
@@ -349,28 +345,24 @@ class Standard
 		$default = array( 'stock.productcode' => '+', 'stock.type.code' => '+' );
 		$sortKeys = $context->getConfig()->get( 'client/html/catalog/stock/sort', $default );
 
+		$siteConfig = $context->getLocale()->getSite()->getConfig();
+		$cntl = \Aimeos\Controller\Frontend\Factory::createController( $context, 'stock' );
 
-		$stockManager = \Aimeos\MShop\Factory::createManager( $context, 'stock' );
+		$filter = $cntl->createFilter();
+		$filter = $cntl->addFilterCodes( $filter, $productCodes );
 
-		$search = $stockManager->createSearch( true );
-		$expr = array(
-			$search->compare( '==', 'stock.productcode', $productCodes ),
-			$search->getConditions(),
-		);
-
-		if( $stockType !== null ) {
-			$expr[] = $search->compare( '==', 'stock.type.code', $stockType );
+		if( isset( $siteConfig['stocktype'] ) ) {
+			$filter = $cntl->addFilterTypes( $filter, [$siteConfig['stocktype']] );
 		}
 
-		$sortations = array();
+		$sortations = [];
 		foreach( $sortKeys as $key => $dir ) {
-			$sortations[] = $search->sort( $dir, $key );
+			$sortations[] = $filter->sort( $dir, $key );
 		}
 
-		$search->setConditions( $search->combine( '&&', $expr ) );
-		$search->setSortations( $sortations );
-		$search->setSlice( 0, 0x7fffffff );
+		$filter->setSortations( $sortations );
+		$filter->setSlice( 0, 0x7fffffff );
 
-		return $stockManager->searchItems( $search );
+		return $cntl->searchItems( $filter );
 	}
 }

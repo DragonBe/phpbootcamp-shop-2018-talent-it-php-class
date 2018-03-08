@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -64,7 +64,7 @@ class Standard
 	{
 		$this->checkParams( $params, array( 'items' ) );
 
-		$ids = array();
+		$ids = [];
 		$manager = $this->getManager();
 		$items = ( !is_array( $params->items ) ? array( $params->items ) : $params->items );
 
@@ -72,7 +72,7 @@ class Standard
 		{
 			$item = $manager->createItem();
 			$item->fromArray( (array) $this->transformValues( $entry ) );
-			$manager->saveItem( $item );
+			$item = $manager->saveItem( $item );
 			$ids[] = $item->getId();
 		}
 
@@ -95,7 +95,7 @@ class Standard
 		$sort[] = $search->sort( '+', 'locale.site.left' );
 		$search->setSortations( $sort );
 
-		$items = $this->getManager()->searchItems( $search, array(), $total );
+		$items = $this->getManager()->searchItems( $search, [], $total );
 
 		return array(
 			'items' => $this->toArray( $items ),
@@ -181,7 +181,7 @@ class Standard
 
 		$manager = $this->getManager();
 
-		$result = array();
+		$result = [];
 		$items = ( !is_array( $params->items ) ? array( $params->items ) : $params->items );
 
 		foreach( $items as $entry )
@@ -200,7 +200,7 @@ class Standard
 			}
 			else
 			{
-				$item = $manager->getTree( $entry, array(), \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST );
+				$item = $manager->getTree( $entry, [], \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST );
 			}
 
 			$result[] = $this->createNodeArray( $item );
@@ -279,7 +279,7 @@ class Standard
 	 */
 	protected function createNodeArray( \Aimeos\MShop\Locale\Item\Site\Iface $item )
 	{
-		$result = $item->toArray();
+		$result = $item->toArray( true );
 
 		if( method_exists( $item, 'getChildren' ) )
 		{

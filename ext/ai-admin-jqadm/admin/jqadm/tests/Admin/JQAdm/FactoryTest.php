@@ -1,21 +1,23 @@
 <?php
 
+/**
+ * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
+ * @copyright Aimeos (aimeos.org), 2015-2017
+ */
+
+
 namespace Aimeos\Admin\JQAdm;
 
 
-/**
- * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
- */
-class FactoryTest extends \PHPUnit_Framework_TestCase
+class FactoryTest extends \PHPUnit\Framework\TestCase
 {
+	private $aimeos;
 	private $context;
-	private $templatePaths;
 
 
 	protected function setUp()
 	{
-		$this->templatePaths = \TestHelperJqadm::getTemplatePaths();
+		$this->aimeos = \TestHelperJqadm::getAimeos();
 		$this->context = \TestHelperJqadm::getContext();
 		$this->context->setView( \TestHelperJqadm::getView() );
 	}
@@ -23,14 +25,24 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
 	public function testCreateClient()
 	{
-		$client = \Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->templatePaths, 'product' );
+		$this->context->getConfig()->set( 'admin/jqadm/resources', ['product'] );
+		$client = \Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->aimeos, 'product' );
 		$this->assertInstanceOf( '\\Aimeos\\Admin\\JQAdm\\Iface', $client );
 	}
 
 
 	public function testCreateClientName()
 	{
-		$client = \Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->templatePaths, 'product', 'Standard' );
+		$this->context->getConfig()->set( 'admin/jqadm/resources', ['product'] );
+		$client = \Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->aimeos, 'product', 'Standard' );
+		$this->assertInstanceOf( '\\Aimeos\\Admin\\JQAdm\\Iface', $client );
+	}
+
+
+	public function testCreateSubClient()
+	{
+		$this->context->getConfig()->set( 'admin/jqadm/resources', ['locale/site'] );
+		$client = \Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->aimeos, 'locale/site' );
 		$this->assertInstanceOf( '\\Aimeos\\Admin\\JQAdm\\Iface', $client );
 	}
 
@@ -38,21 +50,21 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 	public function testCreateClientNameEmpty()
 	{
 		$this->setExpectedException( '\\Aimeos\\Admin\\JQAdm\\Exception' );
-		\Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->templatePaths, '' );
+		\Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->aimeos, '' );
 	}
 
 
 	public function testCreateClientNameInvalid()
 	{
 		$this->setExpectedException( '\\Aimeos\\Admin\\JQAdm\\Exception' );
-		\Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->templatePaths, '%product' );
+		\Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->aimeos, '%product' );
 	}
 
 
 	public function testCreateClientNameNotFound()
 	{
 		$this->setExpectedException( '\\Aimeos\\Admin\\JQAdm\\Exception' );
-		\Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->templatePaths, 'prod' );
+		\Aimeos\Admin\JQAdm\Factory::createClient( $this->context, $this->aimeos, 'unknown' );
 	}
 
 }

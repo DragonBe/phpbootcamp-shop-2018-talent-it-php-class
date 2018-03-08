@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 
@@ -13,36 +13,37 @@ return array(
 			$table = $schema->createTable( 'users' );
 
 			$table->addColumn( 'id', 'integer', array( 'autoincrement' => true ) );
-			$table->addColumn( 'label', 'string', array( 'length' => 255 ) );
+			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
+			$table->addColumn( 'label', 'string', array( 'length' => 255, 'default' => '' ) );
 			$table->addColumn( 'name', 'string', array( 'length' => 255 ) );
 			$table->addColumn( 'remember_token', 'string', array( 'length' => 100, 'notnull' => false ) );
-			$table->addColumn( 'salutation', 'string', array( 'length' => 8 ) );
-			$table->addColumn( 'company', 'string', array( 'length' => 100 ) );
-			$table->addColumn( 'vatid', 'string', array( 'length' => 32 ) );
-			$table->addColumn( 'title', 'string', array( 'length' => 64 ) );
-			$table->addColumn( 'firstname', 'string', array( 'length' => 64 ) );
-			$table->addColumn( 'lastname', 'string', array( 'length' => 64 ) );
-			$table->addColumn( 'address1', 'string', array( 'length' => 200 ) );
-			$table->addColumn( 'address2', 'string', array( 'length' => 200 ) );
-			$table->addColumn( 'address3', 'string', array( 'length' => 200 ) );
-			$table->addColumn( 'postal', 'string', array( 'length' => 16 ) );
-			$table->addColumn( 'city', 'string', array( 'length' => 200 ) );
-			$table->addColumn( 'state', 'string', array( 'length' => 200 ) );
+			$table->addColumn( 'salutation', 'string', array( 'length' => 8, 'default' => '' ) );
+			$table->addColumn( 'company', 'string', array( 'length' => 100, 'default' => '' ) );
+			$table->addColumn( 'vatid', 'string', array( 'length' => 32, 'default' => '' ) );
+			$table->addColumn( 'title', 'string', array( 'length' => 64, 'default' => '' ) );
+			$table->addColumn( 'firstname', 'string', array( 'length' => 64, 'default' => '' ) );
+			$table->addColumn( 'lastname', 'string', array( 'length' => 64, 'default' => '' ) );
+			$table->addColumn( 'address1', 'string', array( 'length' => 200, 'default' => '' ) );
+			$table->addColumn( 'address2', 'string', array( 'length' => 200, 'default' => '' ) );
+			$table->addColumn( 'address3', 'string', array( 'length' => 200, 'default' => '' ) );
+			$table->addColumn( 'postal', 'string', array( 'length' => 16, 'default' => '' ) );
+			$table->addColumn( 'city', 'string', array( 'length' => 200, 'default' => '' ) );
+			$table->addColumn( 'state', 'string', array( 'length' => 200, 'default' => '' ) );
 			$table->addColumn( 'langid', 'string', array( 'length' => 5, 'notnull' => false ) );
 			$table->addColumn( 'countryid', 'string', array( 'length' => 2, 'notnull' => false, 'fixed' => true ) );
-			$table->addColumn( 'telephone', 'string', array( 'length' => 32 ) );
-			$table->addColumn( 'telefax', 'string', array( 'length' => 32 ) );
-			$table->addColumn( 'website', 'string', array( 'length' => 255 ) );
+			$table->addColumn( 'telephone', 'string', array( 'length' => 32, 'default' => '' ) );
+			$table->addColumn( 'telefax', 'string', array( 'length' => 32, 'default' => '' ) );
+			$table->addColumn( 'website', 'string', array( 'length' => 255, 'default' => '' ) );
 			$table->addColumn( 'email', 'string', array( 'length' => 255 ) );
 			$table->addColumn( 'password', 'string', array( 'length' => 255 ) );
 			$table->addColumn( 'longitude', 'decimal', array( 'precision' => 8, 'scale' => 6, 'notnull' => false ) );
 			$table->addColumn( 'latitude', 'decimal', array( 'precision' => 8, 'scale' => 6, 'notnull' => false ) );
 			$table->addColumn( 'birthday', 'date', array( 'notnull' => false ) );
 			$table->addColumn( 'vdate', 'date', array( 'notnull' => false ) );
-			$table->addColumn( 'status', 'smallint', array() );
-			$table->addColumn( 'updated_at', 'datetime', array() );
-			$table->addColumn( 'created_at', 'datetime', array() );
-			$table->addColumn( 'editor', 'string', array('length' => 255 ) );
+			$table->addColumn( 'status', 'smallint', array( 'default' => 1 ) );
+			$table->addColumn( 'updated_at', 'datetime', [] );
+			$table->addColumn( 'created_at', 'datetime', [] );
+			$table->addColumn( 'editor', 'string', array('length' => 255, 'default' => '' ) );
 
 			$table->setPrimaryKey( array( 'id' ), 'pk_lvusr_id' );
 			$table->addUniqueIndex( array( 'email' ), 'unq_lvusr_email' );
@@ -62,8 +63,8 @@ return array(
 			$table = $schema->createTable( 'users_address' );
 
 			$table->addColumn( 'id', 'integer', array( 'autoincrement' => true ) );
-			$table->addColumn( 'siteid', 'integer', array() );
-			$table->addColumn( 'parentid', 'integer', array() );
+			$table->addColumn( 'siteid', 'integer', [] );
+			$table->addColumn( 'parentid', 'integer', [] );
 			$table->addColumn( 'company', 'string', array( 'length' => 100 ) );
 			$table->addColumn( 'vatid', 'string', array( 'length' => 32 ) );
 			$table->addColumn( 'salutation', 'string', array( 'length' => 8 ) );
@@ -84,10 +85,10 @@ return array(
 			$table->addColumn( 'website', 'string', array( 'length' => 255 ) );
 			$table->addColumn( 'longitude', 'decimal', array( 'precision' => 8, 'scale' => 6, 'notnull' => false ) );
 			$table->addColumn( 'latitude', 'decimal', array( 'precision' => 8, 'scale' => 6, 'notnull' => false ) );
-			$table->addColumn( 'flag', 'integer', array() );
-			$table->addColumn( 'pos', 'smallint', array() );
-			$table->addColumn( 'mtime', 'datetime', array() );
-			$table->addColumn( 'ctime', 'datetime', array() );
+			$table->addColumn( 'flag', 'integer', [] );
+			$table->addColumn( 'pos', 'smallint', [] );
+			$table->addColumn( 'mtime', 'datetime', [] );
+			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array('length' => 255 ) );
 
 			$table->setPrimaryKey( array( 'id' ), 'pk_lvuad_id' );
@@ -95,7 +96,7 @@ return array(
 			$table->addIndex( array( 'lastname', 'firstname' ), 'idx_lvuad_last_first' );
 			$table->addIndex( array( 'postal', 'address1' ), 'idx_lvuad_post_addr1' );
 			$table->addIndex( array( 'postal', 'city' ), 'idx_lvuad_post_city' );
-			$table->addIndex( array( 'address1' ), 'idx_lvusr_address1' );
+			$table->addIndex( array( 'address1' ), 'idx_lvuad_address1' );
 			$table->addIndex( array( 'city' ), 'idx_lvuad_city' );
 			$table->addIndex( array( 'email' ), 'idx_lvuad_email' );
 
@@ -107,13 +108,13 @@ return array(
 			$table = $schema->createTable( 'users_list_type' );
 
 			$table->addColumn( 'id', 'integer', array( 'autoincrement' => true ) );
-			$table->addColumn( 'siteid', 'integer', array() );
+			$table->addColumn( 'siteid', 'integer', [] );
 			$table->addColumn( 'domain', 'string', array( 'length' => 32 ) );
 			$table->addColumn( 'code', 'string', array( 'length' => 32 ) );
 			$table->addColumn( 'label', 'string', array( 'length' => 255 ) );
-			$table->addColumn( 'status', 'smallint', array() );
-			$table->addColumn( 'mtime', 'datetime', array() );
-			$table->addColumn( 'ctime', 'datetime', array() );
+			$table->addColumn( 'status', 'smallint', [] );
+			$table->addColumn( 'mtime', 'datetime', [] );
+			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
 			$table->setPrimaryKey( array( 'id' ), 'pk_lvulity_id' );
@@ -130,18 +131,18 @@ return array(
 			$table = $schema->createTable( 'users_list' );
 
 			$table->addColumn( 'id', 'integer', array( 'autoincrement' => true ) );
-			$table->addColumn( 'parentid', 'integer', array() );
-			$table->addColumn( 'siteid', 'integer', array() );
-			$table->addColumn( 'typeid', 'integer', array() );
+			$table->addColumn( 'parentid', 'integer', [] );
+			$table->addColumn( 'siteid', 'integer', [] );
+			$table->addColumn( 'typeid', 'integer', [] );
 			$table->addColumn( 'domain', 'string', array( 'length' => 32 ) );
 			$table->addColumn( 'refid', 'string', array( 'length' => 32 ) );
 			$table->addColumn( 'start', 'datetime', array( 'notnull' => false ) );
 			$table->addColumn( 'end', 'datetime', array( 'notnull' => false ) );
 			$table->addColumn( 'config', 'text', array( 'length' => 0xffff ) );
-			$table->addColumn( 'pos', 'integer', array() );
-			$table->addColumn( 'status', 'smallint', array() );
-			$table->addColumn( 'mtime', 'datetime', array() );
-			$table->addColumn( 'ctime', 'datetime', array() );
+			$table->addColumn( 'pos', 'integer', [] );
+			$table->addColumn( 'status', 'smallint', [] );
+			$table->addColumn( 'mtime', 'datetime', [] );
+			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
 			$table->setPrimaryKey( array( 'id' ), 'pk_lvuli_id' );

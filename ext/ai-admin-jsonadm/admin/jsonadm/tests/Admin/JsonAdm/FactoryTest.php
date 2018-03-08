@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JsonAdm;
 
 
-class FactoryTest extends \PHPUnit_Framework_TestCase
+class FactoryTest extends \PHPUnit\Framework\TestCase
 {
 	public function testCreateClient()
 	{
@@ -18,6 +18,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
 		$client = \Aimeos\Admin\JsonAdm\Factory::createClient( $context, $templatePaths, 'order' );
 		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Common\\Iface', $client );
+		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Order\\Standard', $client );
 	}
 
 
@@ -28,6 +29,18 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
 		$client = \Aimeos\Admin\JsonAdm\Factory::createClient( $context, $templatePaths, 'order/base' );
 		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Common\\Iface', $client );
+		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Order\\Base\\Standard', $client );
+	}
+
+
+	public function testCreateStandard()
+	{
+		$context = \TestHelperJadm::getContext();
+		$templatePaths = \TestHelperJadm::getJsonadmPaths();
+
+		$client = \Aimeos\Admin\JsonAdm\Factory::createClient( $context, $templatePaths, 'stock/type' );
+		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Common\\Iface', $client );
+		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Standard', $client );
 	}
 
 
@@ -38,6 +51,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
 		$client = \Aimeos\Admin\JsonAdm\Factory::createClient( $context, $templatePaths, '' );
 		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Common\\Iface', $client );
+		$this->assertInstanceOf( '\\Aimeos\\Admin\\JsonAdm\\Standard', $client );
 	}
 
 

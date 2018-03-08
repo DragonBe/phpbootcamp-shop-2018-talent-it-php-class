@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product\Image;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -23,13 +23,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$templatePaths = \TestHelperJqadm::getTemplatePaths();
 
 		$this->object = new \Aimeos\Admin\JQAdm\Product\Image\Standard( $this->context, $templatePaths );
+		$this->object->setAimeos( \TestHelperJqadm::getAimeos() );
 		$this->object->setView( $this->view );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object );
+		unset( $this->object, $this->view, $this->context );
 	}
 
 
@@ -40,7 +41,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->view->item = $manager->createItem();
 		$result = $this->object->create();
 
-		$this->assertContains( 'Images', $result );
+		$this->assertContains( 'item-image', $result );
 		$this->assertNull( $this->view->get( 'errors' ) );
 	}
 
@@ -60,6 +61,9 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 	public function testDelete()
 	{
+		$manager = \Aimeos\MShop\Factory::createManager( $this->context, 'product' );
+
+		$this->view->item = $manager->createItem();
 		$result = $this->object->delete();
 
 		$this->assertNull( $this->view->get( 'errors' ) );
@@ -88,10 +92,11 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setCode( 'jqadm-test-image' );
 		$item->setId( null );
 
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
 
 		$param = array(
+			'site' => 'unittest',
 			'image' => array(
 				'product.lists.id' => array( '' ),
 				'media.languageid' => array( 'de' ),
@@ -133,7 +138,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		\Aimeos\MShop\Factory::injectManager( $this->context, 'media', $mediaStub );
 
-		$mediaStub->expects( $this->once() )->method( 'saveItem' );
+		$mediaStub->expects( $this->once() )->method( 'saveItem' )
+			->will( $this->returnValue( $mediaStub->createItem() ) );
 
 
 		\Aimeos\MShop\Factory::setCache( true );
@@ -155,13 +161,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Image\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \RuntimeException() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$this->view = \TestHelperJqadm::getView();
+		$this->view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $this->view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();
@@ -172,13 +181,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Image\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \Aimeos\MShop\Exception() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$this->view = \TestHelperJqadm::getView();
+		$this->view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $this->view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();

@@ -1,14 +1,16 @@
 <?php
 
-namespace Aimeos\Controller\Frontend\Catalog;
-
-
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+
+
+namespace Aimeos\Controller\Frontend\Catalog;
+
+
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 
@@ -44,9 +46,9 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	public function testGetCatalogPath()
 	{
 		$manager = \Aimeos\MShop\Catalog\Manager\Factory::createManager( \TestHelperFrontend::getContext() );
-		$item = $manager->getTree( null, array(), \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST );
+		$item = $manager->getTree( null, [], \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST );
 
-		$list = array();
+		$list = [];
 		foreach( $this->object->getCatalogPath( $item->getChild( 0 )->getId(), array( 'text' ) ) as $item ) {
 			$list[$item->getCode()] = $item;
 		}
@@ -80,7 +82,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$filter = $this->object->createIndexFilter();
 
 		$this->assertInstanceOf( '\\Aimeos\\MW\\Criteria\\Iface', $filter );
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( [], $filter->getSortations() );
 		$this->assertEquals( 0, $filter->getSliceStart() );
 		$this->assertEquals( 100, $filter->getSliceSize() );
 	}
@@ -99,10 +101,10 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			throw new \RuntimeException( 'Wrong expression' );
 		}
 		$this->assertEquals( 'index.catalog.id', $list[0]->getName() );
-		$this->assertEquals( 0, $list[0]->getValue() );
+		$this->assertEquals( array( 0 ), $list[0]->getValue() );
 
 
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( [], $filter->getSortations() );
 		$this->assertEquals( 0, $filter->getSliceStart() );
 		$this->assertEquals( 100, $filter->getSliceSize() );
 	}
@@ -119,7 +121,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			throw new \RuntimeException( 'Sortation not set' );
 		}
 
-		$this->assertEquals( 'sort:index.catalog.position("test",0)', $item->getName() );
+		$this->assertEquals( 'sort:index.catalog.position("test",["0"])', $item->getName() );
 		$this->assertEquals( '-', $item->getOperator() );
 
 		$this->assertEquals( 1, $filter->getSliceStart() );
@@ -177,7 +179,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$filter = $this->object->createIndexFilterCategory( 0, 'failure' );
 
 		$this->assertInstanceOf( '\\Aimeos\\MW\\Criteria\\Iface', $filter );
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( [], $filter->getSortations() );
 	}
 
 
@@ -193,8 +195,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		}
 
 		$this->assertEquals( 'index.catalog.id', $list[0]->getName() );
-		$this->assertEquals( 0, $list[0]->getValue() );
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( array( 0 ), $list[0]->getValue() );
+		$this->assertEquals( [], $filter->getSortations() );
 	}
 
 
@@ -214,7 +216,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals( 0, $list[0]->getValue() );
 
 
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( [], $filter->getSortations() );
 		$this->assertEquals( 0, $filter->getSliceStart() );
 		$this->assertEquals( 100, $filter->getSliceSize() );
 	}
@@ -225,7 +227,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$filter = $this->object->createIndexFilterText( 'Espresso', 'relevance', '-', 1, 2, 'test' );
 
 		$this->assertInstanceOf( '\\Aimeos\\MW\\Criteria\\Iface', $filter );
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( [], $filter->getSortations() );
 		$this->assertEquals( 1, $filter->getSliceStart() );
 		$this->assertEquals( 2, $filter->getSliceSize() );
 	}
@@ -281,7 +283,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$filter = $this->object->createIndexFilterText( '', 'failure' );
 
 		$this->assertInstanceOf( '\\Aimeos\\MW\\Criteria\\Iface', $filter );
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( [], $filter->getSortations() );
 	}
 
 
@@ -298,7 +300,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertEquals( 'index.text.relevance("default","de","Espresso")', $list[0]->getName() );
 		$this->assertEquals( 0, $list[0]->getValue() );
-		$this->assertEquals( array(), $filter->getSortations() );
+		$this->assertEquals( [], $filter->getSortations() );
 	}
 
 
@@ -317,7 +319,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$total = 0;
 		$filter = $this->object->createIndexFilterCategory( $item->getId(), 'position', '+', 1, 1 );
-		$results = $this->object->getIndexItems( $filter, array(), $total );
+		$results = $this->object->getIndexItems( $filter, [], $total );
 
 		$this->assertEquals( 3, $total );
 		$this->assertEquals( 1, count( $results ) );
@@ -328,10 +330,17 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$total = 0;
 		$filter = $this->object->createIndexFilterText( 'Expresso', 'relevance', '+', 0, 1, 'unittype13' );
-		$results = $this->object->getIndexItems( $filter, array(), $total );
+		$results = $this->object->getIndexItems( $filter, [], $total );
 
 		$this->assertEquals( 2, $total );
 		$this->assertEquals( 1, count( $results ) );
+	}
+
+
+	public function testGetProductItems()
+	{
+		$list = $this->object->getProductItems( [-1] );
+		$this->assertEquals( 0, count( $list ) );
 	}
 
 

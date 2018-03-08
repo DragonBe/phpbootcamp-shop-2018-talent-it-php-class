@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -56,7 +56,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/account/history/order/standard/subparts';
-	private $subPartNames = array();
+	private $subPartNames = [];
 	private $cache;
 
 
@@ -68,7 +68,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->getView();
 
@@ -217,7 +217,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
@@ -226,7 +226,7 @@ class Standard
 				$context = $this->getContext();
 
 				$manager = \Aimeos\MShop\Factory::createManager( $context, 'order' );
-				$baseManager = \Aimeos\MShop\Factory::createManager( $context, 'order/base' );
+				$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'basket' );
 
 				$search = $manager->createSearch( true );
 				$expr = array(
@@ -249,7 +249,7 @@ class Standard
 					$view->summaryShowDownloadAttributes = true;
 				}
 
-				$view->summaryBasket = $baseManager->load( $orderItem->getBaseId() );
+				$view->summaryBasket = $controller->load( $orderItem->getBaseId() );
 				$view->summaryTaxRates = $this->getTaxRates( $view->summaryBasket );
 				$view->orderItem = $orderItem;
 			}

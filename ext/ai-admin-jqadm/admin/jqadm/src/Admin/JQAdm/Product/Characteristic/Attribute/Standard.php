@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package Admin
  * @subpackage JQAdm
  */
@@ -55,101 +55,77 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'admin/jqadm/product/characteristic/attribute/standard/subparts';
-	private $subPartNames = array();
+	private $subPartNames = [];
 
 
 	/**
 	 * Copies a resource
 	 *
-	 * @return string admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function copy()
 	{
 		$view = $this->getView();
 
-		$this->setData( $view );
+		$view->attributeData = $this->toArray( $view->item, true );
 		$view->attributeBody = '';
 
 		foreach( $this->getSubClients() as $client ) {
 			$view->attributeBody .= $client->copy();
 		}
 
-		/** admin/jqadm/product/characteristic/attribute/template-item
-		 * Relative path to the HTML body template of the attribute characteristic subpart for products.
-		 *
-		 * The template file contains the HTML code and processing instructions
-		 * to generate the result shown in the body of the frontend. The
-		 * configuration string is the path to the template file relative
-		 * to the templates directory (usually in admin/jqadm/templates).
-		 *
-		 * You can overwrite the template file configuration in extensions and
-		 * provide alternative templates. These alternative templates should be
-		 * named like the default one but with the string "default" replaced by
-		 * an unique name. You may use the name of your project for this. If
-		 * you've implemented an alternative client class as well, "default"
-		 * should be replaced by the name of the new class.
-		 *
-		 * @param string Relative path to the template creating the HTML code
-		 * @since 2016.04
-		 * @category Developer
-		 */
-		$tplconf = 'admin/jqadm/product/characteristic/attribute/template-item';
-		$default = 'product/item-characteristic-attribute-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Creates a new resource
 	 *
-	 * @return string admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function create()
 	{
 		$view = $this->getView();
+		$data = $view->param( 'characteristic/attribute', [] );
+		$siteid = $this->getContext()->getLocale()->getSiteId();
 
-		$this->setData( $view );
+		foreach( $view->value( $data, 'product.lists.id', [] ) as $idx => $value ) {
+			$data['product.lists.siteid'][$idx] = $siteid;
+		}
+
+		$view->attributeData = $data;
 		$view->attributeBody = '';
 
 		foreach( $this->getSubClients() as $client ) {
 			$view->attributeBody .= $client->create();
 		}
 
-		$tplconf = 'admin/jqadm/product/characteristic/attribute/template-item';
-		$default = 'product/item-characteristic-attribute-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Returns a single resource
 	 *
-	 * @return string admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function get()
 	{
 		$view = $this->getView();
 
-		$this->setData( $view );
+		$view->attributeData = $this->toArray( $view->item );
 		$view->attributeBody = '';
 
 		foreach( $this->getSubClients() as $client ) {
 			$view->attributeBody .= $client->get();
 		}
 
-		$tplconf = 'admin/jqadm/product/characteristic/attribute/template-item';
-		$default = 'product/item-characteristic-attribute-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Saves the data
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
 	 */
 	public function save()
 	{
@@ -161,7 +137,7 @@ class Standard
 
 		try
 		{
-			$this->updateItems( $view );
+			$this->fromArray( $view->item, $view->param( 'characteristic/attribute', [] ) );
 			$view->attributeBody = '';
 
 			foreach( $this->getSubClients() as $client ) {
@@ -174,16 +150,15 @@ class Standard
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item-characteristic-attribute' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-			$manager->rollback();
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$context->getLogger()->log( $e->getMessage() . ' - ' . $e->getTraceAsString() );
-			$error = array( 'product-item-characteristic-attribute' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-			$manager->rollback();
+			$error = array( 'product-item-characteristic-attribute' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
+
+		$manager->rollback();
 
 		throw new \Aimeos\Admin\JQAdm\Exception();
 	}
@@ -310,69 +285,111 @@ class Standard
 
 
 	/**
-	 * Returns the mapped input parameter or the existing items as expected by the template
+	 * Creates new and updates existing items using the data array
 	 *
-	 * @param \Aimeos\MW\View\Iface $view View object with helpers and assigned parameters
+	 * @param \Aimeos\MShop\Product\Item\Iface $item Product item object without referenced domain items
+	 * @param string[] $data Data array
 	 */
-	protected function setData( \Aimeos\MW\View\Iface $view )
-	{
-		$data = (array) $view->param( 'characteristic/attribute', array() );
-
-		if( empty( $data ) )
-		{
-			foreach( $view->item->getListItems( 'attribute', 'default' ) as $listItem )
-			{
-				$refItem = $listItem->getRefItem();
-				$data['attribute.label'][] = ( $refItem ? $refItem->getLabel() : '' );
-
-				foreach( $listItem->toArray() as $key => $value ) {
-					$data[$key][] = $value;
-				}
-			}
-		}
-
-		$view->attributeData = $data;
-	}
-
-
-	/**
-	 * Updates existing product attribute references or creates new ones
-	 *
-	 * @param \Aimeos\MW\View\Iface $view View object with helpers and assigned parameters
-	 */
-	protected function updateItems( \Aimeos\MW\View\Iface $view )
+	protected function fromArray( \Aimeos\MShop\Product\Item\Iface $item, array $data )
 	{
 		$context = $this->getContext();
 		$manager = \Aimeos\MShop\Factory::createManager( $context, 'product/lists' );
 		$typeManager = \Aimeos\MShop\Factory::createManager( $context, 'product/lists/type' );
 
-		$id = $view->item->getId();
-		$map = $this->getListItems( $id );
-		$listIds = (array) $view->param( 'characteristic/attribute/product.lists.id', array() );
+		$map = $this->getListItems( $item->getId() );
+		$listIds = (array) $this->getValue( $data, 'product.lists.id', [] );
 
 
-		foreach( $listIds as $pos => $listid )
+		foreach( $listIds as $idx => $listid )
 		{
 			if( isset( $map[$listid] ) ) {
-				unset( $map[$listid], $listIds[$pos] );
+				unset( $map[$listid], $listIds[$idx] );
 			}
 		}
 
 		$manager->deleteItems( array_keys( $map ) );
 
 
-		$item = $manager->createItem();
-		$item->setTypeId( $typeManager->findItem( 'default', array(), 'attribute' )->getId() );
-		$item->setDomain( 'attribute' );
-		$item->setParentId( $id );
+		$listItem = $manager->createItem();
+		$listItem->setDomain( 'attribute' );
+		$listItem->setParentId( $item->getId() );
+		$listItem->setTypeId( $typeManager->findItem( 'default', [], 'attribute' )->getId() );
 
-		foreach( $listIds as $pos => $listid )
+		foreach( $listIds as $idx => $listid )
 		{
-			$item->setId( null );
-			$item->setRefId( $view->param( 'characteristic/attribute/product.lists.refid/' . $pos ) );
-			$item->setPosition( $pos );
+			$litem = clone $listItem;
+			$litem->setPosition( $idx );
+			$litem->setRefId( $this->getValue( $data, 'product.lists.refid/' . $idx ) );
 
-			$manager->saveItem( $item, false );
+			$manager->saveItem( $litem, false );
 		}
+	}
+
+
+	/**
+	 * Constructs the data array for the view from the given item
+	 *
+	 * @param \Aimeos\MShop\Product\Item\Iface $item Product item object including referenced domain items
+	 * @param boolean $copy True if items should be copied, false if not
+	 * @return string[] Multi-dimensional associative list of item data
+	 */
+	protected function toArray( \Aimeos\MShop\Product\Item\Iface $item, $copy = false )
+	{
+		$siteId = $this->getContext()->getLocale()->getSiteId();
+		$data = [];
+
+		foreach( $item->getListItems( 'attribute', 'default' ) as $listItem )
+		{
+			$refItem = $listItem->getRefItem();
+			$data['attribute.label'][] = ( $refItem ? $refItem->getLabel() : '' );
+
+			$list = $listItem->toArray( true );
+
+			if( $copy === true )
+			{
+				$list['product.lists.siteid'] = $siteId;
+				$list['product.lists.id'] = '';
+			}
+
+			foreach( $list as $key => $value ) {
+				$data[$key][] = $value;
+			}
+		}
+
+		return $data;
+	}
+
+
+	/**
+	 * Returns the rendered template including the view data
+	 *
+	 * @param \Aimeos\MW\View\Iface $view View object with data assigned
+	 * @return string HTML output
+	 */
+	protected function render( \Aimeos\MW\View\Iface $view )
+	{
+		/** admin/jqadm/product/characteristic/attribute/template-item
+		 * Relative path to the HTML body template of the attribute characteristic subpart for products.
+		 *
+		 * The template file contains the HTML code and processing instructions
+		 * to generate the result shown in the body of the frontend. The
+		 * configuration string is the path to the template file relative
+		 * to the templates directory (usually in admin/jqadm/templates).
+		 *
+		 * You can overwrite the template file configuration in extensions and
+		 * provide alternative templates. These alternative templates should be
+		 * named like the default one but with the string "default" replaced by
+		 * an unique name. You may use the name of your project for this. If
+		 * you've implemented an alternative client class as well, "default"
+		 * should be replaced by the name of the new class.
+		 *
+		 * @param string Relative path to the template creating the HTML code
+		 * @since 2016.04
+		 * @category Developer
+		 */
+		$tplconf = 'admin/jqadm/product/characteristic/attribute/template-item';
+		$default = 'product/item-characteristic-attribute-default.php';
+
+		return $view->render( $view->config( $tplconf, $default ) );
 	}
 }

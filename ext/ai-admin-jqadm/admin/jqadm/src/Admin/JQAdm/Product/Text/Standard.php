@@ -2,13 +2,15 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JQAdm
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product\Text;
+
+sprintf( 'text' ); // for translation
 
 
 /**
@@ -55,7 +57,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'admin/jqadm/product/text/standard/subparts';
-	private $subPartNames = array();
+	private $subPartNames = [];
 	private $types;
 	private $typelist = array( 'name', 'short', 'long', 'url', 'meta-keyword', 'meta-description' );
 
@@ -63,95 +65,83 @@ class Standard
 	/**
 	 * Copies a resource
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function copy()
 	{
-		$view = $this->getView();
+		$view = $this->addViewData( $this->getView() );
 
-		$this->setData( $view );
+		$view->textData = $this->toArray( $view->item, true );
 		$view->textBody = '';
 
 		foreach( $this->getSubClients() as $client ) {
 			$view->textBody .= $client->copy();
 		}
 
-		/** admin/jqadm/product/text/template-item
-		 * Relative path to the HTML body template of the text subpart for products.
-		 *
-		 * The template file contains the HTML code and processing instructions
-		 * to generate the result shown in the body of the frontend. The
-		 * configuration string is the path to the template file relative
-		 * to the templates directory (usually in admin/jqadm/templates).
-		 *
-		 * You can overwrite the template file configuration in extensions and
-		 * provide alternative templates. These alternative templates should be
-		 * named like the default one but with the string "default" replaced by
-		 * an unique name. You may use the name of your project for this. If
-		 * you've implemented an alternative client class as well, "default"
-		 * should be replaced by the name of the new class.
-		 *
-		 * @param string Relative path to the template creating the HTML code
-		 * @since 2016.04
-		 * @category Developer
-		 */
-		$tplconf = 'admin/jqadm/product/text/template-item';
-		$default = 'product/item-text-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Creates a new resource
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function create()
 	{
-		$view = $this->getView();
+		$view = $this->addViewData( $this->getView() );
+		$siteid = $this->getContext()->getLocale()->getSiteId();
+		$data = $view->param( 'text', [] );
 
-		$this->setData( $view );
+		foreach( $view->value( $data, 'langid', [] ) as $idx => $value ) {
+			$data['siteid'][$idx] = $siteid;
+		}
+
+		$view->textData = $data;
 		$view->textBody = '';
 
 		foreach( $this->getSubClients() as $client ) {
 			$view->textBody .= $client->create();
 		}
 
-		$tplconf = 'admin/jqadm/product/text/template-item';
-		$default = 'product/item-text-default.php';
+		return $this->render( $view );
+	}
 
-		return $view->render( $view->config( $tplconf, $default ) );
+
+	/**
+	 * Deletes a resource
+	 */
+	public function delete()
+	{
+		parent::delete();
+
+		$refIds = array_keys( $this->getView()->item->getRefItems( 'text' ) );
+		\Aimeos\MShop\Factory::createManager( $this->getContext(), 'text' )->deleteItems( $refIds );
 	}
 
 
 	/**
 	 * Returns a single resource
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function get()
 	{
-		$view = $this->getView();
+		$view = $this->addViewData( $this->getView() );
 
-		$this->setData( $view );
+		$view->textData = $this->toArray( $view->item );
 		$view->textBody = '';
 
 		foreach( $this->getSubClients() as $client ) {
 			$view->textBody .= $client->get();
 		}
 
-		$tplconf = 'admin/jqadm/product/text/template-item';
-		$default = 'product/item-text-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Saves the data
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
 	 */
 	public function save()
 	{
@@ -166,7 +156,7 @@ class Standard
 
 		try
 		{
-			$this->updateItems( $view );
+			$this->fromArray( $view->item, $view->param( 'text', [] ) );
 			$view->textBody = '';
 
 			foreach( $this->getSubClients() as $client ) {
@@ -180,20 +170,16 @@ class Standard
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item-text' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-
-			$textManager->rollback();
-			$manager->rollback();
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$context->getLogger()->log( $e->getMessage() . ' - ' . $e->getTraceAsString() );
-			$error = array( 'product-item-text' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-
-			$textManager->rollback();
-			$manager->rollback();
+			$error = array( 'product-item-text' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
+
+		$textManager->rollback();
+		$manager->rollback();
 
 		throw new \Aimeos\Admin\JQAdm\Exception();
 	}
@@ -286,6 +272,21 @@ class Standard
 
 
 	/**
+	 * Adds the required data used in the stock template
+	 *
+	 * @param \Aimeos\MW\View\Iface $view View object
+	 * @return \Aimeos\MW\View\Iface View object with assigned parameters
+	 */
+	protected function addViewData( \Aimeos\MW\View\Iface $view )
+	{
+		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'text/type' );
+		$view->textTypes = $manager->searchItems( $manager->createSearch() );
+
+		return $view;
+	}
+
+
+	/**
 	 * Returns the list of sub-client names configured for the client.
 	 *
 	 * @return array List of JQAdm client names
@@ -307,7 +308,7 @@ class Standard
 	{
 		if( $this->types === null )
 		{
-			$this->types = array();
+			$this->types = [];
 			$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'text/type' );
 
 			$search = $manager->createSearch();
@@ -353,58 +354,15 @@ class Standard
 
 
 	/**
-	 * Returns the mapped input parameter or the existing items as expected by the template
+	 * Creates new and updates existing items using the data array
 	 *
-	 * @param \Aimeos\MW\View\Iface $view View object with helpers and assigned parameters
+	 * @param \Aimeos\MShop\Product\Item\Iface $item Product item object without referenced domain items
+	 * @param string[] $data Data array
 	 */
-	protected function setData( \Aimeos\MW\View\Iface $view )
+	protected function fromArray( \Aimeos\MShop\Product\Item\Iface $item, array $data )
 	{
-		$context = $this->getContext();
-		$manager = \Aimeos\MShop\Factory::createManager( $context, 'text/type' );
-
-		$data = (array) $view->param( 'text', array() );
-
-		if( empty( $data ) && ( $id = $view->item->getId() ) !== null )
-		{
-			if( !isset( $data['langid'] ) ) {
-				$data['langid'] = array();
-			}
-
-			foreach( $view->item->getListItems( 'text', 'default' ) as $listItem )
-			{
-				if( ( $refItem = $listItem->getRefItem() ) === null ) {
-					continue;
-				}
-
-				$type = $refItem->getType();
-				$langid = $refItem->getLanguageId();
-
-				if( in_array( $type, $this->getTypes() ) )
-				{
-					$data['langid'][$langid] = $langid;
-					$data[$type]['listid'][$langid] = $listItem->getId();
-					$data[$type]['content'][$langid] = $refItem->getContent();
-				}
-			}
-		}
-
-		if( !isset( $data['langid'] ) || empty( $data['langid'] ) ) { // show at least one block
-			$data['langid'][] = $context->getLocale()->getLanguageId();
-		}
-
-		$view->textTypes = $manager->searchItems( $manager->createSearch() );
-		$view->textData = $data;
-	}
-
-
-	/**
-	 * Updates existing product text items or creates new ones
-	 *
-	 * @param \Aimeos\MW\View\Iface $view View object with helpers and assigned parameters
-	 */
-	protected function updateItems( \Aimeos\MW\View\Iface $view )
-	{
-		$id = $view->item->getId();
+		$listIds = [];
+		$id = $item->getId();
 		$context = $this->getContext();
 
 		$manager = \Aimeos\MShop\Factory::createManager( $context, 'product' );
@@ -412,67 +370,65 @@ class Standard
 		$listManager = \Aimeos\MShop\Factory::createManager( $context, 'product/lists' );
 		$listTypeManager = \Aimeos\MShop\Factory::createManager( $context, 'product/lists/type' );
 
-		$listIds = array();
-		$langIds = (array) $view->param( 'text/langid', array() );
 		$listItems = $manager->getItem( $id, array( 'text' ) )->getListItems( 'text', 'default' );
+		$langIds = (array) $this->getValue( $data, 'langid', [] );
 
 
 		$listItem = $listManager->createItem();
-		$listItem->setTypeId( $listTypeManager->findItem( 'default', array(), 'text' )->getId() );
+		$listItem->setTypeId( $listTypeManager->findItem( 'default', [], 'text' )->getId() );
 		$listItem->setDomain( 'text' );
 		$listItem->setParentId( $id );
 		$listItem->setStatus( 1 );
 
-		$textItem = $textManager->createItem();
-		$textItem->setDomain( 'product' );
-		$textItem->setStatus( 1 );
+		$newItem = $textManager->createItem();
+		$newItem->setDomain( 'product' );
+		$newItem->setStatus( 1 );
 
 
 		foreach( $langIds as $idx => $langid )
 		{
 			foreach( $this->getTypes() as $type )
 			{
-				if( ( $content = trim( $view->param( 'text/' . $type . '/content/' . $idx ) ) ) === '' ) {
+				if( ( $content = trim( $this->getValue( $data, $type . '/content/' . $idx, '' ) ) ) === '' ) {
 					continue;
 				}
 
-				$listid = $view->param( 'text/' . $type . '/listid/' . $idx );
+				$listid = $this->getValue( $data, $type . '/listid/' . $idx );
 				$listIds[] = $listid;
 
 				if( !isset( $listItems[$listid] ) )
 				{
+					$textItem = clone $newItem;
+
 					$litem = $listItem;
 					$litem->setId( null );
-
-					$item = $textItem;
-					$item->setId( null );
 				}
 				else
 				{
 					$litem = $listItems[$listid];
-					$item = $litem->getRefItem();
+					$textItem = $litem->getRefItem();
 				}
 
-				$item->setContent( $content );
-				$item->setLabel( mb_strcut( $item->getContent(), 0, 255 ) );
-				$item->setTypeId( $this->getTypeId( $type ) );
-				$item->setLanguageId( $langid );
+				$textItem->setContent( $content );
+				$textItem->setLabel( mb_strcut( $textItem->getContent(), 0, 255 ) );
+				$textItem->setTypeId( $this->getTypeId( $type ) );
+				$textItem->setLanguageId( $langid );
 
-				$textManager->saveItem( $item );
+				$textItem = $textManager->saveItem( $textItem );
 
 				$litem->setPosition( $idx );
-				$litem->setRefId( $item->getId() );
+				$litem->setRefId( $textItem->getId() );
 
 				$listManager->saveItem( $litem, false );
 			}
 		}
 
 
-		$rmIds = $allListIds = array();
+		$rmIds = $allListIds = [];
 
 		foreach( $listItems as $id => $listItem )
 		{
-			if( in_array( $listItem->getRefItem()->getType(), $this->getTypes() ) ) {
+			if( $listItem->getRefItem() && in_array( $listItem->getRefItem()->getType(), $this->getTypes() ) ) {
 				$allListIds[] = $id;
 			}
 		}
@@ -485,5 +441,72 @@ class Standard
 
 		$listManager->deleteItems( $rmListIds  );
 		$textManager->deleteItems( $rmIds  );
+	}
+
+
+	/**
+	 * Constructs the data array for the view from the given item
+	 *
+	 * @param \Aimeos\MShop\Product\Item\Iface $item Product item object including referenced domain items
+	 * @param boolean $copy True if items should be copied, false if not
+	 * @return string[] Multi-dimensional associative list of item data
+	 */
+	protected function toArray( \Aimeos\MShop\Product\Item\Iface $item, $copy = false )
+	{
+		$data = [];
+
+		foreach( $item->getListItems( 'text', 'default' ) as $listItem )
+		{
+			if( ( $refItem = $listItem->getRefItem() ) === null ) {
+				continue;
+			}
+
+			$type = $refItem->getType();
+			$langid = $refItem->getLanguageId();
+			$data['langid'][$langid] = $langid;
+			$data['siteid'][$langid] = $item->getSiteId();
+
+			if( in_array( $type, $this->getTypes() ) )
+			{
+				$data[$type]['listid'][$langid] = $listItem->getId();
+				$data[$type]['content'][$langid] = $refItem->getContent();
+			}
+		}
+
+		return $data;
+	}
+
+
+	/**
+	 * Returns the rendered template including the view data
+	 *
+	 * @param \Aimeos\MW\View\Iface $view View object with data assigned
+	 * @return string HTML output
+	 */
+	protected function render( \Aimeos\MW\View\Iface $view )
+	{
+		/** admin/jqadm/product/text/template-item
+		 * Relative path to the HTML body template of the text subpart for products.
+		 *
+		 * The template file contains the HTML code and processing instructions
+		 * to generate the result shown in the body of the frontend. The
+		 * configuration string is the path to the template file relative
+		 * to the templates directory (usually in admin/jqadm/templates).
+		 *
+		 * You can overwrite the template file configuration in extensions and
+		 * provide alternative templates. These alternative templates should be
+		 * named like the default one but with the string "default" replaced by
+		 * an unique name. You may use the name of your project for this. If
+		 * you've implemented an alternative client class as well, "default"
+		 * should be replaced by the name of the new class.
+		 *
+		 * @param string Relative path to the template creating the HTML code
+		 * @since 2016.04
+		 * @category Developer
+		 */
+		$tplconf = 'admin/jqadm/product/text/template-item';
+		$default = 'product/item-text-default.php';
+
+		return $view->render( $view->config( $tplconf, $default ) );
 	}
 }

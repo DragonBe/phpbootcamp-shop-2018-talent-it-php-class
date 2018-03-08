@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -37,6 +37,19 @@ abstract class Base
 		$this->context = $context;
 		$this->name = $name;
 		$this->sort = $sort;
+	}
+
+
+	/**
+	 * Catch unknown methods
+	 *
+	 * @param string $name Name of the method
+	 * @param array $param List of method parameter
+	 * @throws \Aimeos\Controller\ExtJS\Exception If method call failed
+	 */
+	public function __call( $name, array $param )
+	{
+		throw new \Aimeos\Controller\ExtJS\Exception( sprintf( 'Unable to call method "%1$s"', $name ) );
 	}
 
 
@@ -103,7 +116,7 @@ abstract class Base
 		$total = 0;
 		$manager = $this->getManager();
 		$search = $this->initCriteria( $manager->createSearch(), $params );
-		$items = $manager->searchItems( $search, array(), $total );
+		$items = $manager->searchItems( $search, [], $total );
 
 		return array(
 			'items' => $this->toArray( $items ),
@@ -207,7 +220,7 @@ abstract class Base
 		$this->checkParams( $params, array( 'site', 'items' ) );
 		$this->setLocale( $params->site );
 
-		$ids = array();
+		$ids = [];
 		$manager = $this->getManager();
 		$entries = ( !is_array( $params->items ) ? array( $params->items ) : $params->items );
 
@@ -216,7 +229,7 @@ abstract class Base
 			$item = $manager->createItem();
 			$item->fromArray( (array) $this->transformValues( $entry ) );
 
-			$manager->saveItem( $item );
+			$item = $manager->saveItem( $item );
 			$ids[] = $item->getId();
 		}
 
@@ -324,7 +337,7 @@ abstract class Base
 	 */
 	protected function getAttributeSchema( array $attributes, $all = true )
 	{
-		$properties = array();
+		$properties = [];
 		$iface = '\\Aimeos\\MW\\Criteria\\Attribute\\Iface';
 
 		foreach( $attributes as $attribute )
@@ -434,7 +447,7 @@ abstract class Base
 	{
 		if( isset( $params->sort ) && isset( $params->dir ) )
 		{
-			$sortation = array();
+			$sortation = [];
 
 			switch( $params->dir )
 			{
@@ -498,10 +511,10 @@ abstract class Base
 	 */
 	protected function toArray( array $list )
 	{
-		$result = array();
+		$result = [];
 
 		foreach( $list as $item ) {
-			$result[] = (object) $item->toArray();
+			$result[] = (object) $item->toArray( true );
 		}
 
 		return $result;
@@ -532,7 +545,7 @@ abstract class Base
 	 */
 	protected function getDomainItems( array $lists )
 	{
-		$result = array();
+		$result = [];
 
 		foreach( $lists as $domain => $ids )
 		{
@@ -543,7 +556,7 @@ abstract class Base
 			$criteria->setConditions( $criteria->compare( '==', str_replace( '/', '.', $domain ) . '.id', $ids ) );
 			$criteria->setSlice( 0, 0x7fffffff );
 
-			$items = $manager->searchItems( $criteria, array(), $total );
+			$items = $manager->searchItems( $criteria, [], $total );
 
 			$parts = explode( '/', $domain );
 			foreach( $parts as $key => $part ) {

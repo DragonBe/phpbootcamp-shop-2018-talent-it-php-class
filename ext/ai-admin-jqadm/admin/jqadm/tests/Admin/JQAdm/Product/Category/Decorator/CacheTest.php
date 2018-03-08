@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product\Category\Decorator;
 
 
-class CacheTest extends \PHPUnit_Framework_TestCase
+class CacheTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -48,7 +48,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
 		$view = \TestHelperJqadm::getView();
 		$tags = array( 'catalog', 'catalog-1', 'catalog-2' );
 
-		$param = array( 'category' => array( 'catalog.id' => array( '1', '2' ) ) );
+		$param = ['site' => 'unittest', 'category' => ['catalog.id' => ['1', '2']]];
 		$helper = new \Aimeos\MW\View\Helper\Param\Standard( $view, $param );
 		$view->addHelper( 'param', $helper );
 

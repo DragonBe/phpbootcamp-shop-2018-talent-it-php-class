@@ -3,25 +3,30 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
-$params = $this->get( 'listParams', array() );
-$catPath = $this->get( 'listCatPath', array() );
+$params = $this->get( 'listParams', [] );
+$catPath = $this->get( 'listCatPath', [] );
 
 $target = $this->config( 'client/html/catalog/lists/url/target' );
 $cntl = $this->config( 'client/html/catalog/lists/url/controller', 'catalog' );
 $action = $this->config( 'client/html/catalog/lists/url/action', 'list' );
-$config = $this->config( 'client/html/catalog/lists/url/config', array() );
+$config = $this->config( 'client/html/catalog/lists/url/config', [] );
+
+$optTarget = $this->config( 'client/jsonapi/url/target' );
+$optCntl = $this->config( 'client/jsonapi/url/controller', 'jsonapi' );
+$optAction = $this->config( 'client/jsonapi/url/action', 'options' );
+$optConfig = $this->config( 'client/jsonapi/url/config', [] );
 
 
 $classes = '';
-foreach( (array) $this->get( 'listCatPath', array() ) as $cat )
+foreach( (array) $this->get( 'listCatPath', [] ) as $cat )
 {
-	$config = $cat->getConfig();
-	if( isset( $config['css-class'] ) ) {
-		$classes .= ' ' . $config['css-class'];
+	$catConfig = $cat->getConfig();
+	if( isset( $catConfig['css-class'] ) ) {
+		$classes .= ' ' . $catConfig['css-class'];
 	}
 }
 
@@ -45,42 +50,48 @@ foreach( (array) $this->get( 'listCatPath', array() ) as $cat )
 $textTypes = $this->config( 'client/html/catalog/lists/head/text-types', array( 'short', 'long' ) );
 
 
-$quoteItems = array();
-if( $catPath !== array() && ( $catItem = end( $catPath ) ) !== false ) {
+$quoteItems = [];
+if( $catPath !== [] && ( $catItem = end( $catPath ) ) !== false ) {
 	$quoteItems = $catItem->getRefItems( 'text', 'quote', 'default' );
 }
 
 
-/** client/html/catalog/lists/partials/pagination
- * Relative path to the pagination partial template file for catalog lists
- *
- * Partials are templates which are reused in other templates and generate
- * reoccuring blocks filled with data from the assigned values. The pagination
- * partial creates an HTML block containing a page browser and sorting links
- * if necessary.
- *
- * @param string Relative path to the template file
- * @since 2017.01
- * @category Developer
- */
-$pagination = $this->partial(
-	$this->config( 'client/html/catalog/lists/partials/pagination', 'catalog/lists/pagination-default.php' ),
-	array(
-		'params' => $params,
-		'total' => $this->get( 'listProductTotal', 0 ),
-		'current' => $this->get( 'listProductCurr', 0 ),
-		'size' => $this->get( 'listProductSize', 48 )
-	)
-);
-
+$pagination = '';
+if( $this->get( 'listProductTotal', 0 ) > 1 )
+{
+	/** client/html/catalog/lists/partials/pagination
+	 * Relative path to the pagination partial template file for catalog lists
+	 *
+	 * Partials are templates which are reused in other templates and generate
+	 * reoccuring blocks filled with data from the assigned values. The pagination
+	 * partial creates an HTML block containing a page browser and sorting links
+	 * if necessary.
+	 *
+	 * @param string Relative path to the template file
+	 * @since 2017.01
+	 * @category Developer
+	 */
+	$pagination = $this->partial(
+		$this->config( 'client/html/catalog/lists/partials/pagination', 'catalog/lists/pagination-default.php' ),
+		array(
+			'params' => $params,
+			'size' => $this->get( 'listPageSize', 48 ),
+			'total' => $this->get( 'listProductTotal', 0 ),
+			'current' => $this->get( 'listPageCurr', 0 ),
+			'prev' => $this->get( 'listPagePrev', 0 ),
+			'next' => $this->get( 'listPageNext', 0 ),
+			'last' => $this->get( 'listPageLast', 0 ),
+		)
+	);
+}
 
 ?>
-<section class="aimeos catalog-list<?php echo $enc->attr( $classes ); ?>">
+<section class="aimeos catalog-list<?= $enc->attr( $classes ); ?>" data-jsonurl="<?= $enc->attr( $this->url( $optTarget, $optCntl, $optAction, [], [], $optConfig ) ); ?>">
 
 	<?php if( isset( $this->listErrorList ) ) : ?>
 		<ul class="error-list">
 			<?php foreach( (array) $this->listErrorList as $errmsg ) : ?>
-				<li class="error-item"><?php echo $enc->html( $errmsg ); ?></li>
+				<li class="error-item"><?= $enc->html( $errmsg ); ?></li>
 			<?php endforeach; ?>
 		</ul>
 	<?php endif; ?>
@@ -91,17 +102,17 @@ $pagination = $this->partial(
 
 			<div class="imagelist-default">
 				<?php foreach( $catItem->getRefItems( 'media', 'head', 'default' ) as $mediaItem ) : ?>
-					<img class="<?php echo $enc->attr( $mediaItem->getType() ); ?>"
-						src="<?php echo $this->content( $mediaItem->getUrl() ); ?>"
+					<img class="<?= $enc->attr( $mediaItem->getType() ); ?>"
+						src="<?= $this->content( $mediaItem->getUrl() ); ?>"
 					/>
 				<?php endforeach; ?>
 			</div>
 
-			<h1><?php echo $enc->html( $catItem->getName() ); ?></h1>
+			<h1><?= $enc->html( $catItem->getName() ); ?></h1>
 			<?php foreach( (array) $textTypes as $textType ) : ?>
 				<?php foreach( $catItem->getRefItems( 'text', $textType, 'default' ) as $textItem ) : ?>
-					<div class="<?php echo $enc->attr( $textItem->getType() ); ?>">
-						<?php echo $enc->html( $textItem->getContent(), $enc::TRUST ); ?>
+					<div class="<?= $enc->attr( $textItem->getType() ); ?>">
+						<?= $enc->html( $textItem->getContent(), $enc::TRUST ); ?>
 					</div>
 				<?php endforeach; ?>
 			<?php endforeach; ?>
@@ -115,48 +126,50 @@ $pagination = $this->partial(
 
 			<div class="content">
 				<?php foreach( $quoteItems as $quoteItem ) : ?>
-					<article><?php echo $enc->html( $quoteItem->getContent() ); ?></article>
+					<article><?= $enc->html( $quoteItem->getContent() ); ?></article>
 				<?php endforeach; ?>
-				<a href="#"><?php echo $enc->html( $this->translate( 'client', 'Show all quotes' ), $enc::TRUST ); ?></a>
+				<a href="#"><?= $enc->html( $this->translate( 'client', 'Show all quotes' ), $enc::TRUST ); ?></a>
 			</div>
 
 		</div>
 	<?php endif; ?>
 
 
-	<?php echo $this->block()->get( 'catalog/lists/promo' ); ?>
+	<?= $this->block()->get( 'catalog/lists/promo' ); ?>
 
 
-	<div class="catalog-list-type">
-		<a class="type-item type-grid" href="<?php echo $enc->attr( $this->url( $target, $cntl, $action, array( 'l_type' => 'grid' ) + $params, array(), $config ) ); ?>"></a>
-		<a class="type-item type-list" href="<?php echo $enc->attr( $this->url( $target, $cntl, $action, array( 'l_type' => 'list' ) + $params, array(), $config ) ); ?>"></a>
-	</div>
+	<?php if( ( $total = $this->get( 'listProductTotal', 0 ) ) > 0 ) : ?>
+		<div class="catalog-list-type">
+			<a class="type-item type-grid" href="<?= $enc->attr( $this->url( $target, $cntl, $action, array( 'l_type' => 'grid' ) + $params, [], $config ) ); ?>"></a>
+			<a class="type-item type-list" href="<?= $enc->attr( $this->url( $target, $cntl, $action, array( 'l_type' => 'list' ) + $params, [], $config ) ); ?>"></a>
+		</div>
+	<?php endif; ?>
 
 
-	<?php echo $pagination; ?>
+	<?= $pagination; ?>
 
 
 	<?php if( ( $searchText = $this->param( 'f_search', null ) ) != null ) : ?>
 		<div class="list-search">
 
 			<?php if( ( $total = $this->get( 'listProductTotal', 0 ) ) > 0 ) : ?>
-				<?php echo $enc->html( sprintf(
+				<?= $enc->html( sprintf(
 					$this->translate(
 						'client',
 						'Search result for <span class="searchstring">"%1$s"</span> (%2$d article)',
 						'Search result for <span class="searchstring">"%1$s"</span> (%2$d articles)',
 						$total
 					),
-					$enc->html( $searchText ),
+					$searchText,
 					$total
 				), $enc::TRUST ); ?>
 			<?php else : ?>
-				<?php echo $enc->html( sprintf(
+				<?= $enc->html( sprintf(
 					$this->translate(
 						'client',
 						'No articles found for <span class="searchstring">"%1$s"</span>. Please try again with a different keyword.'
 					),
-					$enc->html( $searchText )
+					$searchText
 				), $enc::TRUST ); ?>
 			<?php endif; ?>
 
@@ -164,10 +177,9 @@ $pagination = $this->partial(
 	<?php endif; ?>
 
 
-	<?php echo $this->block()->get( 'catalog/lists/items' ); ?>
+	<?= $this->block()->get( 'catalog/lists/items' ); ?>
 
 
-	<?php echo $pagination; ?>
-
+ 	<?= $pagination; ?>
 
 </section>

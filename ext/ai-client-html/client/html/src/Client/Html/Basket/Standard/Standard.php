@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -56,8 +56,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/basket/standard/standard/subparts';
-	private $subPartNames = array();
-	private $controller;
+	private $subPartNames = [];
 	private $cache;
 
 
@@ -69,7 +68,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$context = $this->getContext();
 		$view = $this->getView();
@@ -87,24 +86,24 @@ class Standard
 		catch( \Aimeos\Client\Html\Exception $e )
 		{
 			$error = array( $this->getContext()->getI18n()->dt( 'client', $e->getMessage() ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\Controller\Frontend\Exception $e )
 		{
 			$error = array( $this->getContext()->getI18n()->dt( 'controller/frontend', $e->getMessage() ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( $this->getContext()->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
 			$context->getLogger()->log( $e->getMessage() . PHP_EOL . $e->getTraceAsString() );
 
 			$error = array( $context->getI18n()->dt( 'client', 'A non-recoverable error occured' ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 
 		/** client/html/basket/standard/standard/template-body
@@ -142,7 +141,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		try
 		{
@@ -282,34 +281,14 @@ class Standard
 	{
 		$view = $this->getView();
 		$context = $this->getContext();
-		$controller = $this->getController();
+		$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'basket' );
 
 		try
 		{
-			$options = array(
-				/** client/html/basket/require-variant
-				 * A variant of a selection product must be chosen
-				 *
-				 * Selection products normally consist of several article variants and by default
-				 * exactly one article variant of a selection product can be put into the basket.
-				 *
-				 * By setting this option to false, the selection product including the chosen
-				 * attributes (if any attribute values were selected) can be put into the basket
-				 * as well. This makes it possible to get all articles or a subset of articles
-				 * (e.g. all of a color) at once.
-				 *
-				 * @param boolean True if a variant must be chosen, false if also the selection product with attributes can be added
-				 * @since 2014.03
-				 * @category Developer
-				 * @category User
-				 */
-				'variant' => $view->config( 'client/html/basket/require-variant', true ),
-			);
-
 			switch( $view->param( 'b_action' ) )
 			{
 				case 'add':
-					$this->addProducts( $view, $options );
+					$this->addProducts( $view, [] );
 					break;
 				case 'coupon-delete':
 					$this->deleteCoupon( $view );
@@ -318,7 +297,7 @@ class Standard
 					$this->deleteProducts( $view );
 					break;
 				default:
-					$this->editProducts( $view, $options );
+					$this->editProducts( $view, [] );
 					$this->addCoupon( $view );
 			}
 
@@ -365,12 +344,12 @@ class Standard
 		catch( \Aimeos\Client\Html\Exception $e )
 		{
 			$error = array( $context->getI18n()->dt( 'client', $e->getMessage() ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\Controller\Frontend\Exception $e )
 		{
 			$error = array( $context->getI18n()->dt( 'controller/frontend', $e->getMessage() ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\MShop\Plugin\Provider\Exception $e )
 		{
@@ -378,19 +357,19 @@ class Standard
 			$errors = array_merge( $errors, $this->translatePluginErrorCodes( $e->getErrorCodes() ) );
 
 			$view->standardErrorCodes = $e->getErrorCodes();
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $errors;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $errors;
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
 			$context->getLogger()->log( $e->getMessage() . PHP_EOL . $e->getTraceAsString() );
 
 			$error = array( $context->getI18n()->dt( 'client', 'A non-recoverable error occured' ) );
-			$view->standardErrorList = $view->get( 'standardErrorList', array() ) + $error;
+			$view->standardErrorList = $view->get( 'standardErrorList', [] ) + $error;
 		}
 
 		// store updated basket after plugins updated content and have thrown an exception
@@ -417,36 +396,38 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
 			$context = $this->getContext();
 			$site = $context->getLocale()->getSite()->getCode();
 
-			if( ( $params = $context->getSession()->get( 'aimeos/catalog/detail/params/last' . $site ) ) !== null )
+			if( ( $params = $context->getSession()->get( 'aimeos/catalog/detail/params/last/' . $site ) ) !== null )
 			{
 				$target = $view->config( 'client/html/catalog/detail/url/target' );
 				$controller = $view->config( 'client/html/catalog/detail/url/controller', 'catalog' );
 				$action = $view->config( 'client/html/catalog/detail/url/action', 'detail' );
-				$config = $view->config( 'client/html/catalog/detail/url/config', array() );
+				$config = $view->config( 'client/html/catalog/detail/url/config', [] );
 			}
 			else
 			{
-				$params = $context->getSession()->get( 'aimeos/catalog/lists/params/last' . $site, array() );
+				$params = $context->getSession()->get( 'aimeos/catalog/lists/params/last/' . $site, [] );
 
 				$target = $view->config( 'client/html/catalog/lists/url/target' );
 				$controller = $view->config( 'client/html/catalog/lists/url/controller', 'catalog' );
 				$action = $view->config( 'client/html/catalog/lists/url/action', 'list' );
-				$config = $view->config( 'client/html/catalog/lists/url/config', array() );
+				$config = $view->config( 'client/html/catalog/lists/url/config', [] );
 
 			}
 
 			if( empty( $params ) === false ) {
-				$view->standardBackUrl = $view->url( $target, $controller, $action, $params, array(), $config );
+				$view->standardBackUrl = $view->url( $target, $controller, $action, $params, [], $config );
 			}
 
-			$view->standardBasket = $this->getController()->get();
+			$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
+
+			$view->standardBasket = $controller->get();
 			$view->standardTaxRates = $this->getTaxRates( $view->standardBasket );
 
 			$this->cache = $view;
@@ -463,32 +444,16 @@ class Standard
 	 */
 	protected function addCoupon( \Aimeos\MW\View\Iface $view )
 	{
+		/** client/html/basket/standard/coupon/allowed
+		 * Number of coupon codes a customer is allowed to enter
+		 *
+		 * @param integer Positive number of coupon codes including zero
+		 * @deprecated Use controller/frontend/basket/standard/coupon/allowed instead
+		 */
+
 		if( ( $coupon = $view->param( 'b_coupon' ) ) != '' )
 		{
-			$controller = $this->getController();
-
-			/** client/html/basket/standard/coupon/allowed
-			 * Number of coupon codes a customer is allowed to enter
-			 *
-			 * This configuration option enables shop owners to limit the number of coupon
-			 * codes that can be added by a customer to his current basket. By default, only
-			 * one coupon code is allowed per order.
-			 *
-			 * Coupon codes are valid until a payed order is placed by the customer. The
-			 * "count" of the codes is decreased afterwards. If codes are not personalized
-			 * the codes can be reused in the next order until their "count" reaches zero.
-			 *
-			 * @param integer Positive number of coupon codes including zero
-			 * @since 2014.05
-			 * @category User
-			 * @category Developer
-			 */
-			$allowed = $this->getContext()->getConfig()->get( 'client/html/basket/standard/coupon/allowed', 1 );
-
-			if( $allowed <= count( $controller->get()->getCoupons() ) ) {
-				throw new \Aimeos\Client\Html\Exception( sprintf( 'Number of coupon codes exceeds the limit' ) );
-			}
-
+			$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
 			$controller->addCoupon( $coupon );
 			$this->clearCached();
 		}
@@ -503,19 +468,18 @@ class Standard
 	 */
 	protected function addProducts( \Aimeos\MW\View\Iface $view, array $options )
 	{
-		$this->clearCached();
-		$controller = $this->getController();
-		$products = (array) $view->param( 'b_prod', array() );
+		$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
+		$products = (array) $view->param( 'b_prod', [] );
 
 		if( ( $prodid = $view->param( 'b_prodid', '' ) ) !== '' )
 		{
 			$products[] = array(
 				'prodid' => $prodid,
 				'quantity' => $view->param( 'b_quantity', 1 ),
-				'attrvarid' => array_filter( (array) $view->param( 'b_attrvarid', array() ) ),
-				'attrconfid' => array_filter( (array) $view->param( 'b_attrconfid', array() ) ),
-				'attrhideid' => array_filter( (array) $view->param( 'b_attrhideid', array() ) ),
-				'attrcustid' => array_filter( (array) $view->param( 'b_attrcustid', array() ) ),
+				'attrvarid' => array_filter( (array) $view->param( 'b_attrvarid', [] ) ),
+				'attrconfid' => array_filter( (array) $view->param( 'b_attrconfid', [] ) ),
+				'attrhideid' => array_filter( (array) $view->param( 'b_attrhideid', [] ) ),
+				'attrcustid' => array_filter( (array) $view->param( 'b_attrcustid', [] ) ),
 				'stocktype' => $view->param( 'b_stocktype', 'default' ),
 			);
 		}
@@ -523,6 +487,8 @@ class Standard
 		foreach( $products as $values ) {
 			$this->addProduct( $controller, $values, $options );
 		}
+
+		$this->clearCached();
 	}
 
 
@@ -539,10 +505,10 @@ class Standard
 			( isset( $values['prodid'] ) ? (string) $values['prodid'] : '' ),
 			( isset( $values['quantity'] ) ? (int) $values['quantity'] : 1 ),
 			$options,
-			( isset( $values['attrvarid'] ) ? array_filter( (array) $values['attrvarid'] ) : array() ),
-			( isset( $values['attrconfid'] ) ? array_filter( (array) $values['attrconfid'] ) : array() ),
-			( isset( $values['attrhideid'] ) ? array_filter( (array) $values['attrhideid'] ) : array() ),
-			( isset( $values['attrcustid'] ) ? array_filter( (array) $values['attrcustid'] ) : array() ),
+			( isset( $values['attrvarid'] ) ? array_filter( (array) $values['attrvarid'] ) : [] ),
+			( isset( $values['attrconfid'] ) ? array_filter( (array) $values['attrconfid'] ) : [] ),
+			( isset( $values['attrhideid'] ) ? array_filter( (array) $values['attrhideid'] ) : [] ),
+			( isset( $values['attrcustid'] ) ? array_filter( (array) $values['attrcustid'] ) : [] ),
 			( isset( $values['stocktype'] ) ? (string) $values['stocktype'] : 'default' )
 		);
 	}
@@ -557,9 +523,9 @@ class Standard
 	{
 		if( ( $coupon = $view->param( 'b_coupon' ) ) != '' )
 		{
-			$this->clearCached();
-			$controller = $this->getController();
+			$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
 			$controller->deleteCoupon( $coupon );
+			$this->clearCached();
 		}
 	}
 
@@ -571,13 +537,14 @@ class Standard
 	 */
 	protected function deleteProducts( \Aimeos\MW\View\Iface $view )
 	{
-		$this->clearCached();
-		$controller = $this->getController();
-		$products = (array) $view->param( 'b_position', array() );
+		$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
+		$products = (array) $view->param( 'b_position', [] );
 
 		foreach( $products as $position ) {
 			$controller->deleteProduct( $position );
 		}
+
+		$this->clearCached();
 	}
 
 
@@ -589,16 +556,15 @@ class Standard
 	 */
 	protected function editProducts( \Aimeos\MW\View\Iface $view, array $options )
 	{
-		$this->clearCached();
-		$controller = $this->getController();
-		$products = (array) $view->param( 'b_prod', array() );
+		$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
+		$products = (array) $view->param( 'b_prod', [] );
 
 		if( ( $position = $view->param( 'b_position', '' ) ) !== '' )
 		{
 			$products[] = array(
 				'position' => $position,
 				'quantity' => $view->param( 'b_quantity', 1 ),
-				'attrconf-code' => array_filter( (array) $view->param( 'b_attrconfcode', array() ) )
+				'attrconf-code' => array_filter( (array) $view->param( 'b_attrconfcode', [] ) )
 			);
 		}
 
@@ -608,23 +574,10 @@ class Standard
 				( isset( $values['position'] ) ? (int) $values['position'] : 0 ),
 				( isset( $values['quantity'] ) ? (int) $values['quantity'] : 1 ),
 				$options,
-				( isset( $values['attrconf-code'] ) ? array_filter( (array) $values['attrconf-code'] ) : array() )
+				( isset( $values['attrconf-code'] ) ? array_filter( (array) $values['attrconf-code'] ) : [] )
 			);
 		}
-	}
 
-
-	/**
-	 * Returns the basket controller object
-	 *
-	 * @return \Controller\Frontend\Basket\Iface Basket controller
-	 */
-	protected function getController()
-	{
-		if( !isset( $this->controller ) ) {
-			$this->controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
-		}
-
-		return $this->controller;
+		$this->clearCached();
 	}
 }

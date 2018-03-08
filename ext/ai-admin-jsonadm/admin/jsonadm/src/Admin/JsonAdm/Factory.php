@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JsonAdm
  */
@@ -22,7 +22,7 @@ class Factory
 	implements \Aimeos\Admin\JsonAdm\Common\Factory\Iface
 {
 	static private $cache = true;
-	static private $clients = array();
+	static private $clients = [];
 
 
 	/**
@@ -40,13 +40,13 @@ class Factory
 			if( $path !== null ) {
 				self::$clients[$id][$path] = null;
 			} else {
-				self::$clients[$id] = array();
+				self::$clients[$id] = [];
 			}
 
 			return;
 		}
 
-		self::$clients = array();
+		self::$clients = [];
 	}
 
 
@@ -69,15 +69,15 @@ class Factory
 		array $templatePaths, $path, $name = null )
 	{
 		$path = strtolower( trim( $path, "/ \n\t\r\0\x0B" ) );
-
-		if( empty( $path ) ) {
-			return self::createClientRoot( $context, $context->getView(), $templatePaths, $path, $name );
-		}
-
 		$id = (string) $context;
 
-		if( self::$cache === false || !isset( self::$clients[$id][$path] ) ) {
-			self::$clients[$id][$path] = self::createClientNew( $context, $templatePaths, $path, $name );
+		if( self::$cache === false || !isset( self::$clients[$id][$path] ) )
+		{
+			if( empty( $path ) ) {
+				self::$clients[$id][$path] = self::createClientRoot( $context, $templatePaths, $path, $name );
+			} else {
+				self::$clients[$id][$path] = self::createClientNew( $context, $templatePaths, $path, $name );
+			}
 		}
 
 		return self::$clients[$id][$path];
@@ -112,6 +112,7 @@ class Factory
 	protected static function createClientNew( \Aimeos\MShop\Context\Item\Iface $context,
 		array $templatePaths, $path, $name )
 	{
+		$pname = $name;
 		$parts = explode( '/', $path );
 
 		foreach( $parts as $key => $part )
@@ -125,24 +126,34 @@ class Factory
 			$parts[$key] = ucwords( $part );
 		}
 
+		if( $pname === null ) {
+			$pname = $context->getConfig()->get( 'admin/jsonadm/' . $path . '/name', 'Standard' );
+		}
 
 		$view = $context->getView();
-		$factory = '\\Aimeos\\Admin\\JsonAdm\\' . join( '\\', $parts ) . '\\Factory';
+		$config = $context->getConfig();
 
-		if( class_exists( $factory ) === true )
-		{
-			$args = array( $context, $view, $templatePaths, $path, $name );
-
-			if( ( $client = @call_user_func_array( array( $factory, 'createClient' ), $args ) ) === false ) {
-				throw new \Aimeos\Admin\JsonAdm\Exception( sprintf( 'Invalid factory "%1$s"', $factory ), 400 );
-			}
-		}
-		else
-		{
-			$client = self::createClientRoot( $context, $view, $templatePaths, $path, $name );
+		if( $view->access( $config->get( 'admin/jsonadm/resource/' . $path . '/groups', [] ) ) !== true ) {
+			throw new \Aimeos\Admin\JQAdm\Exception( sprintf( 'Not allowed to access JQAdm "%1$s" client', $path ) );
 		}
 
-		return $client;
+
+		$view = $context->getView();
+		$iface = '\\Aimeos\\Admin\\JsonAdm\\Iface';
+		$classname = '\\Aimeos\\Admin\\JsonAdm\\' . join( '\\', $parts ) . '\\' . $pname;
+
+		if( ctype_alnum( $pname ) === false )
+		{
+			$classname = is_string( $pname ) ? $classname : '<not a string>';
+			throw new \Aimeos\Admin\JsonAdm\Exception( sprintf( 'Invalid class name "%1$s"', $classname ) );
+		}
+
+		if( class_exists( $classname ) === false ) {
+			return self::createClientRoot( $context, $templatePaths, $path, $name );
+		}
+
+		$client = self::createClientBase( $classname, $iface, $context, $view, $templatePaths, $path );
+		return self::addClientDecorators( $client, $context, $view, $templatePaths, $path );
 	}
 
 
@@ -150,7 +161,6 @@ class Factory
 	 * Creates the top level client
 	 *
 	 * @param \Aimeos\MShop\Context\Item\Iface $context Context object required by clients
-	 * @param \Aimeos\MW\View\Iface $view View object
 	 * @param array $templatePaths List of file system paths where the templates are stored
 	 * @param string $path Name of the client separated by slashes, e.g "product/stock"
 	 * @param string|null $name Name of the JsonAdm client (default: "Standard")
@@ -158,7 +168,7 @@ class Factory
 	 * @throws \Aimeos\Admin\JsonAdm\Exception If the client couldn't be created
 	 */
 	protected static function createClientRoot( \Aimeos\MShop\Context\Item\Iface $context,
-		\Aimeos\MW\View\Iface $view, array $templatePaths, $path, $name = null )
+		array $templatePaths, $path, $name = null )
 	{
 		/** admin/jsonadm/name
 		 * Class name of the used JSON API client implementation
@@ -203,6 +213,7 @@ class Factory
 			throw new \Aimeos\Admin\JsonAdm\Exception( sprintf( 'Invalid class name "%1$s"', $classname ) );
 		}
 
+		$view = $context->getView();
 		$iface = '\\Aimeos\\Admin\\JsonAdm\\Iface';
 		$classname = '\\Aimeos\\Admin\\JsonAdm\\' . $name;
 

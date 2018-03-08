@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -91,34 +91,16 @@ class Standard
 
 		try
 		{
-			$pos = 0;
-			$delete = array();
-			$map = $this->getMappedChunk( $data );
+			$listMap = [];
+			$map = $this->getMappedChunk( $data, $this->getMapping() );
 			$listItems = $product->getListItems( 'attribute', $this->listTypes );
 
-			foreach( $listItems as $listId => $listItem )
+			foreach( $listItems as $listItem )
 			{
-				if( isset( $map[$pos] ) )
-				{
-					if( !isset( $map[$pos]['attribute.code'] ) || !isset( $map[$pos]['attribute.type'] ) )
-					{
-						unset( $map[$pos] );
-						continue;
-					}
-
-					if( $this->checkMatch( $listItem, $map[$pos] ) === true )
-					{
-						$pos++;
-						continue;
-					}
+				if( ( $refItem = $listItem->getRefItem() ) !== null ) {
+					$listMap[ $refItem->getCode() ][ $listItem->getType() ] = $listItem;
 				}
-
-				$listItems[$listId] = null;
-				$delete[] = $listId;
-				$pos++;
 			}
-
-			$listManager->deleteItems( $delete );
 
 			foreach( $map as $pos => $list )
 			{
@@ -133,11 +115,7 @@ class Standard
 					$attrItem = $this->getAttributeItem( $code, $list['attribute.type'] );
 					$attrItem->fromArray( $list );
 					$attrItem->setCode( $code );
-					$manager->saveItem( $attrItem );
-
-					if( ( $listItem = array_shift( $listItems ) ) === null ) {
-						$listItem = $listManager->createItem();
-					}
+					$attrItem = $manager->saveItem( $attrItem );
 
 					$typecode = $this->getValue( $list, 'product.lists.type', 'default' );
 					$list['product.lists.typeid'] = $this->getTypeId( 'product/lists/type', 'attribute', $typecode );
@@ -145,12 +123,24 @@ class Standard
 					$list['product.lists.parentid'] = $product->getId();
 					$list['product.lists.domain'] = 'attribute';
 
+					if( isset( $listMap[$code][$typecode] ) )
+					{
+						$listItem = $listMap[$code][$typecode];
+						unset( $listItems[ $listItem->getId() ] );
+					}
+					else
+					{
+						$listItem = $listManager->createItem();
+					}
+
 					$listItem->fromArray( $this->addListItemDefaults( $list, $pos ) );
-					$listManager->saveItem( $listItem );
+					$listManager->saveItem( $listItem, false );
 				}
 			}
 
-			$remaining = $this->getObject()->process( $product, $data );
+			$listManager->deleteItems( array_keys( $listItems ) );
+
+			$data = $this->getObject()->process( $product, $data );
 
 			$manager->commit();
 		}
@@ -160,7 +150,7 @@ class Standard
 			throw $e;
 		}
 
-		return $remaining;
+		return $data;
 	}
 
 
@@ -184,29 +174,6 @@ class Standard
 
 
 	/**
-	 * Checks if the list item matches the values from the list
-	 *
-	 * @param \Aimeos\MShop\Common\Item\Lists\Iface $listItem List item object
-	 * @param array $list Associative list of key/value pairs from the mapped data
-	 * @return boolean True if the list item matches the values in the list, false if not
-	 */
-	protected function checkMatch( \Aimeos\MShop\Common\Item\Lists\Iface $listItem, array $list )
-	{
-		$refItem = $listItem->getRefItem();
-
-		if( $refItem !== null && $list['attribute.code'] === $refItem->getCode()
-			&& $list['attribute.type'] === $refItem->getType()
-			&& ( !isset( $list['product.lists.type'] ) || isset( $list['product.lists.type'] )
-			&& $list['product.lists.type'] === $listItem->getType() )
-		) {
-			return true;
-		}
-
-		return false;
-	}
-
-
-	/**
 	 * Returns the attribute item for the given code and type
 	 *
 	 * @param string $code Attribute code
@@ -226,7 +193,7 @@ class Standard
 			$item->setCode( $code );
 			$item->setStatus( 1 );
 
-			$manager->saveItem( $item );
+			$item = $manager->saveItem( $item );
 
 			$this->cache->set( $item );
 		}

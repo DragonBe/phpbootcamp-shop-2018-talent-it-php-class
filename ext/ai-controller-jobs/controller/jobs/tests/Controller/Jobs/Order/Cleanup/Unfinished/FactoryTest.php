@@ -1,15 +1,17 @@
 <?php
 
-namespace Aimeos\Controller\Jobs\Order\Cleanup\Unfinished;
-
-
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
+
+
+namespace Aimeos\Controller\Jobs\Order\Cleanup\Unfinished;
+
+
 class FactoryTest
-	extends \PHPUnit_Framework_TestCase
+	extends \PHPUnit\Framework\TestCase
 {
 	public function testCreateController()
 	{

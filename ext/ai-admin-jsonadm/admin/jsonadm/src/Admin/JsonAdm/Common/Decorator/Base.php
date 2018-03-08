@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JsonAdm
  */
@@ -55,11 +55,7 @@ abstract class Base
 	 */
 	public function __call( $name, array $param )
 	{
-		if( ( $result = call_user_func_array( array( $this->client, $name ), $param ) ) === false ) {
-			throw new \Aimeos\Admin\JsonAdm\Exception( sprintf( 'Unable to call method "%1$s"', $name ) );
-		}
-
-		return $result;
+		return @call_user_func_array( array( $this->client, $name ), $param );
 	}
 
 
@@ -143,5 +139,16 @@ abstract class Base
 	public function options( ServerRequestInterface $request, ResponseInterface $response, $prefix = null )
 	{
 		return $this->client->options( $request, $response, $prefix );
+	}
+
+
+	/**
+	 * Returns the underlying admin client object;
+	 *
+	 * @return \Aimeos\Admin\JsonAdm\Iface Admin client object
+	 */
+	protected function getClient()
+	{
+		return $this->client;
 	}
 }

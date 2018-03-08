@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -17,21 +17,107 @@ namespace Aimeos\Controller\Frontend\Order\Decorator;
  * @package Controller
  * @subpackage Frontend
  */
-abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
+abstract class Base
+	extends \Aimeos\Controller\Frontend\Base
+	implements \Aimeos\Controller\Frontend\Common\Decorator\Iface, \Aimeos\Controller\Frontend\Order\Iface
 {
+	private $controller;
+
+
 	/**
-	 * Creates a new order from the given basket.
+	 * Initializes the controller decorator.
 	 *
-	 * Saves the given basket to the storage including the addresses, coupons,
-	 * products, services, etc. and creates/stores a new order item for that
-	 * order.
-	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object to be stored
-	 * @return \Aimeos\MShop\Order\Item\Iface Order item that belongs to the stored basket
+	 * @param \Aimeos\Controller\Frontend\Iface $controller Controller object
+	 * @param \Aimeos\MShop\Context\Item\Iface $context Context object with required objects
 	 */
-	public function store( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function __construct( \Aimeos\Controller\Frontend\Iface $controller, \Aimeos\MShop\Context\Item\Iface $context )
 	{
-		return $this->getController()->store( $basket );
+		$iface = '\Aimeos\Controller\Frontend\Order\Iface';
+		if( !( $controller instanceof $iface ) )
+		{
+			$msg = sprintf( 'Class "%1$s" does not implement interface "%2$s"', get_class( $controller ), $iface );
+			throw new \Aimeos\Controller\Frontend\Exception( $msg );
+		}
+
+		$this->controller = $controller;
+
+		parent::__construct( $context );
+	}
+
+
+	/**
+	 * Passes unknown methods to wrapped objects.
+	 *
+	 * @param string $name Name of the method
+	 * @param array $param List of method parameter
+	 * @return mixed Returns the value of the called method
+	 * @throws \Aimeos\Controller\Frontend\Exception If method call failed
+	 */
+	public function __call( $name, array $param )
+	{
+		return @call_user_func_array( array( $this->controller, $name ), $param );
+	}
+
+
+	/**
+	 * Creates and adds a new order for the given order base ID
+	 *
+	 * @param string $baseId Unique ID of the saved basket
+	 * @param string $type Arbitrary order type (max. eight chars)
+	 * @return \Aimeos\MShop\Order\Item\Iface Created order object
+	 */
+	public function addItem( $baseId, $type )
+	{
+		return $this->controller->addItem( $baseId, $type );
+	}
+
+
+	/**
+	 * Returns the filter for searching items
+	 *
+	 * @return \Aimeos\MW\Criteria\Iface Filter object
+	 */
+	public function createFilter()
+	{
+		return $this->controller->createFilter();
+	}
+
+
+	/**
+	 * Returns the order item for the given ID
+	 *
+	 * @param string $id Unique order ID
+	 * @param boolean $default Use default criteria to limit orders
+	 * @return \Aimeos\MShop\Order\Item\Iface Order object
+	 */
+	public function getItem( $id, $default = true )
+	{
+		return $this->controller->getItem( $id );
+	}
+
+
+	/**
+	 * Saves the modified order item
+	 *
+	 * @param \Aimeos\MShop\Order\Item\Iface $item Order object
+	 * @return \Aimeos\MShop\Order\Item\Iface Saved order item
+	 */
+	public function saveItem( \Aimeos\MShop\Order\Item\Iface $item )
+	{
+		return $this->controller->saveItem( $item );
+	}
+
+
+	/**
+	 * Returns the order items based on the given filter that belong to the current user
+	 *
+	 * @param \Aimeos\MW\Criteria\Iface Filter object
+	 * @param integer &$total|null Variable that will contain the total number of available items
+	 * @return \Aimeos\MShop\Order\Item\Iface[] Associative list of IDs as keys and order objects as values
+	 */
+	public function searchItems( \Aimeos\MW\Criteria\Iface $filter, &$total = null )
+	{
+		return $this->controller->searchItems( $filter, $total );
 	}
 
 
@@ -103,5 +189,33 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	public function update( \Aimeos\MShop\Order\Item\Iface $orderItem )
 	{
 		$this->getController()->update( $orderItem );
+	}
+
+
+	/**
+	 * Creates a new order from the given basket.
+	 *
+	 * Saves the given basket to the storage including the addresses, coupons,
+	 * products, services, etc. and creates/stores a new order item for that
+	 * order.
+	 *
+	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object to be stored
+	 * @return \Aimeos\MShop\Order\Item\Iface Order item that belongs to the stored basket
+	 * @deprecated 2017.04 Use store() from basket controller instead
+	 */
+	public function store( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	{
+		return $this->getController()->store( $basket );
+	}
+
+
+	/**
+	 * Returns the frontend controller
+	 *
+	 * @return \Aimeos\Controller\Frontend\Order\Iface Frontend controller object
+	 */
+	protected function getController()
+	{
+		return $this->controller;
 	}
 }

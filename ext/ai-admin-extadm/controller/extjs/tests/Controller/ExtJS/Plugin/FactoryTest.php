@@ -6,9 +6,9 @@ namespace Aimeos\Controller\ExtJS\Plugin;
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class FactoryTest extends \PHPUnit_Framework_TestCase
+class FactoryTest extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * Tears down the fixture, for example, closes a network connection.
@@ -19,7 +19,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 	protected function tearDown()
 	{
 		$context = \TestHelperExtjs::getContext();
-		$context->getConfig()->set( 'controller/extjs/common/decorators/default', array() );
+		$context->getConfig()->set( 'controller/extjs/common/decorators/default', [] );
 	}
 
 
@@ -79,7 +79,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 		$config = $context->getConfig();
 
 		$config->set( 'controller/extjs/common/decorators/default', array( 'Example', 'Example' ) );
-		$config->set( 'controller/extjs/plugin/decorators/excludes', array() );
+		$config->set( 'controller/extjs/plugin/decorators/excludes', [] );
 
 		$controller = \Aimeos\Controller\ExtJS\Plugin\Factory::createController( $context, 'Standard' );
 

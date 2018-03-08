@@ -5,9 +5,9 @@ namespace Aimeos\Perf\Product\Import\Csv;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 
@@ -22,13 +22,13 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$config->set( 'controller/jobs/product/import/csv/container/content', 'CSV' );
 		$config->set( 'controller/jobs/product/import/csv/mapping', $this->getMapping() );
 
-		$container = \Aimeos\MW\Container\Factory::getContainer( 'tmp/product-import.zip', 'Zip', 'CSV', array() );
+		$container = \Aimeos\MW\Container\Factory::getContainer( 'tmp/product-import.zip', 'Zip', 'CSV', [] );
 
 		$content = $container->create( 'product.csv' );
 
 		for( $i = 0; $i < 1000; $i++ )
 		{
-			$data = array();
+			$data = [];
 
 			$data = $this->addProduct( $data, $i );
 			$data = $this->addText( $data, $i );

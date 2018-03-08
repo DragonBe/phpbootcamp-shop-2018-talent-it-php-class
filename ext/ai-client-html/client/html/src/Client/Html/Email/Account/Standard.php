@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -79,8 +79,6 @@ class Standard
 	 */
 	private $subPartNames = array( 'text', 'html' );
 
-	private $cache;
-
 
 	/**
 	 * Returns the HTML code for insertion into the body.
@@ -90,7 +88,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -141,7 +139,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -275,7 +273,7 @@ class Standard
 		 * This configuration option overwrites the e-mail address set via
 		 * "client/html/email/bcc-email".
 		 *
-		 * @param string E-mail address
+		 * @param string|array E-mail address or list of e-mail addresses
 		 * @since 2015.09
 		 * @category User
 		 * @category Developer
@@ -283,8 +281,11 @@ class Standard
 		 * @see client/html/email/reply-email
 		 * @see client/html/email/from-email
 		 */
-		if( ( $bccEmailAccount = $view->config( 'client/html/email/account/bcc-email', $bccEmail ) ) != null ) {
-			$msg->addBcc( $bccEmailAccount );
+		if( ( $bccEmailAccount = $view->config( 'client/html/email/account/bcc-email', $bccEmail ) ) != null )
+		{
+			foreach( (array) $bccEmailAccount as $emailAddr ) {
+				$msg->addBcc( $emailAddr );
+			}
 		}
 
 
@@ -428,38 +429,33 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
-		if( !isset( $this->cache ) )
+		$salutations = array(
+			\Aimeos\MShop\Common\Item\Address\Base::SALUTATION_MR,
+			\Aimeos\MShop\Common\Item\Address\Base::SALUTATION_MRS,
+			\Aimeos\MShop\Common\Item\Address\Base::SALUTATION_MISS,
+		);
+
+		try
 		{
-			$salutations = array(
-				\Aimeos\MShop\Common\Item\Address\Base::SALUTATION_MR,
-				\Aimeos\MShop\Common\Item\Address\Base::SALUTATION_MRS,
-				\Aimeos\MShop\Common\Item\Address\Base::SALUTATION_MISS,
+			$salutation = '';
+			$addr = $view->extAddressItem;
+
+			if( in_array( $addr->getSalutation(), $salutations ) ) {
+				$salutation = $view->translate( 'client/code', $addr->getSalutation() );
+			}
+
+			/// E-mail intro with salutation (%1$s), first name (%2$s) and last name (%3$s)
+			$view->emailIntro = sprintf( $view->translate( 'client', 'Dear %1$s %2$s %3$s' ),
+				$salutation, $addr->getFirstName(), $addr->getLastName()
 			);
-
-			try
-			{
-				$salutation = '';
-				$addr = $view->extAddressItem;
-
-				if( in_array( $addr->getSalutation(), $salutations ) ) {
-					$salutation = $view->translate( 'client/code', $addr->getSalutation() );
-				}
-
-				/// E-mail intro with salutation (%1$s), first name (%2$s) and last name (%3$s)
-				$view->emailIntro = sprintf( $view->translate( 'client', 'Dear %1$s %2$s %3$s' ),
-					$salutation, $addr->getFirstName(), $addr->getLastName()
-				);
-			}
-			catch( \Exception $e )
-			{
-				$view->emailIntro = $view->translate( 'client/html/email', 'Dear Sir or Madam' );
-			}
-
-			$this->cache = $view;
+		}
+		catch( \Exception $e )
+		{
+			$view->emailIntro = $view->translate( 'client/html/email', 'Dear Sir or Madam' );
 		}
 
-		return $this->cache;
+		return $view;
 	}
 }

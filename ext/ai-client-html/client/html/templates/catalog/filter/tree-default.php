@@ -2,18 +2,18 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
 $level = $this->get( 'level', 0 );
-$path = $this->get( 'path', array() );
-$params = $this->get( 'params', array() );
+$path = $this->get( 'path', [] );
+$params = $this->get( 'params', [] );
 
 $target = $this->config( 'client/html/catalog/lists/url/target' );
 $controller = $this->config( 'client/html/catalog/lists/url/controller', 'catalog' );
 $action = $this->config( 'client/html/catalog/lists/url/action', 'list' );
-$config = $this->config( 'client/html/catalog/lists/url/config', array() );
+$config = $this->config( 'client/html/catalog/lists/url/config', [] );
 
 /** client/html/common/partials/media
  * Relative path to the media partial template file
@@ -31,9 +31,10 @@ $config = $this->config( 'client/html/catalog/lists/url/config', array() );
  * @category Developer
  */
 
+
 ?>
-<ul class="level-<?php echo $enc->attr( $level ); ?>">
-	<?php foreach( $this->get( 'nodes', array() ) as $item ) : ?>
+<ul class="level-<?= $enc->attr( $level ); ?>">
+	<?php foreach( $this->get( 'nodes', [] ) as $item ) : ?>
 		<?php if( $item->getStatus() > 0 ) : ?>
 
 			<?php $id = $item->getId(); $config = $item->getConfig(); ?>
@@ -41,14 +42,14 @@ $config = $this->config( 'client/html/catalog/lists/url/config', array() );
 			<?php $class = ( $item->hasChildren() ? ' withchild' : ' nochild' ) . ( isset( $path[$id] ) ? ' active' : '' ); ?>
 			<?php $class .= ' catcode-' . $item->getCode() . ( isset( $config['css-class'] ) ? ' ' . $config['css-class'] : '' ); ?>
 
-			<li class="cat-item catid-<?php echo $enc->attr( $id . $class ); ?>" data-id="<?php echo $id; ?>" >
+			<li class="cat-item catid-<?= $enc->attr( $id . $class ); ?>" data-id="<?= $id; ?>" >
 
-				<a class="cat-item" href="<?php echo $enc->attr( $this->url( $target, $controller, $action, $params, array(), $config ) ); ?>"><!--
+				<a class="cat-item" href="<?= $enc->attr( $this->url( ( $item->getTarget() ?: $target ), $controller, $action, $params, [], $config ) ); ?>"><!--
 					--><div class="media-list"><!--
 
 						<?php foreach( $item->getListItems( 'media', 'icon' ) as $listItem ) : ?>
 							<?php if( ( $mediaItem = $listItem->getRefItem() ) !== null ) : ?>
-								<?php echo '-->' . $this->partial(
+								<?= '-->' . $this->partial(
 									$this->config( 'client/html/common/partials/media', 'common/partials/media-default.php' ),
 									array( 'item' => $mediaItem, 'boxAttributes' => array( 'class' => 'media-item' ) )
 								) . '<!--'; ?>
@@ -56,12 +57,12 @@ $config = $this->config( 'client/html/catalog/lists/url/config', array() );
 						<?php endforeach; ?>
 
 					--></div><!--
-					--><span class="cat-name"><?php echo $enc->html( $item->getName(), $enc::TRUST ); ?></span><!--
+					--><span class="cat-name"><?= $enc->html( $item->getName(), $enc::TRUST ); ?></span><!--
 				--></a>
 
 				<?php if( count( $item->getChildren() ) > 0 ) : ?>
 					<?php $values = array( 'nodes' => $item->getChildren(), 'path' => $path, 'params' => $params, 'level' => $level + 1 ); ?>
-					<?php echo $this->partial( $this->config( 'client/html/catalog/filter/partials/tree', 'catalog/filter/tree-default.php' ), $values ); ?>
+					<?= $this->partial( $this->config( 'client/html/catalog/filter/partials/tree', 'catalog/filter/tree-default.php' ), $values ); ?>
 				<?php endif; ?>
 
 			</li>

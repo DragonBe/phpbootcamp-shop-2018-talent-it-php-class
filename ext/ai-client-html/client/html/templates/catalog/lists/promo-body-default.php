@@ -2,19 +2,19 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 $enc = $this->encoder();
-$products = $this->get( 'promoItems', array() );
+$products = $this->get( 'promoItems', [] );
 
 ?>
 <?php $this->block()->start( 'catalog/lists/promo' ); ?>
 
 <?php if( !empty( $products ) ) : ?>
 	<section class="catalog-list-promo">
-		<h2 class="header"><?php echo $this->translate( 'client', 'Top seller' ); ?></h2>
-		<?php echo $this->partial(
+		<h2 class="header"><?= $this->translate( 'client', 'Top seller' ); ?></h2>
+		<?= $this->partial(
 			/** client/html/common/partials/products
 			 * Relative path to the products partial template file
 			 *
@@ -33,4 +33,4 @@ $products = $this->get( 'promoItems', array() );
 <?php endif; ?>
 
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'catalog/lists/promo' ); ?>
+<?= $this->block()->get( 'catalog/lists/promo' ); ?>

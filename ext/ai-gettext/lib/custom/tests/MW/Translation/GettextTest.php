@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 
 namespace Aimeos\MW\Translation;
 
 
-class GettextTest extends \PHPUnit_Framework_TestCase
+class GettextTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 

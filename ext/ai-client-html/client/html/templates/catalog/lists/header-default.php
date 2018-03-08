@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 /** client/html/catalog/lists/metatags
@@ -26,15 +26,17 @@
 
 $enc = $this->encoder();
 
-$params = $this->get( 'listParams', array() );
-$catItems = $this->get( 'listCatPath', array() );
-$total = $this->get( 'listProductTotal', 1 ) / $this->get( 'listPageSize', 1 );
-$current = $this->get( 'listPageCurr', 1 );
+$params = $this->get( 'listParams', [] );
+$catItems = $this->get( 'listCatPath', [] );
+$current = $this->get( 'listPageCurr', 0 );
+$prev = $this->get( 'listPagePrev', 0 );
+$next = $this->get( 'listPageNext', 0 );
+$last = $this->get( 'listPageLast', 0 );
 
 $listTarget = $this->config( 'client/html/catalog/lists/url/target' );
 $listController = $this->config( 'client/html/catalog/lists/url/controller', 'catalog' );
 $listAction = $this->config( 'client/html/catalog/lists/url/action', 'list' );
-$listConfig = $this->config( 'client/html/catalog/lists/url/config', array() );
+$listConfig = $this->config( 'client/html/catalog/lists/url/config', [] );
 
 $params = $this->param();
 unset( $params['f_sort'] );
@@ -45,42 +47,37 @@ unset( $params['f_sort'] );
 
 	<?php if( ( $catItem = end( $catItems ) ) !== false ) : ?>
 
-		<title><?php echo $enc->html( $catItem->getName() ); ?></title>
+		<title><?= $enc->html( $catItem->getName() ); ?></title>
 
 		<?php foreach( $catItem->getRefItems( 'text', 'meta-keyword', 'default' ) as $textItem ) : ?>
-		<meta name="keywords" content="<?php echo $enc->attr( strip_tags( $textItem->getContent() ) ); ?>" />
+		<meta name="keywords" content="<?= $enc->attr( strip_tags( $textItem->getContent() ) ); ?>" />
 		<?php endforeach; ?>
 
 		<?php foreach( $catItem->getRefItems( 'text', 'meta-description', 'default' ) as $textItem ) : ?>
-		<meta name="description" content="<?php echo $enc->attr( strip_tags( $textItem->getContent() ) ); ?>" />
+		<meta name="description" content="<?= $enc->attr( strip_tags( $textItem->getContent() ) ); ?>" />
 		<?php endforeach; ?>
 
 	<?php elseif( ( $search = $this->param( 'f_search', null ) ) != null ) : /// Product search hint with user provided search string (%1$s) ?>
-		<title><?php echo $enc->html( sprintf( $this->translate( 'client', 'Result for "%1$s"' ), strip_tags( $search ) ) ); ?></title>
+		<title><?= $enc->html( sprintf( $this->translate( 'client', 'Result for "%1$s"' ), strip_tags( $search ) ) ); ?></title>
 	<?php else : ?>
-		<title><?php echo $enc->html( $this->translate( 'client', 'Our products' ) ); ?></title>
+		<title><?= $enc->html( $this->translate( 'client', 'Our products' ) ); ?></title>
 	<?php endif; ?>
 
 
 	<?php if( $current > 1 ) : ?>
-		<link rel="prev" href="<?php echo $enc->attr( $this->url( $listTarget, $listController, $listAction, array( 'l_page' => $this->pagiPagePrev ) + $params, array(), $listConfig ) ); ?>" />
+		<link rel="prev" href="<?= $enc->attr( $this->url( $listTarget, $listController, $listAction, array( 'l_page' => $prev ) + $params, [], $listConfig ) ); ?>" />
 	<?php endif; ?>
 
 
-	<?php if( $current > 1 && $current < $total ) : // Optimization to avoid loading next page while the user is still filtering ?>
-		<link rel="next prefetch" href="<?php echo $enc->attr( $this->url( $listTarget, $listController, $listAction, array( 'l_page' => $this->pagiPageNext ) + $params, array(), $listConfig ) ); ?>" />
+	<?php if( $current > 1 && $current < $last ) : // Optimization to avoid loading next page while the user is still filtering ?>
+		<link rel="next prefetch" href="<?= $enc->attr( $this->url( $listTarget, $listController, $listAction, array( 'l_page' => $next ) + $params, [], $listConfig ) ); ?>" />
 	<?php endif; ?>
 
 
-	<link rel="canonical" href="<?php echo $enc->attr( $this->url( $listTarget, $listController, $listAction, $params, array(), $listConfig ) ); ?>" />
+	<link rel="canonical" href="<?= $enc->attr( $this->url( $listTarget, $listController, $listAction, $params, [], $listConfig ) ); ?>" />
 	<meta name="application-name" content="Aimeos" />
 
 <?php endif; ?>
 
 
-<?php if( ( $url = $this->get( 'listStockUrl' ) ) != null ) : ?>
-	<script type="text/javascript" defer="defer" src="<?php echo $enc->attr( $url ); ?>"></script>
-<?php endif; ?>
-
-
-<?php echo $this->get( 'listHeader' ); ?>
+<?= $this->get( 'listHeader' ); ?>

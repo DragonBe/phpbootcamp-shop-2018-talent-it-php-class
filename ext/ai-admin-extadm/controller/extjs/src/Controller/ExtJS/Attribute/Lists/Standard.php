@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -49,17 +49,17 @@ class Standard
 
 		$totalList = 0;
 		$search = $this->initCriteria( $this->getManager()->createSearch(), $params );
-		$result = $this->getManager()->searchItems( $search, array(), $totalList );
+		$result = $this->getManager()->searchItems( $search, [], $totalList );
 
-		$idLists = array();
-		$listItems = array();
+		$idLists = [];
+		$listItems = [];
 
 		foreach( $result as $item )
 		{
 			if( ( $domain = $item->getDomain() ) != '' ) {
 				$idLists[$domain][] = $item->getRefId();
 			}
-			$listItems[] = (object) $item->toArray();
+			$listItems[] = (object) $item->toArray( true );
 		}
 
 		return array(

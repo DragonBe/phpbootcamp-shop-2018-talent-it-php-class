@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\MW\Cache;
 
 
-class Laravel5Test extends \PHPUnit_Framework_TestCase
+class Laravel5Test extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $mock;
@@ -90,7 +90,7 @@ class Laravel5Test extends \PHPUnit_Framework_TestCase
 
 	public function testGetMultipleByTags()
 	{
-		$this->assertEquals( array(), $this->object->getMultipleByTags( array( 'key', 'key' ) ) );
+		$this->assertEquals( [], $this->object->getMultipleByTags( array( 'key', 'key' ) ) );
 	}
 
 

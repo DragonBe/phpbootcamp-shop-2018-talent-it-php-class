@@ -3,12 +3,12 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
-$params = $this->get( 'pinnedParams', array() );
-$pinList = $this->get( 'pinnedProductItems', array() );
+$params = $this->get( 'pinnedParams', [] );
+$pinList = $this->get( 'pinnedProductItems', [] );
 
 /** client/html/catalog/session/pinned/url/target
  * Destination of the URL where the controller specified in the URL is known
@@ -79,12 +79,12 @@ $pinAction = $this->config( 'client/html/catalog/session/pinned/url/action', 'de
  * @see client/html/catalog/session/pinned/url/action
  * @see client/html/url/config
  */
-$pinConfig = $this->config( 'client/html/catalog/session/pinned/url/config', array() );
+$pinConfig = $this->config( 'client/html/catalog/session/pinned/url/config', [] );
 
 $detailTarget = $this->config( 'client/html/catalog/detail/url/target' );
 $detailController = $this->config( 'client/html/catalog/detail/url/controller', 'catalog' );
 $detailAction = $this->config( 'client/html/catalog/detail/url/action', 'detail' );
-$detailConfig = $this->config( 'client/html/catalog/detail/url/config', array() );
+$detailConfig = $this->config( 'client/html/catalog/detail/url/config', [] );
 
 /** client/html/catalog/session/pinned/count/enable
  * Displays the number of pinned products in the header of the pinned list
@@ -107,9 +107,9 @@ $count = $this->config( 'client/html/catalog/session/pinned/count/enable', 1 );
 <section class="catalog-session-pinned">
 
 	<h2 class="header">
-		<?php echo $this->translate( 'client', 'Pinned products' ); ?>
+		<?= $this->translate( 'client', 'Pinned products' ); ?>
 		<?php if( $count ) : ?>
-			<span class="count"><?php echo count( $pinList ); ?></span>
+			<span class="count"><?= count( $pinList ); ?></span>
 		<?php endif; ?>
 	</h2>
 
@@ -120,22 +120,22 @@ $count = $this->config( 'client/html/catalog/session/pinned/count/enable', 1 );
 			<?php $detailParams = array( 'd_name' => $productItem->getName( 'url' ), 'd_prodid' => $id ); ?>
 
 			<li class="pinned-item">
-				<a class="modify" href="<?php echo $this->url( $pinTarget, $pinController, $pinAction, $pinParams, array(), $pinConfig ); ?>">
-					<?php echo $this->translate( 'client', 'X' ); ?>
+				<a class="modify" href="<?= $this->url( $pinTarget, $pinController, $pinAction, $pinParams, [], $pinConfig ); ?>">
+					<?= $this->translate( 'client', 'X' ); ?>
 				</a>
 
-				<a href="<?php echo $enc->attr( $this->url( $detailTarget, $detailController, $detailAction, $detailParams, array(), $detailConfig ) ); ?>">
+				<a href="<?= $enc->attr( $this->url( $detailTarget, $detailController, $detailAction, $detailParams, [], $detailConfig ) ); ?>">
 
 					<?php $mediaItems = $productItem->getRefItems( 'media', 'default', 'default' ); ?>
 					<?php if( ( $mediaItem = reset( $mediaItems ) ) !== false ) : ?>
-						<div class="media-item" style="background-image: url('<?php echo $this->content( $mediaItem->getPreview() ); ?>')"></div>
+						<div class="media-item" style="background-image: url('<?= $this->content( $mediaItem->getPreview() ); ?>')"></div>
 					<?php else : ?>
 						<div class="media-item"></div>
 					<?php endif; ?>
 
-					<h3 class="name"><?php echo $enc->html( $productItem->getName(), $enc::TRUST ); ?></h3>
+					<h3 class="name"><?= $enc->html( $productItem->getName(), $enc::TRUST ); ?></h3>
 					<div class="price-list">
-						<?php echo $this->partial(
+						<?= $this->partial(
 							$this->config( 'client/html/common/partials/price', 'common/partials/price-default.php' ),
 							array( 'prices' => $productItem->getRefItems( 'price', null, 'default' ) )
 						); ?>
@@ -149,4 +149,4 @@ $count = $this->config( 'client/html/catalog/session/pinned/count/enable', 1 );
 
 </section>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'catalog/session/pinned' ); ?>
+<?= $this->block()->get( 'catalog/session/pinned' ); ?>

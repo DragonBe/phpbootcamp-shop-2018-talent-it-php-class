@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -47,7 +47,7 @@ class Standard
 		$this->checkParams( $params, array( 'site', 'items' ) );
 		$this->setLocale( $params->site );
 
-		$ids = array();
+		$ids = [];
 		$manager = $this->getManager();
 		$items = ( !is_array( $params->items ) ? array( $params->items ) : $params->items );
 
@@ -55,7 +55,7 @@ class Standard
 		{
 			$item = $manager->createItem();
 			$item->fromArray( (array) $this->transformValues( $entry ) );
-			$manager->saveItem( $item );
+			$item = $manager->saveItem( $item );
 			$ids[] = $item->getId();
 		}
 

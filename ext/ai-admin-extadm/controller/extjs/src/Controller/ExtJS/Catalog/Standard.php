@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -49,13 +49,13 @@ class Standard
 
 		$manager = $this->getManager();
 
-		$result = array();
+		$result = [];
 		$items = ( !is_array( $params->items ) ? array( $params->items ) : $params->items );
 
 		foreach( $items as $entry )
 		{
 			$entry = ( $entry != 'root' ? $entry : null );
-			$item = $manager->getTree( $entry, array(), \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST );
+			$item = $manager->getTree( $entry, [], \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST );
 			$result[] = $this->createNodeArray( $item );
 		}
 
@@ -77,7 +77,7 @@ class Standard
 		$this->checkParams( $params, array( 'site', 'items' ) );
 		$this->setLocale( $params->site );
 
-		$ids = array();
+		$ids = [];
 		$manager = $this->getManager();
 
 		$refId = ( isset( $params->refid ) ? $params->refid : null );
@@ -120,7 +120,7 @@ class Standard
 
 		$manager = $this->getManager();
 
-		$ids = array();
+		$ids = [];
 		$refId = ( isset( $params->refid ) ? $params->refid : null );
 		$items = ( !is_array( $params->items ) ? array( $params->items ) : $params->items );
 
@@ -188,7 +188,7 @@ class Standard
 	 */
 	protected function createNodeArray( \Aimeos\MShop\Catalog\Item\Iface $node )
 	{
-		$result = $node->toArray();
+		$result = $node->toArray( true );
 
 		foreach( $node->getChildren() as $child ) {
 			$result['children'][] = $this->createNodeArray( $child );

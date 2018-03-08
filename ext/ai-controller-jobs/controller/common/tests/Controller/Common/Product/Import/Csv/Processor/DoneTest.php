@@ -5,9 +5,9 @@ namespace Aimeos\Controller\Common\Product\Import\Csv\Processor;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class DoneTest extends \PHPUnit_Framework_TestCase
+class DoneTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
@@ -24,7 +24,7 @@ class DoneTest extends \PHPUnit_Framework_TestCase
 		\Aimeos\MShop\Factory::setCache( true );
 
 		$this->context = \TestHelperCntl::getContext();
-		$this->object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $this->context, array() );
+		$this->object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $this->context, [] );
 	}
 
 

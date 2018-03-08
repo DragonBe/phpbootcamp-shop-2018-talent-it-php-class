@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -57,17 +57,6 @@ class Standard
 	 */
 	private $subPartPath = 'client/html/catalog/detail/standard/subparts';
 
-	/** client/html/catalog/detail/actions/name
-	 * Name of the actions part used by the catalog detail client implementation
-	 *
-	 * Use "Myname" if your class is named "\Aimeos\Client\Html\Catalog\Detail\Actions\Myname".
-	 * The name is case-sensitive and you should avoid camel case names like "MyName".
-	 *
-	 * @param string Last part of the client class name
-	 * @since 2014.09
-	 * @category Developer
-	 */
-
 	/** client/html/catalog/detail/service/name
 	 * Name of the shipping cost part used by the catalog detail client implementation
 	 *
@@ -89,9 +78,9 @@ class Standard
 	 * @since 2014.03
 	 * @category Developer
 	 */
-	private $subPartNames = array( 'actions', 'service', 'seen' );
+	private $subPartNames = array( 'service', 'seen' );
 
-	private $tags = array();
+	private $tags = [];
 	private $expire;
 	private $cache;
 
@@ -104,7 +93,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$prefixes = array( 'd' );
 		$context = $this->getContext();
@@ -138,24 +127,24 @@ class Standard
 			catch( \Aimeos\Client\Html\Exception $e )
 			{
 				$error = array( $context->getI18n()->dt( 'client', $e->getMessage() ) );
-				$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+				$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 			}
 			catch( \Aimeos\Controller\Frontend\Exception $e )
 			{
 				$error = array( $context->getI18n()->dt( 'controller/frontend', $e->getMessage() ) );
-				$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+				$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 			}
 			catch( \Aimeos\MShop\Exception $e )
 			{
 				$error = array( $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-				$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+				$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 			}
 			catch( \Exception $e )
 			{
 				$context->getLogger()->log( $e->getMessage() . PHP_EOL . $e->getTraceAsString() );
 
 				$error = array( $context->getI18n()->dt( 'client', 'A non-recoverable error occured' ) );
-				$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+				$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 			}
 
 			/** client/html/catalog/detail/standard/template-body
@@ -202,7 +191,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$prefixes = array( 'd' );
 		$context = $this->getContext();
@@ -382,31 +371,31 @@ class Standard
 		{
 			$site = $context->getLocale()->getSite()->getCode();
 			$params = $this->getClientParams( $view->param() );
-			$context->getSession()->set( 'aimeos/catalog/detail/params/last' . $site, $params );
+			$context->getSession()->set( 'aimeos/catalog/detail/params/last/' . $site, $params );
 
 			parent::process();
 		}
 		catch( \Aimeos\Client\Html\Exception $e )
 		{
 			$error = array( $context->getI18n()->dt( 'client', $e->getMessage() ) );
-			$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+			$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\Controller\Frontend\Exception $e )
 		{
 			$error = array( $context->getI18n()->dt( 'controller/frontend', $e->getMessage() ) );
-			$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+			$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+			$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
 			$context->getLogger()->log( $e->getMessage() . PHP_EOL . $e->getTraceAsString() );
 
 			$error = array( $context->getI18n()->dt( 'client', 'A non-recoverable error occured' ) );
-			$view->detailErrorList = $view->get( 'detailErrorList', array() ) + $error;
+			$view->detailErrorList = $view->get( 'detailErrorList', [] ) + $error;
 		}
 	}
 
@@ -430,24 +419,77 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
 			$context = $this->getContext();
+			$config = $context->getConfig();
 			$prodid = $view->param( 'd_prodid' );
 
+			if( $prodid == '' )
+			{
+				/** client/html/catalog/detail/prodid-default
+				 * The default product ID used if none is given as parameter
+				 *
+				 * To display a product detail view or a part of it for a specific
+				 * product, you can configure its ID using this setting. This is
+				 * most useful in a CMS where the product ID can be configured
+				 * separately for each content node.
+				 *
+				 * @param string Product ID
+				 * @since 2016.01
+				 * @category User
+				 * @category Developer
+				 * @see client/html/catalog/lists/catid-default
+				 */
+				$prodid = $config->get( 'client/html/catalog/detail/prodid-default', '' );
+			}
+
+
 			$domains = array( 'media', 'price', 'text', 'attribute', 'product' );
+
+			/** client/html/catalog/domains
+			 * A list of domain names whose items should be available in the catalog view templates
+			 *
+			 * @see client/html/catalog/detail/domains
+			 */
+			$domains = $config->get( 'client/html/catalog/domains', $domains );
+
+			/** client/html/catalog/detail/domains
+			 * A list of domain names whose items should be available in the product detail view template
+			 *
+			 * The templates rendering product details usually add the images,
+			 * prices, texts, attributes, products, etc. associated to the product
+			 * item. If you want to display additional or less content, you can
+			 * configure your own list of domains (attribute, media, price, product,
+			 * text, etc. are domains) whose items are fetched from the storage.
+			 * Please keep in mind that the more domains you add to the configuration,
+			 * the more time is required for fetching the content!
+			 *
+			 * Since version 2014.05 this configuration option overwrites the
+			 * "client/html/catalog/domains" option that allows to configure the
+			 * domain names of the items fetched for all catalog related data.
+			 *
+			 * @param array List of domain names
+			 * @since 2014.03
+			 * @category Developer
+			 * @see client/html/catalog/domains
+			 * @see client/html/catalog/lists/domains
+			 */
+			$domains = $config->get( 'client/html/catalog/detail/domains', $domains );
+
+
 			$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'catalog' );
+			$prodCntl = \Aimeos\Controller\Frontend\Factory::createController( $context, 'product' );
+			$attrCntl = \Aimeos\Controller\Frontend\Factory::createController( $context, 'attribute' );
 
 
-			$productItem = $this->getProductItem( $prodid, $domains );
+			$productItem = $prodCntl->getItem( $prodid, $domains );
 			$this->addMetaItems( $productItem, $this->expire, $this->tags );
 
-
-			$productManager = $controller->createManager( 'product' );
 			$productIds = array_keys( $productItem->getRefItems( 'product' ) );
-			$products = $this->getDomainItems( $productManager, 'product.id', $productIds, $domains );
+			$products = $prodCntl->getItems( $productIds, $domains );
 
 
 			$attrIds = array_keys( $productItem->getRefItems( 'attribute' ) );
@@ -460,8 +502,7 @@ class Standard
 			}
 
 
-			$attributeManager = $controller->createManager( 'attribute' );
-			$attributeItems = $this->getDomainItems( $attributeManager, 'attribute.id', $attrIds, $domains );
+			$attributeItems = $attrCntl->getItems( $attrIds, $domains );
 			$this->addMetaItems( $attributeItems, $this->expire, $this->tags );
 
 
@@ -470,21 +511,44 @@ class Standard
 			$this->addMetaItems( $mediaItems, $this->expire, $this->tags );
 
 
+			$productIds = array_keys( $productItem->getRefItems( 'product', null, 'default' ) );
+			$productIds[] = $prodid;
+
 			$propertyManager = $controller->createManager( 'product/property' );
 			$propertyItems = $this->getDomainItems( $propertyManager, 'product.property.parentid', $productIds, $domains );
 
 
-			$productCodes = $this->getProductCodes( $products );
-			$productCodes[] = $productItem->getCode();
+			/** client/html/catalog/detail/stock/enable
+			 * Enables or disables displaying product stock levels in product detail view
+			 *
+			 * This configuration option allows shop owners to display product
+			 * stock levels for each product in the detail views or to disable
+			 * fetching product stock information.
+			 *
+			 * The stock information is fetched via AJAX and inserted via Javascript.
+			 * This allows to cache product items by leaving out such highly
+			 * dynamic content like stock levels which changes with each order.
+			 *
+			 * @param boolean Value of "1" to display stock levels, "0" to disable displaying them
+			 * @since 2014.03
+			 * @category User
+			 * @category Developer
+			 * @see client/html/catalog/lists/stock/enable
+			 * @see client/html/catalog/stock/url/target
+			 * @see client/html/catalog/stock/url/controller
+			 * @see client/html/catalog/stock/url/action
+			 * @see client/html/catalog/stock/url/config
+			 */
 
+			if( (bool) $view->config( 'client/html/catalog/detail/stock/enable', true ) === true ) {
+				$view->detailStockUrl = $this->getStockUrl( $view, array_merge( $products, array( $productItem ) ) );
+			}
 
-			$view->detailProductCodes = $productCodes;
+			$view->detailMediaItems = $mediaItems;
 			$view->detailProductItem = $productItem;
 			$view->detailProductItems = $products;
 			$view->detailPropertyItems = $propertyItems;
 			$view->detailAttributeItems = $attributeItems;
-			$view->detailMediaItems = $mediaItems;
-			$view->detailUserId = $context->getUserId();
 			$view->detailParams = $this->getClientParams( $view->param() );
 
 			$this->cache = $view;
@@ -494,78 +558,5 @@ class Standard
 		$tags = array_merge( $tags, $this->tags );
 
 		return $this->cache;
-	}
-
-
-	/**
-	 * Returns the product item for the given ID including the domain items
-	 *
-	 * @param string $prodid Unique product ID
-	 * @param array List of domain items that should be fetched too
-	 * @throws \Aimeos\Client\Html\Exception If no product item was found
-	 * @return \Aimeos\MShop\Product\Item\Iface Product item object
-	 */
-	protected function getProductItem( $prodid, array $domains )
-	{
-		$context = $this->getContext();
-		$config = $context->getConfig();
-
-		if( $prodid == '' )
-		{
-			/** client/html/catalog/detail/prodid-default
-			 * The default product ID used if none is given as parameter
-			 *
-			 * To display a product detail view or a part of it for a specific
-			 * product, you can configure its ID using this setting. This is
-			 * most useful in a CMS where the product ID can be configured
-			 * separately for each content node.
-			 *
-			 * @param string Product ID
-			 * @since 2016.01
-			 * @category User
-			 * @category Developer
-			 * @see client/html/catalog/lists/catid-default
-			 */
-			$prodid = $config->get( 'client/html/catalog/detail/prodid-default', '' );
-		}
-
-		/** client/html/catalog/domains
-		 * A list of domain names whose items should be available in the catalog view templates
-		 *
-		 * @see client/html/catalog/detail/domains
-		 */
-		$domains = $config->get( 'client/html/catalog/domains', $domains );
-
-		/** client/html/catalog/detail/domains
-		 * A list of domain names whose items should be available in the product detail view template
-		 *
-		 * The templates rendering product details usually add the images,
-		 * prices, texts, attributes, products, etc. associated to the product
-		 * item. If you want to display additional or less content, you can
-		 * configure your own list of domains (attribute, media, price, product,
-		 * text, etc. are domains) whose items are fetched from the storage.
-		 * Please keep in mind that the more domains you add to the configuration,
-		 * the more time is required for fetching the content!
-		 *
-		 * Since version 2014.05 this configuration option overwrites the
-		 * "client/html/catalog/domains" option that allows to configure the
-		 * domain names of the items fetched for all catalog related data.
-		 *
-		 * @param array List of domain names
-		 * @since 2014.03
-		 * @category Developer
-		 * @see client/html/catalog/domains
-		 * @see client/html/catalog/lists/domains
-		 */
-		$domains = $config->get( 'client/html/catalog/detail/domains', $domains );
-
-		$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'catalog' );
-		$items = $controller->getProductItems( array( $prodid ), $domains );
-
-		if( ( $item = reset( $items ) ) === false ) {
-			throw new \Aimeos\Client\Html\Exception( sprintf( 'No product with ID "%1$s" found', $prodid ) );
-		}
-
-		return $item;
 	}
 }

@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 $enc = $this->encoder();
@@ -18,11 +18,19 @@ $trans = array(
 );
 
 ?>
-<div class="order-paymentstatus card panel col-lg-6">
-	<div id="order-paymentstatus-head" class="header card-header">
-		<?php echo $enc->html( $this->translate( 'admin', 'Orders by payment status' ) ); ?>
+<div class="order-paymentstatus card col-lg-6">
+	<div id="order-paymentstatus-head" class="card-header header" role="tab"
+		data-toggle="collapse" data-target="#order-paymentstatus-data"
+		aria-expanded="true" aria-controls="order-paymentstatus-data">
+		<div class="card-tools-left">
+			<div class="btn btn-card-header act-show fa"></div>
+		</div>
+		<span class="item-label header-label">
+			<?= $enc->html( $this->translate( 'admin', 'Orders by payment status' ) ); ?>
+		</span>
 	</div>
-	<div id="order-paymentstatus-data" class="content card-block loading" data-translation="<?php echo $enc->attr( json_encode( $trans ) ); ?>">
+	<div id="order-paymentstatus-data" class="card-block collapse show content loading" role="tabpanel"
+		aria-labelledby="order-paymentstatus-head" data-translation="<?= $enc->attr( json_encode( $trans ) ); ?>">
 	</div>
 </div>
-<?php echo $this->get( 'orderpaymentstatusBody' ); ?>
+<?= $this->get( 'orderpaymentstatusBody' ); ?>

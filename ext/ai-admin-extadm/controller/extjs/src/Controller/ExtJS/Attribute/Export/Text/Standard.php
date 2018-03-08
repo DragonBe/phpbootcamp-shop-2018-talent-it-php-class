@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -49,7 +49,7 @@ class Standard
 		$context = $this->getContext();
 
 		$items = (array) $params->items;
-		$lang = ( property_exists( $params, 'lang' ) ) ? (array) $params->lang : array();
+		$lang = ( property_exists( $params, 'lang' ) ) ? (array) $params->lang : [];
 
 		$languages = ( count( $lang ) > 0 ) ? implode( $lang, '-' ) : 'all';
 
@@ -91,7 +91,7 @@ class Standard
 		$context = $this->getContext();
 
 		$items = (array) $params->items;
-		$lang = ( property_exists( $params, 'lang' ) ) ? (array) $params->lang : array();
+		$lang = ( property_exists( $params, 'lang' ) ) ? (array) $params->lang : [];
 
 		$config = $context->getConfig();
 
@@ -321,7 +321,7 @@ class Standard
 	 */
 	protected function addItem( \Aimeos\MW\Container\Content\Iface $contentItem, \Aimeos\MShop\Attribute\Item\Iface $item, $langid )
 	{
-		$listTypes = array();
+		$listTypes = [];
 
 		foreach( $item->getListItems( 'text' ) as $listItem ) {
 			$listTypes[$listItem->getRefId()] = $listItem->getType();

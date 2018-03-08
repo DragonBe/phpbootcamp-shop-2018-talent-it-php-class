@@ -5,9 +5,9 @@ namespace Aimeos\Controller\ExtJS\Supplier\Lists\Type;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 
@@ -50,7 +50,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$result = $this->object->searchItems( $params );
 
 		$this->assertEquals( 1, count( $result['items'] ) );
-		$this->assertEquals( 1, $result['total'] );
+		$this->assertEquals( 2, $result['total'] );
 		$this->assertEquals( 'default', $result['items'][0]->{'supplier.lists.type.code'} );
 	}
 

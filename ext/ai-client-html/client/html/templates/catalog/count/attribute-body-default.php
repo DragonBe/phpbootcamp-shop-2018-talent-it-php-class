@@ -3,13 +3,13 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 ?>
 <?php $this->block()->start( 'catalog/count/attribute' ); ?>
 // <!--
-var attributeCounts = <?php echo json_encode( $this->get( 'attributeCountList', array() ), JSON_FORCE_OBJECT ); ?>;
+var attributeCounts = <?= json_encode( $this->get( 'attributeCountList', [] ), JSON_FORCE_OBJECT ); ?>;
 
 $( ".catalog-filter-attribute .attribute-lists li.attr-item" ).each( function( index, item ) {
 	$(item).append( function() {
@@ -27,4 +27,4 @@ $( ".catalog-filter-attribute .attribute-lists li.attr-item" ).each( function( i
 });
 // -->
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'catalog/count/attribute' ); ?>
+<?= $this->block()->get( 'catalog/count/attribute' ); ?>

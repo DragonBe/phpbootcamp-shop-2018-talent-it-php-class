@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -36,17 +36,17 @@ $vatFormat = $this->translate( 'client', 'Incl. %1$s%% VAT' );
 
 ?>
 <?php $this->block()->start( 'email/watch/text' ); ?>
-<?php echo wordwrap( strip_tags( $this->get( 'emailIntro' ) ) ); ?>
+<?= wordwrap( strip_tags( $this->get( 'emailIntro' ) ) ); ?>
 
 
-<?php echo wordwrap( strip_tags( $this->translate( 'client', 'One or more products you are watching have been updated.' ) ) ); ?>
+<?= wordwrap( strip_tags( $this->translate( 'client', 'One or more products you are watching have been updated.' ) ) ); ?>
 
 
 
-<?php echo strip_tags( $this->translate( 'client', 'Watched products' ) ); ?>:
+<?= strip_tags( $this->translate( 'client', 'Watched products' ) ); ?>:
 <?php foreach( $this->extProducts as $entry ) : $product = $entry['item']; ?>
 
-<?php echo strip_tags( $product->getName() ); ?>
+<?= strip_tags( $product->getName() ); ?>
 
 
 <?php $price = $entry['price']; $priceCurrency = $this->translate( 'client/currency', $price->getCurrencyId() ); ?>
@@ -54,12 +54,12 @@ $vatFormat = $this->translate( 'client', 'Incl. %1$s%% VAT' );
 <?php if( $price->getCosts() > 0 ) { echo ' ' . strip_tags( sprintf( $costFormat, $this->number( $price->getCosts() ), $priceCurrency ) ); } ?>
 <?php if( $price->getTaxrate() > 0 ) { echo ', ' . strip_tags( sprintf( $vatFormat, $this->number( $price->getTaxrate() ) ) ); } ?>
 
-<?php $params = array( 'd_prodid' => $product->getId(), 'd_name' => $product->getName( 'url' ) ); ?>
-<?php echo $this->url( $detailTarget, $detailController, $detailAction, $params, array(), $detailConfig ); ?>
+<?php $params = array_merge( $this->param(), ['currency' => $entry['currency'], 'd_prodid' => $product->getId(), 'd_name' => $product->getName( 'url' )] ); ?>
+<?= $this->url( ( $product->getTarget() ?: $detailTarget ), $detailController, $detailAction, $params, [], $detailConfig ); ?>
 
 <?php endforeach; ?>
 
 
-<?php echo wordwrap( strip_tags( $this->translate( 'client', 'If you have any questions, please reply to this e-mail' ) ) ); ?>
+<?= wordwrap( strip_tags( $this->translate( 'client', 'If you have any questions, please reply to this e-mail' ) ) ); ?>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'email/watch/text' ); ?>
+<?= $this->block()->get( 'email/watch/text' ); ?>

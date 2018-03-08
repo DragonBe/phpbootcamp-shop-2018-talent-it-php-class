@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Jobs
  */
@@ -184,7 +184,7 @@ class Standard
 		 * @see controller/common/product/import/csv/mapping
 		 * @see controller/common/product/import/csv/max-size
 		 */
-		$converters = $config->get( 'controller/common/product/import/csv/converter', array() );
+		$converters = $config->get( 'controller/common/product/import/csv/converter', [] );
 
 		/** controller/jobs/product/import/csv/converter
 		 * List of converter names for the values at the position in the CSV file
@@ -334,7 +334,7 @@ class Standard
 					$content->next();
 				}
 
-				while( ( $data = $this->getData( $content, $maxcnt, $codePos ) ) !== array() )
+				while( ( $data = $this->getData( $content, $maxcnt, $codePos ) ) !== [] )
 				{
 					$data = $this->convertData( $convlist, $data );
 					$products = $this->getProducts( array_keys( $data ), $domains );
@@ -488,7 +488,7 @@ class Standard
 		 * @see controller/jobs/product/import/csv/container/content
 		 * @see controller/jobs/product/import/csv/container/type
 		 */
-		$options = $config->get( 'controller/jobs/product/import/csv/container/options', array() );
+		$options = $config->get( 'controller/jobs/product/import/csv/container/options', [] );
 
 		return \Aimeos\MW\Container\Factory::getContainer( $location, $container, $content, $options );
 	}
@@ -514,8 +514,6 @@ class Standard
 
 		foreach( $data as $code => $list )
 		{
-			$remaining = array();
-
 			$manager->begin();
 
 			try
@@ -526,15 +524,20 @@ class Standard
 					$product = $manager->createItem();
 				}
 
-				$map = $this->getMappedData( $mapping, $list );
+				$map = $this->getMappedChunk( $list, $mapping );
 
-				$typecode = ( isset( $map['product.type'] ) ? $map['product.type'] : 'default' );
-				$map['product.typeid'] = $this->getTypeId( 'product/type', 'product', $typecode );
+				if( isset( $map[0] ) )
+				{
+					$map = $map[0]; // there can only be one chunk for the base product data
 
-				$product->fromArray( $this->addItemDefaults( $map ) );
-				$manager->saveItem( $product );
+					$typecode = ( isset( $map['product.type'] ) ? $map['product.type'] : 'default' );
+					$map['product.typeid'] = $this->getTypeId( 'product/type', 'product', $typecode );
 
-				$remaining = $processor->process( $product, $list );
+					$product->fromArray( $this->addItemDefaults( $map ) );
+					$product = $manager->saveItem( $product );
+
+					$list = $processor->process( $product, $list );
+				}
 
 				$manager->commit();
 			}
@@ -548,8 +551,8 @@ class Standard
 				$errors++;
 			}
 
-			if( $strict && !empty( $remaining ) ) {
-				$context->getLogger()->log( 'Not imported: ' . print_r( $remaining, true ) );
+			if( $strict && !empty( $list ) ) {
+				$context->getLogger()->log( 'Not imported: ' . print_r( $list, true ) );
 			}
 		}
 

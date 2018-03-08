@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $selected = function( $key, $code ) {
@@ -80,136 +80,301 @@ $action = $this->config( 'admin/jqadm/url/save/action', 'save' );
  * @see admin/jqadm/url/save/controller
  * @see admin/jqadm/url/save/action
  */
-$config = $this->config( 'admin/jqadm/url/save/config', array() );
+$config = $this->config( 'admin/jqadm/url/save/config', [] );
 
-$listTarget = $this->config( 'admin/jqadm/url/search/target' );
-$listCntl = $this->config( 'admin/jqadm/url/search/controller', 'Jqadm' );
-$listAction = $this->config( 'admin/jqadm/url/search/action', 'search' );
-$listConfig = $this->config( 'admin/jqadm/url/search/config', array() );
 
-$params = $this->get( 'pageParams', array() );
-$params['id'] = $this->param( 'id', '' );
+/** admin/jqadm/product/item/config/suggest
+ * List of suggested configuration keys in product item panel
+ *
+ * Product items can store arbitrary key value pairs. This setting gives editors
+ * a hint which config keys are available and are used in the templates.
+ *
+ * @param string List of suggested config keys
+ * @since 2017.10
+ * @category Developer
+ * @see admin/jqadm/catalog/item/config/suggest
+ */
+$cfgSuggest = $this->config( 'admin/jqadm/product/item/config/suggest', ['css-class'] );
+
+
+/** admin/jqadm/partial/itemactions
+ * Relative path to the partial template for displaying the available actions for the item
+ *
+ * The template file contains the HTML code and processing instructions
+ * to generate the result shown in the administration interface. The
+ * configuration string is the path to the template file relative
+ * to the templates directory (usually in admin/jqadm/templates).
+ *
+ * You can overwrite the template file configuration in extensions and
+ * provide alternative templates. These alternative templates should be
+ * named like the default one but with the string "default" replaced by
+ * an unique name. You may use the name of your project for this. If
+ * you've implemented an alternative client class as well, "default"
+ * should be replaced by the name of the new class.
+ *
+ * @param string Relative path to the partial creating the HTML code
+ * @since 2017.10
+ * @category Developer
+ */
+
+
+$params = $this->get( 'pageParams', [] );
+
 
 ?>
 <?php $this->block()->start( 'jqadm_content' ); ?>
 
-<form class="item item-product form-horizontal" method="POST" enctype="multipart/form-data" action="<?php echo $enc->attr( $this->url( $target, $cntl, $action, $params, array(), $config ) ); ?>">
-<?php echo $this->csrf()->formfield(); ?>
+<form class="item item-product form-horizontal" method="POST" enctype="multipart/form-data" action="<?= $enc->attr( $this->url( $target, $cntl, $action, $params, [], $config ) ); ?>">
+	<input id="item-id" type="hidden" name="<?= $enc->attr( $this->formparam( array( 'item', 'product.id' ) ) ); ?>" value="<?= $enc->attr( $this->get( 'itemData/product.id' ) ); ?>" />
+	<input id="item-next" type="hidden" name="<?= $enc->attr( $this->formparam( array( 'next' ) ) ); ?>" value="get" />
+	<?= $this->csrf()->formfield(); ?>
 
-	<div id="accordion" role="tablist" aria-multiselectable="true">
+	<nav class="main-navbar">
+		<span class="navbar-brand">
+			<?= $enc->html( $this->translate( 'admin', 'Product' ) ); ?>:
+			<?= $enc->html( $this->get( 'itemData/product.id' ) ); ?> -
+			<?= $enc->html( $this->get( 'itemData/product.label', $this->translate( 'admin', 'New' ) ) ); ?>
+			<span class="navbar-secondary">(<?= $enc->html( $this->site()->match( $this->get( 'itemData/product.siteid' ) ) ); ?>)</span>
+		</span>
+		<div class="item-actions">
+			<?= $this->partial( $this->config( 'admin/jqadm/partial/itemactions', 'common/partials/itemactions-default.php' ), ['params' => $params] ); ?>
+		</div>
+	</nav>
 
-		<div class="product-item card panel">
-			<div id="product-item" class="header card-header" role="tab" data-toggle="collapse" data-parent="#accordion" data-target="#product-item-data" aria-expanded="true" aria-controls="product-item-data">
-				<?php echo $enc->html( $this->translate( 'admin', 'Basic' ) ); ?> <span class="item-label"> - <?php echo $enc->html( $this->get( 'itemData/product.label' ) ); ?></span>
+	<div class="row item-container">
+
+		<div class="col-md-3 item-navbar">
+			<ul class="nav nav-tabs flex-md-column flex-wrap d-flex justify-content-between" role="tablist">
+
+				<li class="nav-item basic">
+					<a class="nav-link active" href="#basic" data-toggle="tab" role="tab" aria-expanded="true" aria-controls="basic">
+						<?= $enc->html( $this->translate( 'admin', 'Basic' ) ); ?>
+					</a>
+				</li>
+
+				<?php foreach( array_values( $this->get( 'itemSubparts', [] ) ) as $idx => $subpart ) : ?>
+					<li class="nav-item <?= $enc->attr( $subpart ); ?>">
+						<a class="nav-link" href="#<?= $enc->attr( $subpart ); ?>" data-toggle="tab" role="tab" tabindex="<?= ++$idx+1; ?>">
+							<?= $enc->html( $this->translate( 'admin', $subpart ) ); ?>
+						</a>
+					</li>
+				<?php endforeach; ?>
+
+			</ul>
+
+			<div class="item-meta text-muted">
+				<small>
+					<?= $enc->html( $this->translate( 'admin', 'Modified' ) ); ?>:
+					<span class="meta-value"><?= $enc->html( $this->get( 'itemData/product.mtime' ) ); ?></span>
+				</small>
+				<small>
+					<?= $enc->html( $this->translate( 'admin', 'Created' ) ); ?>:
+					<span class="meta-value"><?= $enc->html( $this->get( 'itemData/product.ctime' ) ); ?></span>
+				</small>
+				<small>
+					<?= $enc->html( $this->translate( 'admin', 'Editor' ) ); ?>:
+					<span class="meta-value"><?= $enc->html( $this->get( 'itemData/product.editor' ) ); ?></span>
+				</small>
 			</div>
-			<div id="product-item-data" class="item-basic card-block panel-collapse collapse in" role="tabpanel" aria-labelledby="product-item">
-				<div class="col-lg-6">
-					<div class="form-group row">
-						<label class="col-sm-3 form-control-label"><?php echo $enc->html( $this->translate( 'admin', 'ID' ) ); ?></label>
-						<div class="col-sm-9">
-							<input class="item-id" type="hidden" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'product.id' ) ) ); ?>" value="<?php echo $enc->attr( $this->get( 'itemData/product.id' ) ); ?>" />
-							<p class="form-control-static item-id"><?php echo $enc->attr( $this->get( 'itemData/product.id' ) ); ?></p>
-						</div>
-					</div>
+		</div>
+
+		<div class="col-md-9 item-content tab-content">
+
+			<div id="basic" class="row item-basic tab-pane fade show active" role="tabpanel" aria-labelledby="basic">
+
+				<div class="col-xl-6 content-block <?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?>">
 					<div class="form-group row mandatory">
-						<label class="col-sm-3 form-control-label"><?php echo $enc->html( $this->translate( 'admin', 'Status' ) ); ?></label>
-						<div class="col-sm-9">
-							<select class="form-control c-select item-status" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'product.status' ) ) ); ?>">
-								<option value="1" <?php echo $selected( $this->get( 'itemData/product.status', 1 ), 1 ); ?>><?php echo $enc->html( $this->translate( 'admin', 'status:enabled' ) ); ?></option>
-								<option value="0" <?php echo $selected( $this->get( 'itemData/product.status', 1 ), 0 ); ?>><?php echo $enc->html( $this->translate( 'admin', 'status:disabled' ) ); ?></option>
-								<option value="-1" <?php echo $selected( $this->get( 'itemData/product.status', 1 ), -1 ); ?>><?php echo $enc->html( $this->translate( 'admin', 'status:review' ) ); ?></option>
-								<option value="-2" <?php echo $selected( $this->get( 'itemData/product.status', 1 ), -2 ); ?>><?php echo $enc->html( $this->translate( 'admin', 'status:archive' ) ); ?></option>
+						<label class="col-sm-4 form-control-label"><?= $enc->html( $this->translate( 'admin', 'Status' ) ); ?></label>
+						<div class="col-sm-8">
+							<select class="form-control custom-select item-status" required="required" tabindex="1"
+								name="<?= $enc->attr( $this->formparam( array( 'item', 'product.status' ) ) ); ?>"
+								<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> >
+								<option value="">
+									<?= $enc->html( $this->translate( 'admin', 'Please select' ) ); ?>
+								</option>
+								<option value="1" <?= $selected( $this->get( 'itemData/product.status', 1 ), 1 ); ?> >
+									<?= $enc->html( $this->translate( 'admin', 'status:enabled' ) ); ?>
+								</option>
+								<option value="0" <?= $selected( $this->get( 'itemData/product.status', 1 ), 0 ); ?> >
+									<?= $enc->html( $this->translate( 'admin', 'status:disabled' ) ); ?>
+								</option>
+								<option value="-1" <?= $selected( $this->get( 'itemData/product.status', 1 ), -1 ); ?> >
+									<?= $enc->html( $this->translate( 'admin', 'status:review' ) ); ?>
+								</option>
+								<option value="-2" <?= $selected( $this->get( 'itemData/product.status', 1 ), -2 ); ?> >
+									<?= $enc->html( $this->translate( 'admin', 'status:archive' ) ); ?>
+								</option>
 							</select>
 						</div>
 					</div>
 					<div class="form-group row mandatory">
-						<label class="col-sm-3 form-control-label"><?php echo $enc->html( $this->translate( 'admin', 'Type' ) ); ?></label>
-						<div class="col-sm-9">
-							<select class="form-control c-select item-typeid" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'product.typeid' ) ) ); ?>">
-<?php foreach( $this->get( 'itemTypes', array() ) as $id => $typeItem ) : ?>
-								<option value="<?php echo $enc->attr( $id ); ?>" data-code="<?php echo $enc->attr( $typeItem->getCode() ); ?>" <?php echo $selected( $this->get( 'itemData/product.typeid' ), $id ); ?>><?php echo $enc->html( $typeItem->getLabel() ); ?></option>
-<?php endforeach; ?>
+						<label class="col-sm-4 form-control-label"><?= $enc->html( $this->translate( 'admin', 'Type' ) ); ?></label>
+						<div class="col-sm-8">
+							<select class="form-control custom-select item-typeid" required="required" tabindex="1"
+								name="<?= $enc->attr( $this->formparam( array( 'item', 'product.typeid' ) ) ); ?>"
+								<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> >
+								<option value="">
+									<?= $enc->html( $this->translate( 'admin', 'Please select' ) ); ?>
+								</option>
+
+								<?php foreach( $this->get( 'itemTypes', [] ) as $id => $typeItem ) : ?>
+									<option value="<?= $enc->attr( $id ); ?>" data-code="<?= $enc->attr( $typeItem->getCode() ); ?>"
+										<?= $selected( $this->get( 'itemData/product.typeid' ), $id ); ?> >
+										<?= $enc->html( $typeItem->getLabel() ); ?>
+									</option>
+								<?php endforeach; ?>
 							</select>
 						</div>
 					</div>
 					<div class="form-group row mandatory">
-						<label class="col-sm-3 form-control-label"><?php echo $enc->html( $this->translate( 'admin', 'Code' ) ); ?></label>
-						<div class="col-sm-9">
-							<input class="form-control item-code" type="text" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'product.code' ) ) ); ?>"
-								placeholder="<?php echo $enc->attr( $this->translate( 'admin', 'EAN, SKU or article number (required)' ) ); ?>"
-								value="<?php echo $enc->attr( $this->get( 'itemData/product.code' ) ); ?>" />
+						<label class="col-sm-4 form-control-label help"><?= $enc->html( $this->translate( 'admin', 'SKU' ) ); ?></label>
+						<div class="col-sm-8">
+							<input class="form-control item-code" type="text" required="required" tabindex="1"
+								name="<?= $enc->attr( $this->formparam( array( 'item', 'product.code' ) ) ); ?>"
+								placeholder="<?= $enc->attr( $this->translate( 'admin', 'EAN, SKU or article number (required)' ) ); ?>"
+								value="<?= $enc->attr( $this->get( 'itemData/product.code' ) ); ?>"
+								<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> />
+						</div>
+						<div class="col-sm-12 form-text text-muted help-text">
+							<?= $enc->html( $this->translate( 'admin', 'Unique article code related to stock levels, e.g. from the ERP system, an EAN/GTIN number or self invented' ) ); ?>
 						</div>
 					</div>
 					<div class="form-group row mandatory">
-						<label class="col-sm-3 form-control-label"><?php echo $enc->html( $this->translate( 'admin', 'Label' ) ); ?></label>
-						<div class="col-sm-9">
-							<input class="form-control item-label" type="text" name="<?php echo $this->formparam( array( 'item', 'product.label' ) ); ?>"
-								placeholder="<?php echo $enc->attr( $this->translate( 'admin', 'Internal name (required)' ) ); ?>"
-								value="<?php echo $enc->attr( $this->get( 'itemData/product.label' ) ); ?>" />
+						<label class="col-sm-4 form-control-label help"><?= $enc->html( $this->translate( 'admin', 'Label' ) ); ?></label>
+						<div class="col-sm-8">
+							<input class="form-control item-label" type="text" required="required" tabindex="1"
+								name="<?= $this->formparam( array( 'item', 'product.label' ) ); ?>"
+								placeholder="<?= $enc->attr( $this->translate( 'admin', 'Internal name (required)' ) ); ?>"
+								value="<?= $enc->attr( $this->get( 'itemData/product.label' ) ); ?>"
+								<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> />
+						</div>
+						<div class="col-sm-12 form-text text-muted help-text">
+							<?= $enc->html( $this->translate( 'admin', 'Internal article name, will be used on the web site if no product name for the language is available' ) ); ?>
 						</div>
 					</div>
 					<div class="form-group row optional">
-						<label class="col-sm-3 form-control-label"><?php echo $enc->html( $this->translate( 'admin', 'Start date' ) ); ?></label>
-						<div class="col-sm-9">
-							<input class="form-control item-datestart date" type="text" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'product.datestart' ) ) ); ?>"
-								placeholder="<?php echo $enc->attr( $this->translate( 'admin', 'YYYY-MM-DD hh:mm:ss (optional)' ) ); ?>"
-								value="<?php echo $enc->attr( $this->get( 'itemData/product.datestart' ) ); ?>"
-								data-format="<?php echo $this->translate( 'admin', 'yy-mm-dd' ); ?>" />
+						<label class="col-sm-4 form-control-label help"><?= $enc->html( $this->translate( 'admin', 'Start date' ) ); ?></label>
+						<div class="col-sm-8">
+							<input class="form-control item-datestart" type="datetime-local" tabindex="1"
+								name="<?= $enc->attr( $this->formparam( array( 'item', 'product.datestart' ) ) ); ?>"
+								placeholder="<?= $enc->attr( $this->translate( 'admin', 'YYYY-MM-DD hh:mm:ss (optional)' ) ); ?>"
+								value="<?= $enc->attr( str_replace( ' ', 'T', $this->get( 'itemData/product.datestart' ) ) ); ?>"
+								<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> />
+						</div>
+						<div class="col-sm-12 form-text text-muted help-text">
+							<?= $enc->html( $this->translate( 'admin', 'The article is only shown on the web site after that date and time, useful or seasonal articles' ) ); ?>
 						</div>
 					</div>
 					<div class="form-group row optional">
-						<label class="col-sm-3 control-label"><?php echo $enc->html( $this->translate( 'admin', 'End date' ) ); ?></label>
-						<div class="col-sm-9">
-							<input class="form-control item-dateend date" type="text" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'product.dateend' ) ) ); ?>"
-								placeholder="<?php echo $enc->attr( $this->translate( 'admin', 'YYYY-MM-DD hh:mm:ss (optional)' ) ); ?>"
-								value="<?php echo $enc->attr( $this->get( 'itemData/product.dateend' ) ); ?>"
-								data-format="<?php echo $this->translate( 'admin', 'yy-mm-dd' ); ?>" />
+						<label class="col-sm-4 form-control-label help"><?= $enc->html( $this->translate( 'admin', 'End date' ) ); ?></label>
+						<div class="col-sm-8">
+							<input class="form-control item-dateend" type="datetime-local" tabindex="1"
+								name="<?= $enc->attr( $this->formparam( array( 'item', 'product.dateend' ) ) ); ?>"
+								placeholder="<?= $enc->attr( $this->translate( 'admin', 'YYYY-MM-DD hh:mm:ss (optional)' ) ); ?>"
+								value="<?= $enc->attr( str_replace( ' ', 'T', $this->get( 'itemData/product.dateend' ) ) ); ?>"
+								<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> />
+						</div>
+						<div class="col-sm-12 form-text text-muted help-text">
+							<?= $enc->html( $this->translate( 'admin', 'The article is only shown on the web site until that date and time, useful or seasonal articles' ) ); ?>
 						</div>
 					</div>
-				</div>
-				<div class="col-lg-6">
-					<table class="item-config table table-striped">
+					<div class="form-group row optional warning">
+						<label class="col-sm-4 form-control-label help"><?= $enc->html( $this->translate( 'admin', 'URL target' ) ); ?></label>
+						<div class="col-sm-8">
+							<input class="form-control item-target" type="text" tabindex="1"
+								name="<?= $enc->attr( $this->formparam( array( 'item', 'product.target' ) ) ); ?>"
+								placeholder="<?= $enc->attr( $this->translate( 'admin', 'Route or page ID (optional)' ) ); ?>"
+								value="<?= $enc->attr( $this->get( 'itemData/product.target' ) ); ?>"
+								<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> />
+						</div>
+						<div class="col-sm-12 form-text text-muted help-text">
+							<?= $enc->html( $this->translate( 'admin', 'Route name or page ID of the product detail page if this product should shown on a different page' ) ); ?>
+						</div>
+					</div>
+				</div><!--
+
+				--><div class="col-xl-6 content-block <?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?>">
+							<table class="item-config table table-striped" data-keys="<?= $enc->attr( json_encode( $cfgSuggest ) ); ?>">
 						<thead>
 							<tr>
-								<th><?php echo $enc->html( $this->translate( 'admin', 'Option' ) ); ?></th>
-								<th><?php echo $enc->html( $this->translate( 'admin', 'Value' ) ); ?></th>
-								<th class="actions"><div class="btn btn-primary fa fa-plus"></div></th>
+								<th>
+									<span class="help"><?= $enc->html( $this->translate( 'admin', 'Option' ) ); ?></span>
+									<div class="form-text text-muted help-text">
+										<?= $enc->html( $this->translate( 'admin', 'Article specific configuration options, will be available as key/value pairs in the templates' ) ); ?>
+									</div>
+								</th>
+								<th>
+									<?= $enc->html( $this->translate( 'admin', 'Value' ) ); ?>
+								</th>
+								<th class="actions">
+									<?php if( !$this->site()->readonly( $this->get( 'itemData/product.siteid' ) ) ) : ?>
+										<div class="btn act-add fa" tabindex="1"
+											title="<?= $enc->attr( $this->translate( 'admin', 'Insert new entry (Ctrl+I)') ); ?>">
+										</div>
+									<?php endif; ?>
+								</th>
 							</tr>
 						</thead>
 						<tbody>
-<?php	foreach( (array) $this->get( 'itemData/config/key', array() ) as $idx => $key ) : ?>
-							<tr class="config-item">
-								<td><input type="text" class="config-key form-control" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'config', 'key', '' ) ) ); ?>" value="<?php echo $enc->attr( $this->get( 'itemData/config/key/' . $idx, $key ) ); ?>" /></td>
-								<td><input type="text" class="config-value form-control" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'config', 'val', '' ) ) ); ?>" value="<?php echo $enc->attr( $this->get( 'itemData/config/val/' . $idx ) ); ?>" /></td>
-								<td class="actions"><div class="btn btn-danger fa fa-trash"></div></td>
-							</tr>
-<?php	endforeach; ?>
+
+							<?php foreach( (array) $this->get( 'itemData/config/key', [] ) as $idx => $key ) : ?>
+								<tr class="config-item">
+									<td>
+										<input type="text" class="config-key form-control" tabindex="1"
+											name="<?= $enc->attr( $this->formparam( array( 'item', 'config', 'key', '' ) ) ); ?>"
+											value="<?= $enc->attr( $this->get( 'itemData/config/key/' . $idx, $key ) ); ?>"
+											<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> />
+									</td>
+									<td>
+										<input type="text" class="config-value form-control" tabindex="1"
+											name="<?= $enc->attr( $this->formparam( array( 'item', 'config', 'val', '' ) ) ); ?>"
+											value="<?= $enc->attr( $this->get( 'itemData/config/val/' . $idx ) ); ?>"
+											<?= $this->site()->readonly( $this->get( 'itemData/product.siteid' ) ); ?> />
+									</td>
+									<td class="actions">
+										<?php if( !$this->site()->readonly( $this->get( 'itemData/product.siteid' ) ) ) : ?>
+											<div class="btn act-delete fa" tabindex="1"
+												title="<?= $enc->attr( $this->translate( 'admin', 'Delete this entry') ); ?>">
+											</div>
+										<?php endif; ?>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+
 							<tr class="prototype">
-								<td><input type="text" class="config-key form-control" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'config', 'key', '' ) ) ); ?>" value="" disabled="disabled" /></td>
-								<td><input type="text" class="config-value form-control" name="<?php echo $enc->attr( $this->formparam( array( 'item', 'config', 'val', '' ) ) ); ?>" value="" disabled="disabled" /></td>
-								<td class="actions"><div class="btn btn-danger fa fa-trash"></div></td>
+								<td>
+									<input type="text" class="config-key form-control" tabindex="1" disabled="disabled"
+										name="<?= $enc->attr( $this->formparam( array( 'item', 'config', 'key', '' ) ) ); ?>" />
+								</td>
+								<td>
+									<input type="text" class="config-value form-control" tabindex="1" disabled="disabled"
+										name="<?= $enc->attr( $this->formparam( array( 'item', 'config', 'val', '' ) ) ); ?>" />
+								</td>
+								<td class="actions">
+									<?php if( !$this->site()->readonly( $this->get( 'itemData/product.siteid' ) ) ) : ?>
+										<div class="btn act-delete fa" tabindex="1"
+											title="<?= $enc->attr( $this->translate( 'admin', 'Delete this entry') ); ?>">
+										</div>
+									<?php endif; ?>
+								</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
+
 			</div>
+
+			<?= $this->get( 'itemBody' ); ?>
+
 		</div>
 
-<?php echo $this->get( 'itemBody' ); ?>
-
-	</div>
-
-	<div class="actions-group">
-		<button class="btn btn-primary">
-			<?php echo $enc->html( $this->translate( 'admin', 'Save' ) ); ?>
-		</button>
-		<a class="btn btn-warning" href="<?php echo $enc->attr( $this->url( $listTarget, $listCntl, $listAction, $params, array(), $listConfig ) ); ?>">
-			<?php echo $enc->html( $this->translate( 'admin', 'Cancel' ) ); ?>
-		</a>
+		<div class="item-actions">
+			<?= $this->partial( $this->config( 'admin/jqadm/partial/itemactions', 'common/partials/itemactions-default.php' ), ['params' => $params] ); ?>
+		</div>
 	</div>
 </form>
 
 <?php $this->block()->stop(); ?>
 
 
-<?php echo $this->render( $this->config( 'admin/jqadm/template/page', 'common/page-default.php' ) ); ?>
+<?= $this->render( $this->config( 'admin/jqadm/template/page', 'common/page-default.php' ) ); ?>

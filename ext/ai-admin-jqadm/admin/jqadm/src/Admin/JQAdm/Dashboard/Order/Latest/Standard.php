@@ -2,13 +2,15 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package Admin
  * @subpackage JQAdm
  */
 
 
 namespace Aimeos\Admin\JQAdm\Dashboard\Order\Latest;
+
+sprintf( 'latest' ); // for translation
 
 
 /**
@@ -55,62 +57,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'admin/jqadm/dashboard/order/latest/standard/subparts';
-	private $subPartNames = array();
-
-
-	/**
-	 * Copies a resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function copy()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be copied' );
-	}
-
-
-	/**
-	 * Creates a new resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function create()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'New resources can not be created' );
-	}
-
-
-	/**
-	 * Deletes a resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function delete()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be deleted' );
-	}
-
-
-	/**
-	 * Returns a single resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function get()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be retrieved' );
-	}
-
-
-	/**
-	 * Saves the data
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function save()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be modified' );
-	}
+	private $subPartNames = [];
 
 
 	/**
@@ -134,12 +81,12 @@ class Standard
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'order-latest' => $this->getContext()->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$error = array( 'order-latest' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$error = array( 'order-latest' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 
 		/** admin/jqadm/dashboard/order/latest/template-item
@@ -261,19 +208,28 @@ class Standard
 	 */
 	protected function addOrders( \Aimeos\MW\View\Iface $view )
 	{
-		$basketItems = array();
 		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order' );
-		$baseManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order/base' );
 
 		$search = $manager->createSearch();
-		$search->setSortations( array( $search->sort( '-', 'order.ctime' ) ) );
+		$search->setSortations( [$search->sort( '-', 'order.ctime' ), $search->sort( '-', 'order.id' )] );
 		$search->setSlice( 0, 10 );
 
 		$items = $manager->searchItems( $search );
 
+		$baseIds = [];
 		foreach( $items as $item ) {
-			$basketItems[$item->getBaseId()] = $baseManager->load( $item->getBaseId() );
+			$baseIds[] = $item->getBaseId();
 		}
+
+
+		$baseManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order/base' );
+
+		$baseSearch = $manager->createSearch();
+		$baseSearch->setConditions( $baseSearch->compare( '==', 'order.base.id', $baseIds ) );
+		$baseSearch->setSlice( 0, 0x7fffffff );
+
+		$basketItems = $baseManager->searchItems( $baseSearch, ['order/base/address', 'order/base/service'] );
+
 
 		$view->orderlatestBaskets = $basketItems;
 		$view->orderlatestItems = $items;

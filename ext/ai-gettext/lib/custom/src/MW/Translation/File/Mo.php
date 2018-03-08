@@ -3,7 +3,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package MW
  * @subpackage Translation
  */
@@ -28,7 +28,7 @@ class Mo
 	private $str;
 	private $strlen;
 	private $pos = 0;
-	private $messages = array();
+	private $messages = [];
 
 
 	/**
@@ -119,7 +119,7 @@ class Mo
 	 */
 	protected function extractTable( $originalTable, $translationTable, $total )
 	{
-		$messages = array();
+		$messages = [];
 
 		for( $i = 0; $i < $total; ++$i )
 		{
@@ -149,7 +149,7 @@ class Mo
 				continue;
 			}
 
-			$messages[$original] = array();
+			$messages[$original] = [];
 
 			foreach( explode( "\x00", $translated ) as $idx => $value ) {
 				$messages[$original][$idx] = $value;

@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -56,11 +56,11 @@ $textStock = array(
 );
 
 
-$result = array();
-$stockItemsByProducts = $this->get( 'stockItemsByProducts', array() );
+$result = [];
+$stockItemsByProducts = $this->get( 'stockItemsByProducts', [] );
 
 
-foreach( $this->get( 'stockProductCodes', array() ) as $prodCode )
+foreach( $this->get( 'stockProductCodes', [] ) as $prodCode )
 {
 	if( !isset( $stockItemsByProducts[$prodCode] ) ) {
 		continue;
@@ -119,7 +119,7 @@ foreach( $this->get( 'stockProductCodes', array() ) as $prodCode )
 
 ?>
 // <!--
-var aimeosStockHtml = <?php echo json_encode( $result, JSON_FORCE_OBJECT ); ?>;
+var aimeosStockHtml = <?= json_encode( $result, JSON_FORCE_OBJECT ); ?>;
 
 $(".aimeos .product .stock-list .articleitem").each(function() {
 

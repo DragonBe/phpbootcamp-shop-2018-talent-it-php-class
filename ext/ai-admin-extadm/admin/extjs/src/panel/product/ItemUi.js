@@ -1,7 +1,7 @@
 /*!
  * LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * Copyright (c) Metaways Infosystems GmbH, 2011
- * Copyright (c) Aimeos (aimeos.org), 2015
+ * Copyright (c) Aimeos (aimeos.org), 2015-2017
  */
 
 Ext.ns('MShop.panel.product');
@@ -104,6 +104,13 @@ MShop.panel.product.ItemUi = Ext.extend(MShop.panel.AbstractListItemUi, {
                             name : 'product.dateend',
                             format : 'Y-m-d H:i:s',
                             emptyText : MShop.I18n.dt('admin', 'YYYY-MM-DD hh:mm:ss (optional)')
+                        }, {
+                            xtype : 'textfield',
+                            fieldLabel : MShop.I18n.dt('admin', 'URL target'),
+                            name : 'product.target',
+                            maxLength : 255,
+                            regex : /^[^ \v\t\r\n\f]+$/,
+                            emptyText : MShop.I18n.dt('admin', 'Route or page ID (optional)')
                         }, {
                             xtype : 'displayfield',
                             fieldLabel : MShop.I18n.dt('admin', 'Created'),

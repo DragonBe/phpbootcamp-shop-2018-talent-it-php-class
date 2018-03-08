@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -100,17 +100,15 @@ class Standard
 
 		try
 		{
-			$types = array();
+			$types = [];
 
-			foreach( $this->getMappedChunk( $data ) as $list )
+			foreach( $this->getMappedChunk( $data, $this->getMapping() ) as $list )
 			{
-				if( !isset( $list['product.code'] ) || $list['product.code'] === '' || isset( $list['product.lists.type'] )
-					&& $this->listTypes !== null && !in_array( $list['product.lists.type'], (array) $this->listTypes )
-				) {
+				if( $this->checkEntry( $list ) === false ) {
 					continue;
 				}
 
-				$listMap = array();
+				$listMap = [];
 				$type = ( isset( $list['product.lists.type'] ) ? $list['product.lists.type'] : 'default' );
 				$types[] = $type;
 
@@ -130,7 +128,7 @@ class Standard
 
 			$this->deleteListItems( $product->getId(), $types );
 
-			$remaining = $this->getObject()->process( $product, $data );
+			$data = $this->getObject()->process( $product, $data );
 
 			$manager->commit();
 		}
@@ -140,7 +138,25 @@ class Standard
 			throw $e;
 		}
 
-		return $remaining;
+		return $data;
+	}
+
+
+	/**
+	 * Checks if an entry can be used for updating a media item
+	 *
+	 * @param array $list Associative list of key/value pairs from the mapping
+	 * @return boolean True if valid, false if not
+	 */
+	protected function checkEntry( array $list )
+	{
+		if( !isset( $list['product.code'] ) || $list['product.code'] === '' || isset( $list['product.lists.type'] )
+			&& $this->listTypes !== null && !in_array( $list['product.lists.type'], (array) $this->listTypes )
+		) {
+			return false;
+		}
+
+		return true;
 	}
 
 

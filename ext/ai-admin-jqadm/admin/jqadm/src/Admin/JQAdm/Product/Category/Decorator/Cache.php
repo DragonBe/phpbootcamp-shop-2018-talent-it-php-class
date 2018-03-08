@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package Admin
  * @subpackage JQAdm
  */
@@ -29,7 +29,7 @@ class Cache extends \Aimeos\Admin\JQAdm\Common\Decorator\Base
 		$result = $this->getClient()->save();
 		$ids = array( 'catalog' );
 
-		foreach( $this->getView()->param( 'category/catalog.id', array() ) as $id ) {
+		foreach( $this->getView()->param( 'category/catalog.id', [] ) as $id ) {
 			$ids[] = 'catalog-' . $id;
 		}
 

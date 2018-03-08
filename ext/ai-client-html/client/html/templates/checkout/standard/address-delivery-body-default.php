@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -31,35 +31,35 @@ $disablenew = (bool) $this->config( 'client/html/common/address/delivery/disable
 $target = $this->config( 'client/html/checkout/standard/url/target' );
 $controller = $this->config( 'client/html/checkout/standard/url/controller', 'checkout' );
 $action = $this->config( 'client/html/checkout/standard/url/action', 'index' );
-$config = $this->config( 'client/html/checkout/standard/url/config', array() );
+$config = $this->config( 'client/html/checkout/standard/url/config', [] );
 
 try {
 	$addrArray = $this->standardBasket->getAddress( \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_DELIVERY )->toArray();
 } catch( Exception $e ) {
-	$addrArray = array();
+	$addrArray = [];
 }
 
 
-$deliveryDefault = ( $addrArray === array() ? -1 : 'null' );
+$deliveryDefault = ( $addrArray === [] ? -1 : 'null' );
 $deliveryOption = $this->param( 'ca_deliveryoption', ( isset( $addrArray['order.base.address.addressid'] ) && $addrArray['order.base.address.addressid'] != '' ? $addrArray['order.base.address.addressid'] : $deliveryDefault ) );
 
-$deliverySalutations = $this->get( 'deliverySalutations', array() );
-$deliveryCountries = $this->get( 'addressCountries', array() );
-$deliveryStates = $this->get( 'addressStates', array() );
-$deliveryLanguages = $this->get( 'addressLanguages', array() );
+$deliverySalutations = $this->get( 'deliverySalutations', [] );
+$deliveryCountries = $this->get( 'addressCountries', [] );
+$deliveryStates = $this->get( 'addressStates', [] );
+$deliveryLanguages = $this->get( 'addressLanguages', [] );
 
 
-$deliveryCssAll = array();
+$deliveryCssAll = [];
 
-foreach( $this->get( 'deliveryMandatory', array() ) as $name ) {
+foreach( $this->get( 'deliveryMandatory', [] ) as $name ) {
 	$deliveryCssAll[$name][] = 'mandatory';
 }
 
-foreach( $this->get( 'deliveryOptional', array() ) as $name ) {
+foreach( $this->get( 'deliveryOptional', [] ) as $name ) {
 	$deliveryCssAll[$name][] = 'optional';
 }
 
-foreach( $this->get( 'deliveryHidden', array() ) as $name ) {
+foreach( $this->get( 'deliveryHidden', [] ) as $name ) {
 	$deliveryCssAll[$name][] = 'hidden';
 }
 
@@ -68,24 +68,24 @@ foreach( $this->get( 'deliveryHidden', array() ) as $name ) {
 <?php $this->block()->start( 'checkout/standard/address/delivery' ); ?>
 <div class="checkout-standard-address-delivery">
 
-	<h2><?php echo $enc->html( $this->translate( 'client', 'Delivery address' ), $enc::TRUST ); ?></h2>
+	<h2><?= $enc->html( $this->translate( 'client', 'Delivery address' ), $enc::TRUST ); ?></h2>
 
 	<div class="item-address item-like">
 		<div class="header">
-			<input type="radio" name="<?php echo $enc->attr( $this->formparam( array( 'ca_deliveryoption' ) ) ); ?>" value="-1" <?php echo ( $deliveryOption == -1 ? 'checked="checked"' : '' ); ?> />
-			<div class="values"><span class="value value-like"><?php echo $enc->html( $this->translate( 'client', 'like billing address' ), $enc::TRUST ); ?></span></div>
+			<input id="ca_deliveryoption-like" type="radio" name="<?= $enc->attr( $this->formparam( array( 'ca_deliveryoption' ) ) ); ?>" value="-1" <?= ( $deliveryOption == -1 ? 'checked="checked"' : '' ); ?> />
+			<label for="ca_deliveryoption-like" class="values value-like"><?= $enc->html( $this->translate( 'client', 'like billing address' ), $enc::TRUST ); ?></label>
 		</div>
 	</div>
 
 
-	<?php foreach( $this->get( 'addressDeliveryItems', array() ) as $id => $addr ) : ?>
+	<?php foreach( $this->get( 'addressDeliveryItems', [] ) as $id => $addr ) : ?>
 
 		<div class="item-address">
 
 			<div class="header">
-				<a class="modify minibutton" href="<?php echo $enc->attr( $this->url( $target, $controller, $action, array( 'step' => 'address', 'ca_delivery_delete' => $id ), array(), $config ) ); ?>">X</a>
-				<input type="radio" name="<?php echo $enc->attr( $this->formparam( array( 'ca_deliveryoption' ) ) ); ?>" value="<?php echo $enc->attr( $addr->getAddressId() ); ?>" <?php echo ( $deliveryOption == $id ? 'checked="checked"' : '' ); ?> />
-				<div class="values">
+				<a class="modify minibutton" href="<?= $enc->attr( $this->url( $target, $controller, $action, array( 'step' => 'address', 'ca_delivery_delete' => $id ), [], $config ) ); ?>">X</a>
+				<input id="ca_deliveryoption-<?= $id; ?>" type="radio" name="<?= $enc->attr( $this->formparam( array( 'ca_deliveryoption' ) ) ); ?>" value="<?= $enc->attr( $addr->getAddressId() ); ?>" <?= ( $deliveryOption == $id ? 'checked="checked"' : '' ); ?> />
+				<label for="ca_deliveryoption-<?= $id; ?>" class="values">
 <?php
 	echo preg_replace( "/\n+/m", "<br/>", trim( $enc->html( sprintf(
 		/// Address format with company (%1$s), salutation (%2$s), title (%3$s), first name (%4$s), last name (%5$s),
@@ -127,14 +127,14 @@ foreach( $this->get( 'deliveryHidden', array() ) as $name ) {
 		$addr->getVatID()
 	) ) ) );
 ?>
-				</div>
+				</label>
 			</div>
 
 <?php
 	$deliveryCss = $deliveryCssAll;
 	if( $deliveryOption == $id )
 	{
-		foreach( $this->get( 'deliveryError', array() ) as $name => $msg ) {
+		foreach( $this->get( 'deliveryError', [] ) as $name => $msg ) {
 			$deliveryCss[$name][] = 'error';
 		}
 	}
@@ -146,7 +146,7 @@ foreach( $this->get( 'deliveryHidden', array() ) as $name ) {
 	}
 ?>
 			<ul class="form-list">
-				<?php echo $this->partial(
+				<?= $this->partial(
 					$this->config( 'client/html/checkout/standard/partials/address', 'checkout/standard/address-partial-default.php' ),
 					array(
 						'address' => $addrValues,
@@ -167,30 +167,30 @@ foreach( $this->get( 'deliveryHidden', array() ) as $name ) {
 
 	<?php if( $disablenew === false ) : ?>
 
-		<div class="item-address item-new" data-option="<?php echo $enc->attr( $deliveryOption ); ?>">
+		<div class="item-address item-new" data-option="<?= $enc->attr( $deliveryOption ); ?>">
 
 			<div class="header">
-				<input type="radio" name="<?php echo $enc->attr( $this->formparam( array( 'ca_deliveryoption' ) ) ); ?>" value="null" <?php echo ( $deliveryOption == 'null' ? 'checked="checked"' : '' ); ?> />
-				<div class="values"><span class="value value-new"><?php echo $enc->html( $this->translate( 'client', 'new address' ), $enc::TRUST ); ?></span></div>
+				<input id="ca_deliveryoption-null" type="radio" name="<?= $enc->attr( $this->formparam( array( 'ca_deliveryoption' ) ) ); ?>" value="null" <?= ( $deliveryOption == 'null' ? 'checked="checked"' : '' ); ?> />
+				<label for="ca_deliveryoption-null" class="values value-new"><?= $enc->html( $this->translate( 'client', 'new address' ), $enc::TRUST ); ?></label>
 			</div>
 
 <?php
 	$deliveryCss = $deliveryCssAll;
 	if( $deliveryOption == 'null' )
 	{
-		foreach( $this->get( 'deliveryError', array() ) as $name => $msg ) {
+		foreach( $this->get( 'deliveryError', [] ) as $name => $msg ) {
 			$deliveryCss[$name][] = 'error';
 		}
 	}
 
-	$addrValues = array_merge( $addrArray, $this->param( 'ca_delivery', array() ) );
+	$addrValues = array_merge( $addrArray, $this->param( 'ca_delivery', [] ) );
 
 	if( !isset( $addrValues['order.base.address.languageid'] ) || $addrValues['order.base.address.languageid'] == '' ) {
 		$addrValues['order.base.address.languageid'] = $this->get( 'deliveryLanguage', 'en' );
 	}
 ?>
 			<ul class="form-list">
-				<?php echo $this->partial(
+				<?= $this->partial(
 					$this->config( 'client/html/checkout/standard/partials/address', 'checkout/standard/address-partial-default.php' ),
 					array(
 						'address' => $addrValues,
@@ -210,4 +210,4 @@ foreach( $this->get( 'deliveryHidden', array() ) as $name ) {
 
 </div>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'checkout/standard/address/delivery' ); ?>
+<?= $this->block()->get( 'checkout/standard/address/delivery' ); ?>

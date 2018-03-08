@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -22,7 +22,7 @@ $string = sprintf( $msg, $order->getId(), date_create( $order->getTimeCreated() 
 ?>
 <?php $this->block()->start( 'email/delivery/html/intro' ); ?>
 <p class="email-common-intro content-block">
-	<?php echo $enc->html( nl2br( $string ), $enc::TRUST ); ?>
+	<?= $enc->html( nl2br( $string ), $enc::TRUST ); ?>
 </p>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'email/delivery/html/intro' ); ?>
+<?= $this->block()->get( 'email/delivery/html/intro' ); ?>

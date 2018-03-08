@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -90,7 +90,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$context = $this->getContext();
 		$view = $this->getView();
@@ -108,24 +108,24 @@ class Standard
 		catch( \Aimeos\Client\Html\Exception $e )
 		{
 			$error = array( $this->getContext()->getI18n()->dt( 'client', $e->getMessage() ) );
-			$view->selectErrorList = $view->get( 'selectErrorList', array() ) + $error;
+			$view->selectErrorList = $view->get( 'selectErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\Controller\Frontend\Exception $e )
 		{
 			$error = array( $this->getContext()->getI18n()->dt( 'controller/frontend', $e->getMessage() ) );
-			$view->selectErrorList = $view->get( 'selectErrorList', array() ) + $error;
+			$view->selectErrorList = $view->get( 'selectErrorList', [] ) + $error;
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( $this->getContext()->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->selectErrorList = $view->get( 'selectErrorList', array() ) + $error;
+			$view->selectErrorList = $view->get( 'selectErrorList', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
 			$context->getLogger()->log( $e->getMessage() . PHP_EOL . $e->getTraceAsString() );
 
 			$error = array( $context->getI18n()->dt( 'client', 'A non-recoverable error occured' ) );
-			$view->selectErrorList = $view->get( 'selectErrorList', array() ) + $error;
+			$view->selectErrorList = $view->get( 'selectErrorList', [] ) + $error;
 		}
 
 		/** client/html/locale/select/standard/template-body
@@ -163,7 +163,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		try
 		{
@@ -313,11 +313,11 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
-			$map = array();
+			$map = [];
 			$context = $this->getContext();
 			$config = $context->getConfig();
 			$locale = $context->getLocale();
@@ -334,7 +334,7 @@ class Standard
 			 * @since 2015.06
 			 * @see client/html/locale/select/currency/param-name
 			 */
-			$langname = $config->get( 'client/html/locale/select/language/param-name', 'loc_languageid' );
+			$langname = $config->get( 'client/html/locale/select/language/param-name', 'locale' );
 
 			/** client/html/locale/select/currency/param-name
 			 * Name of the parameter that contains the currency ID value
@@ -348,7 +348,7 @@ class Standard
 			 * @since 2015.06
 			 * @see client/html/locale/select/language/param-name
 			 */
-			$curname = $config->get( 'client/html/locale/select/currency/param-name', 'loc_currencyid' );
+			$curname = $config->get( 'client/html/locale/select/currency/param-name', 'currency' );
 
 
 			$manager = \Aimeos\MShop\Factory::createManager( $context, 'locale' );

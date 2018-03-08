@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JsonAdm\Common\Decorator;
 
 
-class BaseTest extends \PHPUnit_Framework_TestCase
+class BaseTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $stub;
@@ -22,16 +22,18 @@ class BaseTest extends \PHPUnit_Framework_TestCase
 		$this->view = $context->getView();
 
 		$this->stub = $this->getMockBuilder( '\\Aimeos\\Admin\\JsonAdm\\Standard' )
-			->setConstructorArgs( array( $context, $this->view, array(), 'attribute' ) )
+			->setConstructorArgs( array( $context, $this->view, [], 'attribute' ) )
 			->getMock();
 
-		$this->object = new TestBase( $this->stub, $context, $this->view, array(), 'attribute' );
+		$this->object = $this->getMockBuilder( '\\Aimeos\\Admin\\JsonAdm\\Common\\Decorator\Base' )
+			->setConstructorArgs( [$this->stub, $context, $this->view, [], ''] )
+			->getMockForAbstractClass();
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object, $this->stub );
+		unset( $this->object, $this->stub, $this->view );
 	}
 
 
@@ -89,47 +91,19 @@ class BaseTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	public function testGetContext()
+	public function testGetClient()
 	{
-		$this->assertInstanceOf( '\\Aimeos\\MShop\\Context\\Item\\Iface', $this->object->getContextPublic() );
+		$result = $this->access( 'getClient' )->invokeArgs( $this->object, [] );
+		$this->assertSame( $this->stub, $result );
 	}
 
 
-	public function testGetTemplatePaths()
+	protected function access( $name )
 	{
-		$this->assertEquals( array(), $this->object->getTemplatePathsPublic() );
-	}
+		$class = new \ReflectionClass( '\Aimeos\Admin\JsonAdm\Common\Decorator\Base' );
+		$method = $class->getMethod( $name );
+		$method->setAccessible( true );
 
-
-	public function testGetPath()
-	{
-		$this->assertEquals( 'attribute', $this->object->getPathPublic() );
-	}
-
-
-	public function testCall()
-	{
-		$this->markTestIncomplete( 'PHP warning is triggered instead of exception' );
-	}
-
-}
-
-
-class TestBase
-	extends \Aimeos\Admin\JsonAdm\Common\Decorator\Base
-{
-	public function getContextPublic()
-	{
-		return $this->getContext();
-	}
-
-	public function getTemplatePathsPublic()
-	{
-		return $this->getTemplatePaths();
-	}
-
-	public function getPathPublic()
-	{
-		return $this->getPath();
+		return $method;
 	}
 }

@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -110,15 +110,18 @@ class Standard
 
 		try
 		{
+			$listMap = [];
 			$prodid = $product->getId();
-			$map = $this->getMappedChunk( $data );
-			$listItems = $this->getListItemPool( $product, $map );
+			$map = $this->getMappedChunk( $data, $this->getMapping() );
+			$listItems = $this->getListItems( $prodid, $this->listTypes );
+
+			foreach( $listItems as $listItem ) {
+				$listMap[ $listItem->getParentId() ][ $listItem->getType() ] = $listItem;
+			}
 
 			foreach( $map as $pos => $list )
 			{
-				if( !isset( $list['catalog.code'] ) || $list['catalog.code'] === '' || isset( $list['catalog.lists.type'] )
-					&& $this->listTypes !== null && !in_array( $list['catalog.lists.type'], (array) $this->listTypes )
-				) {
+				if( $this->checkEntry( $list ) === false ) {
 					continue;
 				}
 
@@ -133,21 +136,28 @@ class Standard
 						throw new \Aimeos\Controller\Jobs\Exception( sprintf( $msg, $code, $product->getCode() ) );
 					}
 
-					if( ( $listItem = array_shift( $listItems ) ) === null ) {
-						$listItem = $listManager->createItem();
-					}
-
 					$list['catalog.lists.typeid'] = $this->getTypeId( 'catalog/lists/type', 'product', $type );
 					$list['catalog.lists.parentid'] = $catid;
 					$list['catalog.lists.refid'] = $prodid;
 					$list['catalog.lists.domain'] = 'product';
 
+					if( isset( $listMap[$catid][$type] ) )
+					{
+						$listItem = $listMap[$catid][$type];
+						unset( $listItems[ $listItem->getId() ] );
+					}
+					else
+					{
+						$listItem = $listManager->createItem();
+					}
+
 					$listItem->fromArray( $this->addListItemDefaults( $list, $pos++ ) );
-					$listManager->saveItem( $listItem );
+					$listManager->saveItem( $listItem, false );
 				}
 			}
 
-			$remaining = $this->getObject()->process( $product, $data );
+			$listManager->deleteItems( array_keys( $listItems ) );
+			$data = $this->getObject()->process( $product, $data );
 
 			$manager->commit();
 		}
@@ -157,7 +167,7 @@ class Standard
 			throw $e;
 		}
 
-		return $remaining;
+		return $data;
 	}
 
 
@@ -179,6 +189,24 @@ class Standard
 		}
 
 		return $list;
+	}
+
+
+	/**
+	 * Checks if the entry from the mapped data is valid
+	 *
+	 * @param array $list Associative list of key/value pairs from the mapped data
+	 * @return boolean True if the entry is valid, false if not
+	 */
+	protected function checkEntry( array $list )
+	{
+		if( !isset( $list['catalog.code'] ) || $list['catalog.code'] === '' || isset( $list['catalog.lists.type'] )
+			&& $this->listTypes !== null && !in_array( $list['catalog.lists.type'], (array) $this->listTypes )
+		) {
+			return false;
+		}
+
+		return true;
 	}
 
 
@@ -208,39 +236,5 @@ class Standard
 		$search->setSlice( 0, 0x7FFFFFFF );
 
 		return $manager->searchItems( $search );
-	}
-
-
-	/**
-	 * Returns the pool of list items that can be reassigned
-	 *
-	 * @param \Aimeos\MShop\Product\Item\Iface $product Product item object
-	 * @param array $map List of associative arrays containing the chunked properties
-	 * @return array List of list items implementing \Aimeos\MShop\Common\Item\Lists\Iface
-	 */
-	protected function getListItemPool( \Aimeos\MShop\Product\Item\Iface $product, array $map )
-	{
-		$pos = 0;
-		$delete = array();
-		$listItems = $this->getListItems( $product->getId(), $this->listTypes );
-
-		foreach( $listItems as $listId => $listItem )
-		{
-			if( isset( $map[$pos] ) && ( !isset( $map[$pos]['catalog.code'] )
-				|| $this->cache->get( $map[$pos]['catalog.code'] ) == $listItem->getParentId() )
-			) {
-				$pos++;
-				continue;
-			}
-
-			$listItems[$listId] = null;
-			$delete[] = $listId;
-			$pos++;
-		}
-
-		$listManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'catalog/lists' );
-		$listManager->deleteItems( $delete );
-
-		return $listItems;
 	}
 }

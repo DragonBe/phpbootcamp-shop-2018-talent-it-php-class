@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product\Selection;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -23,25 +23,45 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$templatePaths = \TestHelperJqadm::getTemplatePaths();
 
 		$this->object = new \Aimeos\Admin\JQAdm\Product\Selection\Standard( $this->context, $templatePaths );
+		$this->object->setAimeos( \TestHelperJqadm::getAimeos() );
 		$this->object->setView( $this->view );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object );
+		unset( $this->object, $this->view, $this->context );
 	}
 
 
 	public function testCreate()
 	{
+		$param = array(
+			'site' => 'unittest',
+			'selection' => array(
+				'product.id' => array( 0 => '' ),
+				'product.code' => array( 0 => 'testprod' ),
+				'product.label' => array( 0 => 'test product' ),
+				'attr' => array(
+					'id' => array( 0 => '123' ),
+					'label' => array( 0 => 'test attribute' ),
+					'ref' => array( 0 => 'testprod' ),
+				)
+			),
+		);
+
+		$helper = new \Aimeos\MW\View\Helper\Param\Standard( $this->view, $param );
+		$this->view->addHelper( 'param', $helper );
+
 		$manager = \Aimeos\MShop\Factory::createManager( $this->context, 'product' );
 
 		$this->view->item = $manager->createItem();
 		$result = $this->object->create();
 
 		$this->assertNull( $this->view->get( 'errors' ) );
-		$this->assertStringStartsWith( '<div class="product-item-selection', $result );
+		$this->assertContains( 'item-selection', $result );
+		$this->assertContains( 'testprod', $result );
+		$this->assertContains( 'value="123"', $result );
 	}
 
 
@@ -65,30 +85,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 	public function testGet()
 	{
-		$param = array(
-			'selection' => array(
-				'product.id' => array( 0 => '' ),
-				'product.code' => array( 0 => 'testprod' ),
-				'product.label' => array( 0 => 'test product' ),
-				'attr' => array(
-					'id' => array( 0 => '123' ),
-					'label' => array( 0 => 'test attribute' ),
-					'ref' => array( 0 => 'testprod' ),
-				)
-			),
-		);
-
-		$helper = new \Aimeos\MW\View\Helper\Param\Standard( $this->view, $param );
-		$this->view->addHelper( 'param', $helper );
-
 		$manager = \Aimeos\MShop\Factory::createManager( $this->context, 'product' );
-		$this->view->item = $manager->findItem( 'U:TEST' );
+		$this->view->item = $manager->findItem( 'U:TEST', ['product'] );
 
 		$result = $this->object->get();
 
 		$this->assertNull( $this->view->get( 'errors' ) );
-		$this->assertContains( 'testprod', $result );
-		$this->assertContains( 'value="123"', $result );
+		$this->assertContains( 'U:TEST', $result );
+		$this->assertContains( 'value="U:TESTSUB01"', $result );
 	}
 
 
@@ -100,13 +104,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setCode( 'jqadm-test-selection' );
 		$item->setId( null );
 
-		$manager->saveItem( $item );
+		$item = $manager->saveItem( $item );
 
 		$attrManager = \Aimeos\MShop\Factory::createManager( $this->context, 'attribute' );
-		$attrItem = $attrManager->findItem( 'xs', array(), 'product', 'size' );
+		$attrItem = $attrManager->findItem( 'xs', [], 'product', 'size' );
 
 
 		$param = array(
+			'site' => 'unittest',
 			'selection' => array(
 				'product.lists.id' => array( 0 => '' ),
 				'product.id' => array( 0 => $item->getId() ),
@@ -152,13 +157,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Selection\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \RuntimeException() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$this->view = \TestHelperJqadm::getView();
+		$this->view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $this->view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();
@@ -169,13 +177,16 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$object = $this->getMockBuilder( '\Aimeos\Admin\JQAdm\Product\Selection\Standard' )
 			->setConstructorArgs( array( $this->context, \TestHelperJqadm::getTemplatePaths() ) )
-			->setMethods( array( 'updateItems' ) )
+			->setMethods( array( 'fromArray' ) )
 			->getMock();
 
-		$object->expects( $this->once() )->method( 'updateItems' )
+		$object->expects( $this->once() )->method( 'fromArray' )
 			->will( $this->throwException( new \Aimeos\MShop\Exception() ) );
 
-		$object->setView( \TestHelperJqadm::getView() );
+		$this->view = \TestHelperJqadm::getView();
+		$this->view->item = \Aimeos\MShop\Factory::createManager( $this->context, 'product' )->createItem();
+
+		$object->setView( $this->view );
 
 		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
 		$object->save();

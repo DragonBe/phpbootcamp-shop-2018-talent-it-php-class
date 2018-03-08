@@ -5,9 +5,9 @@ namespace Aimeos\MShop\Customer\Manager;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class LaravelTest extends \PHPUnit_Framework_TestCase
+class LaravelTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $fixture;
@@ -15,9 +15,6 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 	private $editor = 'ai-laravel:unittest';
 
 
-	/**
-	 * Sets up the fixture. This method is called before a test is executed.
-	 */
 	protected function setUp()
 	{
 		$context = \TestHelper::getContext();
@@ -33,9 +30,6 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * Tears down the fixture. This method is called after a test is executed.
-	 */
 	protected function tearDown()
 	{
 		unset( $this->object, $this->fixture, $this->address );
@@ -91,13 +85,13 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 
 		$item->setCode( 'unitTest' );
 		$item->setLabel( 'unitTest' );
-		$this->object->saveItem( $item );
+		$resultSaved = $this->object->saveItem( $item );
 		$itemSaved = $this->object->getItem( $item->getId() );
 
 		$itemExp = clone $itemSaved;
 		$itemExp->setCode( 'unitTest2' );
 		$itemExp->setLabel( 'unitTest2' );
-		$this->object->saveItem( $itemExp );
+		$resultUpd = $this->object->saveItem( $itemExp );
 		$itemUpd = $this->object->getItem( $itemExp->getId() );
 
 		$this->object->deleteItem( $item->getId() );
@@ -129,6 +123,9 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals( $itemExp->getTimeCreated(), $itemUpd->getTimeCreated() );
 		$this->assertRegExp( '/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $itemUpd->getTimeModified() );
 
+		$this->assertInstanceOf( '\Aimeos\MShop\Common\Item\Iface', $resultSaved );
+		$this->assertInstanceOf( '\Aimeos\MShop\Common\Item\Iface', $resultUpd );
+
 		$this->setExpectedException( '\\Aimeos\\MShop\\Exception' );
 		$this->object->getItem( $item->getId() );
 	}
@@ -145,7 +142,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$total = 0;
 		$search = $this->object->createSearch();
 
-		$expr = array();
+		$expr = [];
 		$expr[] = $search->compare( '!=', 'customer.id', null );
 		$expr[] = $search->compare( '==', 'customer.label', 'Erika Mustermann' );
 		$expr[] = $search->compare( '==', 'customer.code', 'unitCustomer2' );
@@ -207,7 +204,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$expr[] = $search->compare( '==', 'customer.address.editor', $this->editor );
 
 		$search->setConditions( $search->combine( '&&', $expr ) );
-		$result = $this->object->searchItems( $search, array(), $total );
+		$result = $this->object->searchItems( $search, [], $total );
 		$this->assertEquals( 1, count( $result ) );
 	}
 
@@ -220,7 +217,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$search->setConditions( $search->compare( '==', 'customer.address.editor', $this->editor ) );
 		$search->setSlice( 0, 2 );
 
-		$results = $this->object->searchItems( $search, array(), $total );
+		$results = $this->object->searchItems( $search, [], $total );
 		$this->assertEquals( 2, count( $results ) );
 		$this->assertEquals( 3, $total );
 
@@ -238,7 +235,23 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 			$search->getConditions()
 		);
 		$search->setConditions( $search->combine( '&&', $conditions ) );
-		$this->assertEquals( 2, count( $this->object->searchItems( $search, array(), $total ) ) );
+		$this->assertEquals( 2, count( $this->object->searchItems( $search, [], $total ) ) );
+	}
+
+
+	public function testSearchItemsRef()
+	{
+		$search = $this->object->createSearch();
+		$search->setConditions( $search->compare( '==', 'customer.code', 'unitCustomer1' ) );
+
+		$results = $this->object->searchItems( $search, ['customer/address', 'text'] );
+
+		if( ( $item = reset( $results ) ) === false ) {
+			throw new \Exception( 'No customer item for "unitCustomer1" available' );
+		}
+
+		$this->assertEquals( 1, count( $item->getRefItems( 'text' ) ) );
+		$this->assertEquals( 1, count( $item->getAddressItems() ) );
 	}
 
 

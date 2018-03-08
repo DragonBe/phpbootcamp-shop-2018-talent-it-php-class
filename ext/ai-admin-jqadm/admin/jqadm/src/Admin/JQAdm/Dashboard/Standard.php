@@ -2,13 +2,15 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package Admin
  * @subpackage JQAdm
  */
 
 
 namespace Aimeos\Admin\JQAdm\Dashboard;
+
+sprintf( 'dashboard' ); // for translation
 
 
 /**
@@ -56,6 +58,17 @@ class Standard
 	 */
 	private $subPartPath = 'admin/jqadm/dashboard/standard/subparts';
 
+	/** admin/jqadm/dashboard/job/name
+	 * Name of the job subpart used by the JQAdm dashboard implementation
+	 *
+	 * Use "Myname" if your class is named "\Aimeos\Admin\Jqadm\Dashboard\Job\Myname".
+	 * The name is case-sensitive and you should avoid camel case names like "MyName".
+	 *
+	 * @param string Last part of the JQAdm class name
+	 * @since 2017.08
+	 * @category Developer
+	 */
+
 	/** admin/jqadm/dashboard/order/name
 	 * Name of the order subpart used by the JQAdm dashboard implementation
 	 *
@@ -66,29 +79,7 @@ class Standard
 	 * @since 2016.07
 	 * @category Developer
 	 */
-	private $subPartNames = array( 'order' );
-
-
-	/**
-	 * Copies a resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function copy()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be copied' );
-	}
-
-
-	/**
-	 * Creates a new resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function create()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'New resources can not be created' );
-	}
+	private $subPartNames = array( 'job', 'order' );
 
 
 	/**
@@ -98,29 +89,8 @@ class Standard
 	 */
 	public function delete()
 	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be deleted' );
-	}
-
-
-	/**
-	 * Returns a single resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function get()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be retrieved' );
-	}
-
-
-	/**
-	 * Saves the data
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function save()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be modified' );
+		parent::delete();
+		return $this->search();
 	}
 
 
@@ -145,12 +115,12 @@ class Standard
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'dashboard' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
 			$error = array( 'dashboard' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 
 		/** admin/jqadm/dashboard/template-list

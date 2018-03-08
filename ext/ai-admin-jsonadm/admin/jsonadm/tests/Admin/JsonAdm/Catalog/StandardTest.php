@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JsonAdm\Catalog;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -57,10 +57,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	public function testGetTree()
 	{
 		$params = array(
-			'id' => $this->getCatalogItem( 'group' )->getId(),
-			'filter' => array(
-				'==' => array( 'catalog.status' => 1 )
-			),
+			'id' => $this->getCatalogItem( 'root' )->getId(),
 			'include' => 'catalog,text'
 		);
 		$helper = new \Aimeos\MW\View\Helper\Param\Standard( $this->view, $params );
@@ -68,7 +65,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$response = $this->object->get( $this->view->request(), $this->view->response() );
 		$result = json_decode( (string) $response->getBody(), true );
-
 
 		$this->assertEquals( 200, $response->getStatusCode() );
 		$this->assertEquals( 1, count( $response->getHeader( 'Content-Type' ) ) );
@@ -87,7 +83,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$stub = $this->getCatalogMock( array( 'getItem', 'moveItem', 'saveItem' ) );
 
 		$stub->expects( $this->once() )->method( 'moveItem' );
-		$stub->expects( $this->once() )->method( 'saveItem' );
+		$stub->expects( $this->once() )->method( 'saveItem' )
+			->will( $this->returnValue( $stub->createItem() ) );
 		$stub->expects( $this->exactly( 2 ) )->method( 'getItem' ) // 2x due to decorator
 			->will( $this->returnValue( $stub->createItem() ) );
 

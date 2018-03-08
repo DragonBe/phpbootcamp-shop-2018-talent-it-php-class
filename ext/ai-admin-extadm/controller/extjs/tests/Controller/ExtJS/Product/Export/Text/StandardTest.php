@@ -6,9 +6,9 @@ namespace Aimeos\Controller\ExtJS\Product\Export\Text;
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
@@ -44,7 +44,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$productManager = \Aimeos\MShop\Product\Manager\Factory::createManager( $this->context );
 		$criteria = $productManager->createSearch();
 
-		$expr = array();
+		$expr = [];
 		$expr[] = $criteria->compare( '==', 'product.code', 'CNE' );
 		$criteria->setConditions( $criteria->compare( '==', 'product.code', 'CNE' ) );
 
@@ -83,7 +83,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue( file_exists( $deCSV ) );
 		$fh = fopen( $deCSV, 'r' );
-		$lines = array();
+		$lines = [];
 
 		while( ( $data = fgetcsv( $fh ) ) != false ) {
 			$lines[] = $data;

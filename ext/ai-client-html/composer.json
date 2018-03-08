@@ -4,7 +4,7 @@
 	"keywords": ["aimeos", "extension", "client", "html"],
 	"homepage": "https://aimeos.org/",
 	"type": "aimeos-extension",
-	"license": "LGPL-3.0",
+	"license": "LGPL-3.0-or-later",
 	"support": {
 		"source": "https://github.com/aimeos/ai-client-html",
 		"issues": "https://github.com/aimeos/ai-client-html/issues",
@@ -16,9 +16,9 @@
 	"require": {
 		"php": ">=5.3.3",
 		"composer/installers": "^1.0",
-		"aimeos/aimeos-core": "~2017.01",
-		"aimeos/ai-controller-jobs": "~2017.01",
-		"aimeos/ai-controller-frontend": "~2017.01"
+		"aimeos/aimeos-core": "~2017.10",
+		"aimeos/ai-controller-jobs": "~2017.10",
+		"aimeos/ai-controller-frontend": "~2017.10"
 	},
 	"autoload": {
 		"psr-4": {

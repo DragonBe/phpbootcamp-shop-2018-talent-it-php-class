@@ -6,9 +6,9 @@ namespace Aimeos\Controller\ExtJS\Locale\Site;
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 
@@ -61,18 +61,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$result = $this->object->getTree( $params );
 
 		$this->assertEquals( 'Root', $result['items']->{'locale.site.label'} );
-		$this->assertGreaterThanOrEqual( 2, $result['items']->{'children'} );
-
-
-		$ids = array();
-		foreach( $result['items']->{'children'} as $child ) {
-			$ids[] = $child->{'locale.site.id'};
-		}
-
-		$params = (object) array( 'items' => $ids );
-		$result = $this->object->getTree( $params );
-
-		$this->assertGreaterThanOrEqual( 2, $result['items'] );
 	}
 
 
@@ -147,7 +135,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	public function testMoveItemsNoAction()
 	{
 		$moveParams = (object) array(
-			'items' => array(),
+			'items' => [],
 			'oldparentid' => null,
 			'newparentid' => null,
 			'refid' => null,
@@ -156,20 +144,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$result = $this->object->moveItems( $moveParams );
 
 		$this->assertTrue( $result['success'] );
-	}
-
-	// call moveItems(), throws "not implemented" yet
-	public function testMoveItemsException()
-	{
-		$moveParams = (object) array(
-			'items' => null,
-			'oldparentid' => null,
-			'newparentid' => null,
-			'refid' => null
-		);
-
-		$this->setExpectedException( '\\Aimeos\\MShop\\Locale\\Exception' );
-		$this->object->moveItems( $moveParams );
 	}
 
 

@@ -2,12 +2,12 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 class TestHelperJqadm
 {
 	private static $aimeos;
-	private static $context = array();
+	private static $context = [];
 
 
 	public static function bootstrap()
@@ -35,6 +35,9 @@ class TestHelperJqadm
 
 		$view = new \Aimeos\MW\View\Standard( self::getTemplatePaths() );
 
+		$helper = new \Aimeos\MW\View\Helper\Param\Standard( $view, ['site' => 'unittest'] );
+		$view->addHelper( 'param', $helper );
+
 		$trans = new \Aimeos\MW\Translation\None( 'de_DE' );
 		$helper = new \Aimeos\MW\View\Helper\Translate\Standard( $view, $trans );
 		$view->addHelper( 'translate', $helper );
@@ -52,12 +55,23 @@ class TestHelperJqadm
 		$helper = new \Aimeos\MW\View\Helper\Config\Standard( $view, $config );
 		$view->addHelper( 'config', $helper );
 
+		$helper = new \Aimeos\MW\View\Helper\Session\Standard( $view, new \Aimeos\MW\Session\None() );
+		$view->addHelper( 'session', $helper );
+
+		$helper = new \Aimeos\MW\View\Helper\Request\Standard( $view, new \Zend\Diactoros\ServerRequest() );
+		$view->addHelper( 'request', $helper );
+
+		$helper = new \Aimeos\MW\View\Helper\Response\Standard( $view, new \Zend\Diactoros\Response() );
+		$view->addHelper( 'response', $helper );
+
 		$helper = new \Aimeos\MW\View\Helper\Csrf\Standard( $view, '_csrf_token', '_csrf_value' );
 		$view->addHelper( 'csrf', $helper );
 
 		$fcn = function() { return array( 'admin' ); };
 		$helper = new \Aimeos\MW\View\Helper\Access\Standard( $view, $fcn );
 		$view->addHelper( 'access', $helper );
+
+		$view->pageSitePath = [];
 
 		return $view;
 	}
@@ -69,7 +83,7 @@ class TestHelperJqadm
 	}
 
 
-	private static function getAimeos()
+	public static function getAimeos()
 	{
 		if( !isset( self::$aimeos ) )
 		{
@@ -112,6 +126,10 @@ class TestHelperJqadm
 		$ctx->setFilesystemManager( $fs );
 
 
+		$mq = new \Aimeos\MW\MQueue\Manager\Standard( $conf );
+		$ctx->setMessageQueueManager( $mq );
+
+
 		$logger = new \Aimeos\MW\Logger\File( $site . '.log', \Aimeos\MW\Logger\Base::DEBUG );
 		$ctx->setLogger( $logger );
 
@@ -133,7 +151,7 @@ class TestHelperJqadm
 		$ctx->setLocale( $locale );
 
 
-		$ctx->setEditor( 'core:admin/jqadm' );
+		$ctx->setEditor( 'ai-admin-jqadm:admin/jqadm' );
 
 		return $ctx;
 	}

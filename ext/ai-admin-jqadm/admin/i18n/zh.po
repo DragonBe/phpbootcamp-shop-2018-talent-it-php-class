@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aimeos-core\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-03 12:08+0100\n"
-"PO-Revision-Date: 2017-01-03 11:21+0000\n"
-"Last-Translator: Aimeos <aimeos@aimeos.org>\n"
+"POT-Creation-Date: 2017-10-16 15:11+0200\n"
+"PO-Revision-Date: 2017-10-16 13:12+0000\n"
+"Last-Translator: Aimeos\n"
 "Language-Team: Chinese (http://www.transifex.com/aimeos/aimeos-core/language/zh/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,13 +19,46 @@ msgstr ""
 "Language: zh\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#, php-format
+msgid ""
+"%1$s\n"
+"%2$s %3$s\n"
+"%5$s %4$s\n"
+"%7$s, %6$s\n"
+"%8$s, %9$s\n"
+"%10$s\n"
+"%11$s\n"
+"%12$s"
+msgstr ""
+
 #. / price format with value (%1$s) and currency (%2$s)
 #, php-format
 msgid "%1$s %2$s"
 msgstr "%1$s %2$s"
 
+#, php-format
+msgid "%1$s (Ctrl+Alt+%2$s)"
+msgstr ""
+
+#, php-format
+msgid "%s/%s/%s.%s"
+msgstr ""
+
+msgid ""
+"(International) facsimilie number without separation characters, can start "
+"with a \"+\""
+msgstr ""
+
+msgid ""
+"(International) telephone number without separation characters, can start "
+"with a \"+\""
+msgstr ""
+
 msgid "Actual current price"
 msgstr "實際當前價格"
+
+msgid "Actual price customers can buy the article for on the web site"
+msgstr ""
 
 msgid "Add"
 msgstr "添加"
@@ -33,8 +66,22 @@ msgstr "添加"
 msgid "Add filter"
 msgstr "添加篩選"
 
+msgid "Add new entry (Ctrl+A)"
+msgstr ""
+
 msgid "Additional"
 msgstr "附加"
+
+msgid ""
+"Additional delivery costs for each item, e.g. $20 for one heavy item will be"
+" $100 for five items it total"
+msgstr ""
+
+msgid "Additional information where the customer's appartment can be found"
+msgstr ""
+
+msgid "Additional information where the supplier's office can be found"
+msgstr ""
 
 msgid "Additional information, e.g. flat number"
 msgstr "附加訊息，例如 flag number"
@@ -54,11 +101,46 @@ msgstr "地址3"
 msgid "Address ID"
 msgstr "地址ID"
 
+msgid "Address identifier of the customer's house for delivery"
+msgstr ""
+
+msgid "Address identifier of the supplier's office"
+msgstr ""
+
 msgid "Addresses"
 msgstr "地址"
 
+#, php-format
+msgid "Admin JQAdm type is empty"
+msgstr ""
+
+#, php-format
+msgid "Aimeos object not available"
+msgstr ""
+
 msgid "All"
 msgstr "所有"
+
+msgid ""
+"All attributes that uniquely define an article, e.g. width, length and color"
+" for jeans"
+msgstr ""
+
+msgid "Allow custom price"
+msgstr ""
+
+msgid "Allow customers to choose themselves how much they want to pay"
+msgstr ""
+
+msgid ""
+"Article description shown by search engines, added to the head section of "
+"the product detail page"
+msgstr ""
+
+msgid ""
+"Article specific configuration options, will be available as key/value pairs"
+" in the templates"
+msgstr ""
 
 msgid "Associated attributes"
 msgstr "關聯的屬性"
@@ -87,6 +169,33 @@ msgstr "關聯的文本"
 msgid "Attribute"
 msgstr "属性"
 
+msgid "Attribute Lists Type"
+msgstr ""
+
+msgid "Attribute Lists Types"
+msgstr ""
+
+msgid "Attribute Property Type"
+msgstr ""
+
+msgid "Attribute Property Types"
+msgstr ""
+
+msgid "Attribute Type"
+msgstr ""
+
+msgid "Attribute Types"
+msgstr ""
+
+msgid "Attribute name"
+msgstr ""
+
+msgid "Attribute position (optional)"
+msgstr ""
+
+msgid "Attribute properties that are not shared with other attributes"
+msgstr ""
+
 msgid "Attribute type"
 msgstr "屬性類型"
 
@@ -106,11 +215,17 @@ msgstr "屬性"
 msgid "Available attributes"
 msgstr "可用的属性"
 
+msgid "Available currency for the current site"
+msgstr ""
+
 msgid "Available customer groups"
 msgstr "可用的顧客組"
 
 msgid "Available customers"
 msgstr "可用的顧客"
+
+msgid "Available language for the current site"
+msgstr ""
 
 msgid "Available media"
 msgstr "可用的媒體"
@@ -127,6 +242,9 @@ msgstr "可用tag"
 msgid "Available texts"
 msgstr "可用文本"
 
+msgid "Back"
+msgstr "返回"
+
 msgid "Back in stock"
 msgstr "商品有庫存 "
 
@@ -136,11 +254,20 @@ msgstr "基本ID"
 msgid "Basic"
 msgstr "基礎"
 
+msgid "Basket"
+msgstr "購物車"
+
 msgid "Billing address"
 msgstr "帳單地址"
 
 msgid "Birthday"
 msgstr "生日"
+
+msgid "Birthday of the customer"
+msgstr ""
+
+msgid "Bug or suggestion?"
+msgstr ""
 
 msgid "Bundles"
 msgstr "組合包"
@@ -154,8 +281,20 @@ msgstr "快取項目明細"
 msgid "Cancel"
 msgstr "取消"
 
+msgid "Cancel and return to list"
+msgstr ""
+
 msgid "Catalog"
 msgstr "商品型錄"
+
+msgid "Catalog Lists Type"
+msgstr ""
+
+msgid "Catalog Lists Types"
+msgstr ""
+
+msgid "Catalog Types"
+msgstr ""
 
 #. : Catalog item panel title with catalog label ({0}) and site code ({1)}
 #, python-brace-format
@@ -165,6 +304,20 @@ msgstr "型錄：{0} ({1})"
 msgid "Categories"
 msgstr "商品型錄"
 
+msgid "Categories the product can be found in by the user on the web site"
+msgstr ""
+
+msgid "Categories the product will be shown for in the promotional section"
+msgstr ""
+
+msgid "Category name"
+msgstr ""
+
+msgid ""
+"Category specific configuration options, will be available as key/value "
+"pairs in the templates"
+msgstr ""
+
 msgid "Characteristics"
 msgstr "特色"
 
@@ -173,6 +326,25 @@ msgstr "市"
 
 msgid "City name (required)"
 msgstr "城市名 (必填)"
+
+msgid "City or town name (required)"
+msgstr ""
+
+#, php-format
+msgid "Class \"%1$s\" does not implement \"%2$s\""
+msgstr "class \"%1$s\" 沒有實裝 \"%2$s\""
+
+#, php-format
+msgid "Class \"%1$s\" does not implement interface \"%2$s\""
+msgstr "class \"%1$s\" 沒有實裝界面 \"%2$s\""
+
+#, php-format
+msgid "Class \"%1$s\" not available"
+msgstr "class \"%1$s\" 無法使用"
+
+#, php-format
+msgid "Class \"%1$s\" not found"
+msgstr "找不到class \"%1$s\""
 
 msgid "Clear"
 msgstr "清除"
@@ -186,79 +358,38 @@ msgstr "關閉"
 msgid "Code"
 msgstr "代碼"
 
+msgid "Code to uniquely identify the site"
+msgstr ""
+
 msgid "Codes"
 msgstr "代碼"
 
-#. /jqadm/partial/filter
-#. * Relative path to the partial template for displaying the product filter
-#. *
-#. * The template file contains the HTML code and processing instructions
-#. * to generate the result shown in the administration interface. The
-#. * configuration string is the path to the template file relative
-#. * to the templates directory (usually in admin/jqadm/templates).
-#. *
-#. * You can overwrite the template file configuration in extensions and
-#. * provide alternative templates. These alternative templates should be
-#. * named like the default one but with the string "default" replaced by
-#. * an unique name. You may use the name of your project for this. If
-#. * you've implemented an alternative client class as well, "default"
-#. * should be replaced by the name of the new class.
-#. *
-#. * @param string Relative path to the partial creating the HTML code
-#. * @since 2016.04
-#. * @category Developer
-#. * @see admin/jqadm/partial/confirm
-#. * @see admin/jqadm/partial/error
-#. /jqadm/partial/pagination
-#. * Relative path to the partial template for displaying the pagination
-#. *
-#. * The template file contains the HTML code and processing instructions
-#. * to generate the result shown in the administration interface. The
-#. * configuration string is the path to the template file relative
-#. * to the templates directory (usually in admin/jqadm/templates).
-#. *
-#. * You can overwrite the template file configuration in extensions and
-#. * provide alternative templates. These alternative templates should be
-#. * named like the default one but with the string "default" replaced by
-#. * an unique name. You may use the name of your project for this. If
-#. * you've implemented an alternative client class as well, "default"
-#. * should be replaced by the name of the new class.
-#. *
-#. * @param string Relative path to the partial creating the HTML code
-#. * @since 2016.04
-#. * @category Developer
-#. * @see admin/jqadm/partial/filter
-#. * @see admin/jqadm/partial/confirm
-#. * @see admin/jqadm/partial/error
-#. /jqadm/template/page
-#. * Relative path to the template for the base page template
-#. *
-#. * The template file contains the HTML code and processing instructions
-#. * to generate the result shown in the administration interface. The
-#. * configuration string is the path to the template file relative
-#. * to the templates directory (usually in admin/jqadm/templates).
-#. *
-#. * You can overwrite the template file configuration in extensions and
-#. * provide alternative templates. These alternative templates should be
-#. * named like the default one but with the string "default" replaced by
-#. * an unique name. You may use the name of your project for this. If
-#. * you've implemented an alternative client class as well, "default"
-#. * should be replaced by the name of the new class.
-#. *
-#. * @param string Relative path to the partial creating the HTML code
-#. * @since 2016.04
-#. * @category Developer
 msgid "Columns"
 msgstr "欄位"
 
 msgid "Comment"
 msgstr "備註"
 
+msgid "Communication"
+msgstr ""
+
 msgid "Company"
 msgstr "公司"
 
+msgid "Company details"
+msgstr ""
+
 msgid "Company name"
 msgstr "公司名稱"
+
+msgid "Company name (optional)"
+msgstr ""
+
+msgid "Config"
+msgstr ""
+
+msgid "Configurable"
+msgstr ""
 
 msgid "Configuration"
 msgstr "配置"
@@ -268,6 +399,9 @@ msgstr "内容"
 
 msgid "Copy"
 msgstr "複製"
+
+msgid "Copy this entry"
+msgstr ""
 
 msgid "Costs"
 msgstr "成本"
@@ -284,8 +418,22 @@ msgstr "計數"
 msgid "Country"
 msgstr "國家"
 
+msgid "Country ID"
+msgstr ""
+
 msgid "Country code"
 msgstr "國家代碼"
+
+msgid "Country code (required)"
+msgstr ""
+
+msgid ""
+"Country specific tax rate to calculate and display the included tax (B2C) or"
+" add the tax if required (B2B)"
+msgstr ""
+
+msgid "Country state code (optional)"
+msgstr ""
 
 msgid "Country state, e.g. \"NY\""
 msgstr "國家州別，例如 \"NY\""
@@ -301,6 +449,9 @@ msgstr "優惠券代碼"
 msgid "Coupon code: {0} ({1})"
 msgstr "優惠券代碼：{0} ({1})"
 
+msgid "Coupon provider or coupon decorator configuration name"
+msgstr ""
+
 #. : Coupon item panel title with coupon label ({0}) and site code ({1)}
 #, python-brace-format
 msgid "Coupon: {0} ({1})"
@@ -312,14 +463,32 @@ msgstr "優惠券"
 msgid "Created"
 msgstr "創建"
 
+msgid "Currencies"
+msgstr ""
+
 msgid "Currency"
 msgstr "貨幣"
 
 msgid "Currency (required)"
 msgstr "貨幣 (必填)"
 
+msgid "Custom"
+msgstr ""
+
 msgid "Customer"
 msgstr "顧客"
+
+msgid "Customer ID"
+msgstr ""
+
+msgid "Customer Lists Type"
+msgstr ""
+
+msgid "Customer Lists Types"
+msgstr ""
+
+msgid "Customer Types"
+msgstr ""
 
 #. : Customer address item panel title with customer name ({0}) and site code
 #. ({1)}
@@ -329,6 +498,12 @@ msgstr "顧客"
 msgid "Customer address: {0} ({1})"
 msgstr "顧客地址： {0} ({1})"
 
+msgid "Customer comment (optional)"
+msgstr ""
+
+msgid "Customer e-mail address"
+msgstr ""
+
 #. : Customer group item panel title with customer name ({0}) and site code
 #. ({1)}
 #. : Customer group item panel title with customer name ({0}) and site code
@@ -337,16 +512,28 @@ msgstr "顧客地址： {0} ({1})"
 msgid "Customer group: {0} ({1})"
 msgstr "顧客群組: {0} ({1})"
 
+msgid "Customer password"
+msgstr ""
+
 #. : Customer item panel title with customer label ({0}) and site code ({1)}
 #, python-brace-format
 msgid "Customer: {0} ({1})"
 msgstr "顧客：{0} ({1})"
+
+msgid "Dashboard"
+msgstr ""
 
 msgid "Date"
 msgstr "日期"
 
 msgid "Date back"
 msgstr "追溯到"
+
+msgid "Date of the last delivery status change"
+msgstr ""
+
+msgid "Date of the last payment status change"
+msgstr ""
 
 msgid "Default"
 msgstr "預設"
@@ -357,8 +544,18 @@ msgstr "删除"
 msgid "Delete items?"
 msgstr "删除項目？"
 
+msgid "Delete this entry"
+msgstr ""
+
+msgid "Delivery"
+msgstr "運送"
+
 msgid "Delivery address"
 msgstr "配送地址"
+
+msgid ""
+"Delivery costs for the whole order or additional costs for payment options"
+msgstr ""
 
 msgid "Delivery date"
 msgstr "配送日期"
@@ -367,6 +564,15 @@ msgid "Delivery status"
 msgstr "配送狀態"
 
 msgid "Delivery types"
+msgstr ""
+
+msgid "Descritive name of the currency"
+msgstr ""
+
+msgid "Descritive name of the language"
+msgstr ""
+
+msgid "Descritive name of the site"
 msgstr ""
 
 msgid "Details"
@@ -384,8 +590,17 @@ msgstr "網域 (必填)"
 msgid "Download"
 msgstr "下載"
 
+msgid "Download this file"
+msgstr ""
+
+msgid "Duplicate entry (Ctrl+D)"
+msgstr ""
+
 msgid "E-Mail"
 msgstr "E-Mail"
+
+msgid "E-Mail address (required)"
+msgstr ""
 
 msgid "E-Mail, e.g. me@example.com (required)"
 msgstr "E-Mail，例如 me@example.com (必填)"
@@ -396,8 +611,14 @@ msgstr "歐洲商品編碼，最小存貨單位 or 產品號碼 (必填)"
 msgid "Edit"
 msgstr "編輯"
 
+msgid "Edit this entry"
+msgstr ""
+
 msgid "Editor"
 msgstr "編輯者"
+
+msgid "Email"
+msgstr ""
 
 msgid "End date"
 msgstr "結束日期"
@@ -405,49 +626,15 @@ msgstr "結束日期"
 msgid "Error"
 msgstr "錯誤"
 
-#. /jqadm/partial/error
-#. * Relative path to the partial template for displaying errors
-#. *
-#. * The template file contains the HTML code and processing instructions
-#. * to generate the result shown in the administration interface. The
-#. * configuration string is the path to the template file relative
-#. * to the templates directory (usually in admin/jqadm/templates).
-#. *
-#. * You can overwrite the template file configuration in extensions and
-#. * provide alternative templates. These alternative templates should be
-#. * named like the default one but with the string "default" replaced by
-#. * an unique name. You may use the name of your project for this. If
-#. * you've implemented an alternative client class as well, "default"
-#. * should be replaced by the name of the new class.
-#. *
-#. * @param string Relative path to the partial creating the HTML code
-#. * @since 2016.04
-#. * @category Developer
-#. * @see admin/jqadm/partial/confirm
-#. * @see admin/jqadm/partial/filter
-#. * @see admin/jqadm/partial/pagination
-#. /jqadm/partial/confirm
-#. * Relative path to the partial template for displaying the confirmation
-#. dialog
-#. *
-#. * The template file contains the HTML code and processing instructions
-#. * to generate the result shown in the administration interface. The
-#. * configuration string is the path to the template file relative
-#. * to the templates directory (usually in admin/jqadm/templates).
-#. *
-#. * You can overwrite the template file configuration in extensions and
-#. * provide alternative templates. These alternative templates should be
-#. * named like the default one but with the string "default" replaced by
-#. * an unique name. You may use the name of your project for this. If
-#. * you've implemented an alternative client class as well, "default"
-#. * should be replaced by the name of the new class.
-#. *
-#. * @param string Relative path to the partial creating the HTML code
-#. * @since 2016.04
-#. * @category Developer
-#. * @see admin/jqadm/partial/error
-#. * @see admin/jqadm/partial/filter
-#. * @see admin/jqadm/partial/pagination
+msgid "Excl. tax"
+msgstr ""
+
+msgid "Execution order of the plugins"
+msgstr ""
+
+msgid "Expert"
+msgstr ""
+
 msgid "Expert mode"
 msgstr "匯出模式"
 
@@ -463,6 +650,12 @@ msgstr "匯出成功"
 msgid "Facility"
 msgstr "設施"
 
+msgid "Facsimile"
+msgstr ""
+
+msgid "Facsimile number (optional)"
+msgstr ""
+
 msgid "Facsimile number, e.g. +155512345"
 msgstr "傳真碼，例如+155512345"
 
@@ -475,14 +668,38 @@ msgstr "檔案路徑"
 msgid "Filter"
 msgstr "篩選"
 
+msgid "Find category"
+msgstr ""
+
 msgid "First"
 msgstr "第一筆"
 
 msgid "First name"
 msgstr "名"
 
+msgid "First name (optional)"
+msgstr ""
+
+msgid "First name of the person if used in cultures where they are used"
+msgstr ""
+
 msgid "Firstname"
 msgstr "名"
+
+msgid "Floor"
+msgstr ""
+
+msgid "Floor / Appartment"
+msgstr ""
+
+msgid "Floor / Office"
+msgstr ""
+
+msgid "Floor and/or appartment (optional)"
+msgstr ""
+
+msgid "Floor and/or office (optional)"
+msgstr ""
 
 msgid "Flush"
 msgstr "清除"
@@ -508,20 +725,79 @@ msgstr "高度"
 msgid "Honorary title"
 msgstr "榮譽稱號"
 
+msgid "Honorary title (optional)"
+msgstr ""
+
+msgid "Honorary titles like Dr., Ph.D, etc."
+msgstr ""
+
 msgid "House no"
 msgstr "門牌號碼"
 
 msgid "House number"
 msgstr "門牌號碼"
 
+msgid "House number (optional)"
+msgstr ""
+
+msgid "How the customer is addressed in e-mails"
+msgstr ""
+
+msgid "How the supplier is addressed in e-mails"
+msgstr ""
+
 msgid "ID"
 msgstr "ID"
+
+msgid "ID of a related invoice, e.g. of a changed or refunded invoice"
+msgstr ""
+
+msgid "ISO currency code (required)"
+msgstr ""
+
+msgid "ISO language code (required)"
+msgstr ""
 
 msgid "Images"
 msgstr "圖片"
 
+msgid ""
+"Images will only be shown for that language, useful if the image contains "
+"text or is language sepecific"
+msgstr ""
+
 msgid "Import"
 msgstr "匯入"
+
+msgid "Import/Export jobs"
+msgstr ""
+
+msgid "Incl. tax"
+msgstr ""
+
+msgid "Info"
+msgstr ""
+
+msgid "Insert new entry"
+msgstr ""
+
+msgid "Insert new entry (Ctrl+I)"
+msgstr ""
+
+msgid ""
+"Internal article name, will be used on the web site if no product name for "
+"the language is available"
+msgstr ""
+
+msgid ""
+"Internal attribute name, will be used on the web site if no name for the "
+"language is available"
+msgstr ""
+
+msgid ""
+"Internal category name, will be used on the web site if no name for the "
+"language is available"
+msgstr ""
 
 msgid "Internal name"
 msgstr "內部名稱"
@@ -529,12 +805,35 @@ msgstr "內部名稱"
 msgid "Internal name (required)"
 msgstr "內部名稱 (必填)"
 
+msgid "Internal type name shown in the administration interface"
+msgstr ""
+
 #, python-brace-format
 msgid "Invalid action \"{0}\""
 msgstr "無效操作 \"{0}\""
 
+#, php-format
+msgid "Invalid characters in class name \"%1$s\""
+msgstr "class名稱 \"%1$s\" 包含無效的字符"
+
+#, php-format
+msgid "Invalid characters in client name \"%1$s\""
+msgstr "client名稱 \"%1$s\"包含無效的字符 "
+
+#, php-format
+msgid "Invalid class name \"%1$s\""
+msgstr "無效的class名稱\"%1$s\""
+
 msgid "Invalid data"
 msgstr "無效數據"
+
+#, php-format
+msgid "Invalid domain \"%1$s\""
+msgstr "無效的網域 \"%1$s\""
+
+#, php-format
+msgid "Invalid factory \"%1$s\""
+msgstr "無效的factory \"%1$s\""
 
 #, python-brace-format
 msgid "Invalid value for configuration key \"{0}\""
@@ -552,8 +851,25 @@ msgstr "任務項目明細"
 msgid "Jobs"
 msgstr "任務"
 
+msgid ""
+"Keywords for search engines, added to the head section of the category page"
+msgstr ""
+
+msgid ""
+"Keywords for search engines, added to the head section of the product detail"
+" page"
+msgstr ""
+
 msgid "Label"
 msgstr "標籤"
+
+msgid "Label (required)"
+msgstr ""
+
+msgid ""
+"Label will be used if empty but then there must be no name for all "
+"languages. Otherwise, items will not be shown when sorting by name"
+msgstr ""
 
 msgid "Language"
 msgstr "語言"
@@ -561,8 +877,20 @@ msgstr "語言"
 msgid "Language (required)"
 msgstr "語言 (必填)"
 
+msgid "Language ID"
+msgstr ""
+
+msgid "Languages"
+msgstr ""
+
 msgid "Last"
 msgstr "最後一筆"
+
+msgid "Last delivery status of the invoice"
+msgstr ""
+
+msgid "Last delivery status of the order"
+msgstr ""
 
 msgid "Last modified"
 msgstr "最後修改"
@@ -572,6 +900,17 @@ msgstr "姓"
 
 msgid "Last name (required)"
 msgstr "姓 (必填)"
+
+msgid ""
+"Last name of the person or full name in cultures where no first names are "
+"used"
+msgstr ""
+
+msgid "Last payment status of the invoice"
+msgstr ""
+
+msgid "Last payment status of the order"
+msgstr ""
 
 msgid "Lastname"
 msgstr "姓"
@@ -605,6 +944,17 @@ msgstr "列表項目明细"
 
 msgid "List modification time"
 msgstr "列表修改時間"
+
+msgid ""
+"List of articles that should be sold as one product, often at a reduced "
+"price"
+msgstr ""
+
+msgid "List of products often bought together"
+msgstr ""
+
+msgid "List of suggested products"
+msgstr ""
 
 msgid "List position"
 msgstr "列表位置"
@@ -656,6 +1006,18 @@ msgstr "長敘述"
 msgid "Media"
 msgstr "媒體"
 
+msgid "Media Lists Type"
+msgstr ""
+
+msgid "Media Lists Types"
+msgstr ""
+
+msgid "Media Type"
+msgstr ""
+
+msgid "Media Types"
+msgstr ""
+
 msgid "Media type"
 msgstr "媒體類型"
 
@@ -690,6 +1052,12 @@ msgstr "最小數量"
 msgid "Miss"
 msgstr "小姐"
 
+msgid "Modifed"
+msgstr ""
+
+msgid "Modified"
+msgstr ""
+
 msgid "Mr"
 msgstr "先生"
 
@@ -702,11 +1070,18 @@ msgstr "姓名"
 msgid "Name of the coupon provider class (required)"
 msgstr "優惠券供應者的class名稱 (必填)"
 
+msgid ""
+"Name of the downloaded file when customers saves the file on their computers"
+msgstr ""
+
 msgid "Name of the plugin provider class (required)"
 msgstr "插件供應者的class名稱 (必填)"
 
 msgid "Name of the service provider class (required)"
 msgstr "服務供應者的class名稱 (必填)"
+
+msgid "New"
+msgstr ""
 
 msgid "Next"
 msgstr "下一筆"
@@ -714,8 +1089,30 @@ msgstr "下一筆"
 msgid "No error information available"
 msgstr "沒有可用的錯誤訊息"
 
+#, php-format
+msgid "No file uploaded for %1$d. new image"
+msgstr ""
+
 msgid "No items"
 msgstr "沒有項目"
+
+msgid "No items found"
+msgstr ""
+
+#, php-format
+msgid "No items found for \"%1$s %2$s %3$s\""
+msgstr ""
+
+#, php-format
+msgid "No view available"
+msgstr "没有可用的view"
+
+msgid "No voucher"
+msgstr ""
+
+#, php-format
+msgid "Not allowed to access JQAdm \"%1$s\" client"
+msgstr ""
 
 msgid "Not implemented"
 msgstr "未實裝"
@@ -723,8 +1120,27 @@ msgstr "未實裝"
 msgid "Notice"
 msgstr "通知"
 
+msgid ""
+"Number of articles currently in stock, leave empty for an unlimited quantity"
+msgstr ""
+
+msgid "OK"
+msgstr ""
+
+msgid "Official VAT ID to determine if the tax needs to be billed in invoices"
+msgstr ""
+
+msgid ""
+"One provider and zero or more decorator class names separated by commas"
+msgstr ""
+
 msgid "Option"
 msgstr "選項"
+
+msgid ""
+"Optional product components that can be chosen by the customer together with"
+" the product"
+msgstr ""
 
 msgid "Order"
 msgstr "訂單"
@@ -732,8 +1148,20 @@ msgstr "訂單"
 msgid "Order item details"
 msgstr "訂單項目明細"
 
+msgid "Order of the language/currency combinations"
+msgstr ""
+
+msgid "Order of the service options in the checkout process"
+msgstr ""
+
 msgid "Order product ID"
 msgstr "訂單商品ID"
+
+msgid "Order totals"
+msgstr ""
+
+msgid "Orders"
+msgstr ""
 
 msgid "Orders by day"
 msgstr ""
@@ -744,12 +1172,25 @@ msgstr ""
 msgid "Orders by payment status"
 msgstr ""
 
+msgid "Orders by weekday"
+msgstr ""
+
 msgid "Overview"
 msgstr "總覽"
+
+msgid ""
+"Overwrite the existing file and customers bought it in the past can then "
+"download the new content too"
+msgstr ""
 
 #, php-format
 msgid "Page %1$d of %2$d"
 msgstr "第%1$d 頁 共 %2$d 頁"
+
+msgid ""
+"Page description shown by search engines, added to the head section of the "
+"category page"
+msgstr ""
 
 msgid "Parameter"
 msgstr "參數"
@@ -763,13 +1204,47 @@ msgstr "密碼 (必填)"
 msgid "Path"
 msgstr "路徑"
 
+msgid "Pay costs"
+msgstr ""
+
+msgid "Pay date"
+msgstr ""
+
+msgid "Pay name"
+msgstr ""
+
+msgid "Pay price"
+msgstr ""
+
+msgid "Pay rebate"
+msgstr ""
+
+msgid "Pay status"
+msgstr ""
+
+msgid "Payment"
+msgstr "支付"
+
 msgid "Payment date"
 msgstr "支付日期"
 
 msgid "Payment status"
 msgstr "支付狀態"
 
+msgid "Payment type"
+msgstr ""
+
 msgid "Payment types"
+msgstr ""
+
+#, php-format
+msgid "Permission denied"
+msgstr ""
+
+msgid "Personal data"
+msgstr ""
+
+msgid "Phone"
 msgstr ""
 
 msgid "Physical values"
@@ -781,6 +1256,9 @@ msgstr "請再次確認您的資料"
 msgid "Please save the coupon first before you can add codes"
 msgstr "在增加新的代碼前請先將您的優惠券代碼儲存"
 
+msgid "Please select"
+msgstr "請選擇"
+
 msgid ""
 "Please select an item on the right side and add it via drag and drop to this"
 " list."
@@ -788,6 +1266,18 @@ msgstr "請從右側選擇一樣項目並拖曳到列表。"
 
 msgid "Plugin"
 msgstr "插件"
+
+msgid "Plugin Type"
+msgstr ""
+
+msgid "Plugin Types"
+msgstr ""
+
+msgid "Plugin position (required)"
+msgstr ""
+
+msgid "Plugin provider or plugin decorator configuration name"
+msgstr ""
 
 msgid "Plugin type"
 msgstr "插件類型"
@@ -802,11 +1292,26 @@ msgstr "插件類型：{0} ({1})"
 msgid "Plugin: {0} ({1})"
 msgstr "插件：{0} ({1})"
 
+msgid "Plugins"
+msgstr ""
+
 msgid "Position"
 msgstr "位置"
 
+msgid "Position (required)"
+msgstr ""
+
+msgid "Postal"
+msgstr ""
+
 msgid "Postal code"
 msgstr "郵遞區號代碼"
+
+msgid "Postal code for delivery if used in the area the customer is living"
+msgstr ""
+
+msgid "Postal code for delivery if used in the area the supplier is living"
+msgstr ""
 
 msgid "Preview"
 msgstr "預覽"
@@ -819,6 +1324,18 @@ msgstr "前一筆"
 
 msgid "Price"
 msgstr "價格"
+
+msgid "Price Lists Type"
+msgstr ""
+
+msgid "Price Lists Types"
+msgstr ""
+
+msgid "Price Type"
+msgstr ""
+
+msgid "Price Types"
+msgstr ""
 
 msgid "Price type"
 msgstr "價格類型"
@@ -844,6 +1361,35 @@ msgstr "商品"
 
 msgid "Product ID"
 msgstr "商品ID"
+
+msgid "Product Lists Type"
+msgstr ""
+
+msgid "Product Lists Types"
+msgstr ""
+
+msgid "Product Property Type"
+msgstr ""
+
+msgid "Product Property Types"
+msgstr ""
+
+msgid "Product Type"
+msgstr ""
+
+msgid "Product Types"
+msgstr ""
+
+msgid ""
+"Product attributes stored in the basket where customers can enter their own "
+"texts or values"
+msgstr ""
+
+msgid "Product attributes that are used by other products too"
+msgstr ""
+
+msgid "Product characteristics that are not shared with other products"
+msgstr ""
 
 msgid "Product code"
 msgstr "商品代碼"
@@ -919,6 +1465,9 @@ msgstr "商品：{0} ({1})"
 msgid "Products"
 msgstr "商品"
 
+msgid "Products bought together"
+msgstr "一起購買商品"
+
 msgid "Promotion"
 msgstr "推廣"
 
@@ -934,8 +1483,17 @@ msgstr "屬性 (必填)"
 msgid "Provider"
 msgstr "供應者"
 
+msgid "Provider/decorator class names (required)"
+msgstr ""
+
+msgid "Purchase"
+msgstr ""
+
 msgid "Purchase date"
 msgstr "購買日期"
+
+msgid "Purchased"
+msgstr ""
 
 msgid "Quantity"
 msgstr "數量"
@@ -946,8 +1504,19 @@ msgstr "數量(空白表示無限制)"
 msgid "Rebate"
 msgstr "折扣"
 
+msgid ""
+"Reduction from the original price, used to calculate the rebate in % and the"
+" cross price"
+msgstr ""
+
 msgid "Ref-ID"
 msgstr "Ref-ID"
+
+msgid "Related ID"
+msgstr ""
+
+msgid "Related order"
+msgstr ""
 
 msgid "Related order ID"
 msgstr "關聯的訂單ID"
@@ -961,14 +1530,54 @@ msgstr "取代檔案"
 msgid "Request"
 msgstr "請求"
 
+#, php-format
+msgid "Required parameter \"%1$s\" is missing"
+msgstr ""
+
+msgid ""
+"Required quantity of articles for block pricing, e.g. one article for $5.00,"
+" ten articles for $45.00"
+msgstr ""
+
+msgid "Reset"
+msgstr ""
+
 msgid "Result"
 msgstr "結果"
+
+msgid ""
+"Route name or page ID of the category page if this category should shown on "
+"a different page"
+msgstr ""
+
+msgid ""
+"Route name or page ID of the product detail page if this product should "
+"shown on a different page"
+msgstr ""
+
+msgid "Route or page ID (optional)"
+msgstr ""
+
+msgid "SKU"
+msgstr ""
 
 msgid "Salutation"
 msgstr "稱呼"
 
 msgid "Save"
 msgstr "保存"
+
+msgid "Save & Close"
+msgstr ""
+
+msgid "Save & Copy"
+msgstr ""
+
+msgid "Save & New"
+msgstr ""
+
+msgid "Save entry (Ctrl+S)"
+msgstr ""
 
 msgid "Saving"
 msgstr "保存中"
@@ -996,11 +1605,35 @@ msgstr "服務"
 msgid "Service ID"
 msgstr "服務ID"
 
+msgid "Service Lists Type"
+msgstr ""
+
+msgid "Service Lists Types"
+msgstr ""
+
+msgid "Service Type"
+msgstr ""
+
+msgid "Service Types"
+msgstr ""
+
+msgid "Service attribute code"
+msgstr ""
+
 msgid "Service fees"
 msgstr "服務費"
 
 msgid "Service item details"
 msgstr "服務項目明細"
+
+msgid "Service name"
+msgstr ""
+
+msgid "Service position (required)"
+msgstr ""
+
+msgid "Service provider or service decorator configuration name"
+msgstr ""
 
 msgid "Service type"
 msgstr "服務類型"
@@ -1018,8 +1651,47 @@ msgstr "服務：{0} ({1})"
 msgid "Services"
 msgstr "服務"
 
+msgid "Ship date"
+msgstr ""
+
+msgid "Ship status"
+msgstr ""
+
+msgid "Shipping"
+msgstr "運送"
+
+msgid "Shipping costs per item"
+msgstr ""
+
+msgid "Shipping or payment costs"
+msgstr ""
+
+msgid "Shipping/Payment costs"
+msgstr ""
+
 msgid "Short description"
 msgstr "短敘述"
+
+msgid ""
+"Short state code (e.g. NY) if used in the country the customer is living"
+msgstr ""
+
+msgid ""
+"Short state code (e.g. NY) if used in the country the supplier has his "
+"office"
+msgstr ""
+
+msgid "Show"
+msgstr "顯示"
+
+msgid "Show entry"
+msgstr ""
+
+msgid "Show/hide this entry"
+msgstr ""
+
+msgid "Shown if the article reached a stock level of zero"
+msgstr ""
 
 msgid "Simple mode"
 msgstr "簡易模式"
@@ -1027,14 +1699,30 @@ msgstr "簡易模式"
 msgid "Site"
 msgstr "分站"
 
+msgid ""
+"Site specific configuration options, will be available as key/value pairs"
+msgstr ""
+
+msgid "Site the order was placed at"
+msgstr ""
+
+msgid "Sites"
+msgstr ""
+
 msgid "Size"
 msgstr "尺寸"
 
 msgid "Sorry, adding orders manually is currently not implemented"
 msgstr "很抱歉，目前無法實作手動新增訂單"
 
+msgid "Sorting of the attributes within the same attribute type"
+msgstr ""
+
 msgid "Source"
 msgstr "來源"
+
+msgid "Source of the invoice, e.g. by web or phone"
+msgstr ""
 
 msgid "Start date"
 msgstr "開始日期"
@@ -1048,6 +1736,12 @@ msgstr "狀態"
 msgid "Stock"
 msgstr "庫存"
 
+msgid "Stock Type"
+msgstr ""
+
+msgid "Stock Types"
+msgstr ""
+
 msgid "Stock level"
 msgstr "庫存量"
 
@@ -1057,8 +1751,23 @@ msgstr "街"
 msgid "Street (required)"
 msgstr "街 (必填)"
 
+msgid "Street name (optional)"
+msgstr ""
+
+msgid "Sub-total"
+msgstr "小計"
+
+msgid "Subscription"
+msgstr ""
+
 msgid "Substracted rebate amount"
 msgstr "減去扣除數量"
+
+msgid "Suggested products"
+msgstr "建議商品"
+
+msgid "Sum"
+msgstr "合計"
 
 msgid "Supplier"
 msgstr "供應商"
@@ -1071,16 +1780,28 @@ msgstr "供應商"
 msgid "Supplier address: {0} ({1})"
 msgstr "供應商地址：{0} ({1})"
 
+msgid "Supplier name or company"
+msgstr ""
+
 #. : Supplier item panel title with supplier label ({0}) and site code ({1)}
 #, python-brace-format
 msgid "Supplier: {0} ({1})"
 msgstr "供應商：{0} ({1})"
+
+msgid "Suppliers"
+msgstr ""
 
 msgid "Switching language ..."
 msgstr "轉換語言中..."
 
 msgid "Switching site ..."
 msgstr "轉換分站中..."
+
+msgid "Tag Type"
+msgstr ""
+
+msgid "Tag Types"
+msgstr ""
 
 msgid "Tag value (required)"
 msgstr "tag值 (必填)"
@@ -1092,6 +1813,9 @@ msgstr "Tag：{0} ({1})"
 
 msgid "Tags"
 msgstr "標籤"
+
+msgid "Tax"
+msgstr ""
 
 msgid "Tax rate"
 msgstr "稅率"
@@ -1105,11 +1829,26 @@ msgstr "傳真"
 msgid "Telephone"
 msgstr "電話"
 
+msgid "Telephone number (optional)"
+msgstr ""
+
 msgid "Telephone number, e.g. +155512345"
 msgstr "電話號碼，例如 +155512345"
 
 msgid "Text"
 msgstr "文本"
+
+msgid "Text Lists Type"
+msgstr ""
+
+msgid "Text Lists Types"
+msgstr ""
+
+msgid "Text Type"
+msgstr ""
+
+msgid "Text Types"
+msgstr ""
 
 msgid "Text type"
 msgstr "文本類型"
@@ -1128,9 +1867,34 @@ msgid "Texts"
 msgstr "文本"
 
 msgid ""
+"The article is only shown on the web site after that date and time, useful "
+"or seasonal articles"
+msgstr ""
+
+msgid ""
+"The article is only shown on the web site until that date and time, useful "
+"or seasonal articles"
+msgstr ""
+
+msgid "The article name as used in URLs, e.g. for non-latin languages"
+msgstr ""
+
+msgid "The category name as used in URLs, e.g. for non-latin languages"
+msgstr ""
+
+msgid ""
 "The file with the exported texts will be available within a few minutes. It "
 "can then be downloaded from the \"Job\" panel of the \"Overview\" tab."
 msgstr "包含文本的匯出檔案將在幾分鐘內c匯出完成, 您可以在總覽中的工作面板找到它。"
+
+msgid "The image title is used for the title tag of the image on the web site"
+msgstr ""
+
+msgid "The option is only shown on the web site after that date and time"
+msgstr ""
+
+msgid "The option is only shown on the web site until that date and time"
+msgstr ""
 
 msgid ""
 "The texts of your uploaded file will be imported within a few minutes. You "
@@ -1141,11 +1905,23 @@ msgstr "包含文本的匯入檔案將在幾分鐘內匯入完成, 您可以在�
 msgid "This combination already exists"
 msgstr "這個組合已經存在"
 
+msgid "Three letter ISO currency code"
+msgstr ""
+
 msgid "Title"
 msgstr "標題"
 
+msgid "Toggle dropdown"
+msgstr ""
+
 msgid "Total"
 msgstr "合計"
+
+msgid "Two letter ISO country code"
+msgstr ""
+
+msgid "Two letter ISO language code"
+msgstr ""
 
 msgid "Two letter country code, e.g. \"US\" (required)"
 msgstr "兩個字元的國家代碼，例如: \"US\" (必填)"
@@ -1156,11 +1932,75 @@ msgstr "類別"
 msgid "Types"
 msgstr "類別"
 
+msgid "Types for additional images like icons"
+msgstr ""
+
+msgid "Types for additional prices like per one lb/kg or per month"
+msgstr ""
+
+msgid "URL of the customer web site"
+msgstr ""
+
+msgid "URL of the supplier web site"
+msgstr ""
+
 msgid "URL segment"
 msgstr "URL片段"
 
+msgid "URL target"
+msgstr ""
+
+#, php-format
+msgid "Unable to call method \"%1$s\""
+msgstr "無法呼叫method \"%1$s\""
+
+msgid ""
+"Unique article code related to stock levels, e.g. from the ERP system, an "
+"EAN/GTIN number or self invented"
+msgstr ""
+
+msgid "Unique attribute code (required)"
+msgstr ""
+
+msgid "Unique attribute code, e.g. \"green\" for attributes of type \"color\""
+msgstr ""
+
+msgid "Unique category code (required)"
+msgstr ""
+
+msgid "Unique category code, either from external system or self-invented"
+msgstr ""
+
 msgid "Unique code (required)"
 msgstr "獨特的代碼(必填)"
+
+msgid "Unique code to identify the service, usually self-invented"
+msgstr ""
+
+msgid "Unique customer e-mail address"
+msgstr ""
+
+msgid "Unique service code (required)"
+msgstr ""
+
+msgid "Unique site code (required)"
+msgstr ""
+
+msgid "Unique supplier code"
+msgstr ""
+
+msgid "Unique type code"
+msgstr ""
+
+msgid "Unique type code (required)"
+msgstr ""
+
+msgid "Unique type code, e.g. \"color\" for attributes like \"green\", \"blue\", \"red\""
+msgstr ""
+
+#, php-format
+msgid "Unknown type \"%1$s\""
+msgstr ""
 
 msgid "Upload failed"
 msgstr "上傳失敗"
@@ -1174,14 +2014,26 @@ msgstr "已上傳"
 msgid "Used by"
 msgstr "被使用於"
 
+msgid "User groups"
+msgstr ""
+
 msgid "User name"
 msgstr "使用者名稱"
 
 msgid "User name, e.g. e-mail address (required)"
 msgstr "使用者名稱，例如e-mail (必填)"
 
+msgid "Users"
+msgstr ""
+
+msgid "VAT ID"
+msgstr ""
+
 msgid "Value"
 msgstr "值"
+
+msgid "Value added tax identifier (optional)"
+msgstr ""
 
 msgid "Variant attributes"
 msgstr "變量屬性"
@@ -1198,8 +2050,21 @@ msgstr "增值稅ID，例如\"GB999999999\""
 msgid "Verification date"
 msgstr "認證日期"
 
+msgid "View details"
+msgstr ""
+
+msgid "Voucher"
+msgstr ""
+
+msgid "Vouchers"
+msgstr ""
+
 msgid "Warehouse"
 msgstr "倉庫"
+
+msgid ""
+"Warehouse or local store if your articles are available at several locations"
+msgstr ""
 
 #. : Product warehouse item panel title with warehouse label ({0}) and site
 #. code ({1)}
@@ -1208,6 +2073,15 @@ msgstr "倉庫"
 #, python-brace-format
 msgid "Warehouse: {0} ({1})"
 msgstr "倉庫：{0} ({1})"
+
+msgid "Web"
+msgstr ""
+
+msgid "Web site"
+msgstr "網站"
+
+msgid "Web site URL (optional)"
+msgstr ""
 
 msgid "Web site, e.g. www.example.com"
 msgstr "網站，例如 www.example.com"
@@ -1238,11 +2112,154 @@ msgstr "你將要清除整個當前分站的所有快取, 確定嗎？"
 msgid "Zip code"
 msgstr "Zip code"
 
+msgid "Zip code (optional)"
+msgstr ""
+
+#, php-format
+msgid "address"
+msgstr "地址"
+
+msgid "address:delivery"
+msgstr "配送地址"
+
+msgid "address:payment"
+msgstr "帳單地址"
+
+#, php-format
+msgid "attribute"
+msgstr "屬性"
+
+#, php-format
+msgid "bundle"
+msgstr "組合包"
+
+#, php-format
+msgid "catalog"
+msgstr "商品型錄"
+
+#, php-format
+msgid "category"
+msgstr "商品型錄"
+
+#, php-format
+msgid "characteristic"
+msgstr "特色"
+
+#, php-format
+msgid "code"
+msgstr "代碼"
+
+msgid "company"
+msgstr "公司"
+
+#, php-format
+msgid "coupon"
+msgstr ""
+
+#, php-format
+msgid "customer"
+msgstr ""
+
+#, php-format
 msgid "dashboard"
 msgstr ""
 
+#, php-format
+msgid "day"
+msgstr ""
+
+#, php-format
+msgid "deliverytype"
+msgstr ""
+
+#, php-format
+msgid "download"
+msgstr "下載"
+
+#, php-format
+msgid "hour"
+msgstr ""
+
+#, php-format
+msgid "image"
+msgstr "圖片"
+
+#, php-format
+msgid "invoice"
+msgstr ""
+
+#, php-format
+msgid "latest"
+msgstr ""
+
+#, php-format
+msgid "locale"
+msgstr ""
+
+#, php-format
+msgid "locale/currency"
+msgstr ""
+
+#, php-format
+msgid "locale/language"
+msgstr ""
+
+#, php-format
+msgid "locale/site"
+msgstr ""
+
+msgid "media"
+msgstr "媒體"
+
+msgid "miss"
+msgstr "小姐"
+
+msgid "mr"
+msgstr "先生"
+
+msgid "mrs"
+msgstr "女士"
+
 msgid "new"
 msgstr "新"
+
+msgid "no"
+msgstr ""
+
+msgid "not available any more"
+msgstr ""
+
+#, php-format
+msgid "option"
+msgstr "選項"
+
+#, php-format
+msgid "order"
+msgstr ""
+
+msgid "pay:-1"
+msgstr "尚未完成"
+
+msgid "pay:0"
+msgstr "已删除"
+
+msgid "pay:1"
+msgstr "取消"
+
+msgid "pay:2"
+msgstr "被拒絕"
+
+msgid "pay:3"
+msgstr "已退款"
+
+msgid "pay:4"
+msgstr "處理中"
+
+msgid "pay:5"
+msgstr "已授權"
+
+msgid "pay:6"
+msgstr "已收款"
 
 msgid "pay:authorized"
 msgstr "支付：已授權"
@@ -1251,10 +2268,10 @@ msgid "pay:canceled"
 msgstr "支付：已取消"
 
 msgid "pay:deleted"
-msgstr "支付：已刪除"
+msgstr "狀態：被刪除"
 
 msgid "pay:pending"
-msgstr "支付：待進行"
+msgstr "狀態：待處理"
 
 msgid "pay:received"
 msgstr "支付：已收款"
@@ -1266,10 +2283,84 @@ msgid "pay:refused"
 msgstr "支付：被拒絕"
 
 msgid "pay:unfinished"
-msgstr "支付：未完成"
+msgstr "狀態：未完成"
 
+#, php-format
+msgid "paymentstatus"
+msgstr ""
+
+#, php-format
+msgid "paymenttype"
+msgstr ""
+
+#, php-format
+msgid "physical"
+msgstr ""
+
+#, php-format
+msgid "plugin"
+msgstr ""
+
+#, php-format
+msgid "price"
+msgstr "價格"
+
+#, php-format
 msgid "product"
 msgstr "商品"
+
+#, php-format
+msgid "property"
+msgstr ""
+
+#, php-format
+msgid "related"
+msgstr "商品"
+
+#, php-format
+msgid "selection"
+msgstr "變量"
+
+#, php-format
+msgid "service"
+msgstr "服務"
+
+msgid "service:delivery"
+msgstr "運送"
+
+msgid "service:payment"
+msgstr "支付"
+
+#, php-format
+msgid "special"
+msgstr ""
+
+msgid "stat:-1"
+msgstr "尚未完成"
+
+msgid "stat:0"
+msgstr "已删除"
+
+msgid "stat:1"
+msgstr "處理中"
+
+msgid "stat:2"
+msgstr "程序進行中"
+
+msgid "stat:3"
+msgstr "已出貨"
+
+msgid "stat:4"
+msgstr "已送達"
+
+msgid "stat:5"
+msgstr "遺失"
+
+msgid "stat:6"
+msgstr "被拒絕"
+
+msgid "stat:7"
+msgstr "被退貨"
 
 msgid "stat:deleted"
 msgstr "狀態：被刪除"
@@ -1290,7 +2381,7 @@ msgid "stat:progress"
 msgstr "狀態：處理中"
 
 msgid "stat:refused"
-msgstr "狀態：被拒絕"
+msgstr "支付：被拒絕"
 
 msgid "stat:returned"
 msgstr "狀態：已退貨"
@@ -1310,8 +2401,110 @@ msgstr "狀態：已啟用"
 msgid "status:review"
 msgstr "狀態：已審核"
 
+#, php-format
+msgid "stock"
+msgstr ""
+
+#, php-format
+msgid "supplier"
+msgstr ""
+
+msgid "tag"
+msgstr "標籤"
+
+#, php-format
+msgid "text"
+msgstr "文本"
+
+#, php-format
+msgid "type"
+msgstr ""
+
+#, php-format
+msgid "type/attribute"
+msgstr "屬性"
+
+#, php-format
+msgid "type/attribute/lists"
+msgstr ""
+
+#, php-format
+msgid "type/attribute/property"
+msgstr ""
+
+#, php-format
+msgid "type/catalog/lists"
+msgstr ""
+
+#, php-format
+msgid "type/customer/lists"
+msgstr ""
+
+#, php-format
+msgid "type/media"
+msgstr "媒體"
+
+#, php-format
+msgid "type/media/lists"
+msgstr ""
+
+#, php-format
+msgid "type/plugin"
+msgstr ""
+
+#, php-format
+msgid "type/price"
+msgstr "價格"
+
+#, php-format
+msgid "type/price/lists"
+msgstr ""
+
+#, php-format
+msgid "type/product"
+msgstr "商品"
+
+#, php-format
+msgid "type/product/lists"
+msgstr ""
+
+#, php-format
+msgid "type/product/property"
+msgstr ""
+
+#, php-format
+msgid "type/service"
+msgstr "服務"
+
+#, php-format
+msgid "type/service/lists"
+msgstr ""
+
+#, php-format
+msgid "type/stock"
+msgstr ""
+
+#, php-format
+msgid "type/tag"
+msgstr "標籤"
+
+#, php-format
+msgid "type/text"
+msgstr "文本"
+
+#, php-format
+msgid "type/text/lists"
+msgstr ""
+
 msgid "unknown"
-msgstr "未知"
+msgstr ""
+
+#, php-format
+msgid "weekday"
+msgstr ""
+
+msgid "yes"
+msgstr ""
 
 msgid "yy-mm-dd"
 msgstr "yy-mm-dd"

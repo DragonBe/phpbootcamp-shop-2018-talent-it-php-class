@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JsonAdm
  */
@@ -424,13 +424,17 @@ class Standard
 
 		try
 		{
-			$resources = $attributes = array();
+			$resources = $attributes = [];
 
 			foreach( $this->getDomains( $view ) as $domain )
 			{
 				$manager = \Aimeos\MShop\Factory::createManager( $context, $domain );
 				$resources = array_merge( $resources, $manager->getResourceType( true ) );
 				$attributes = array_merge( $attributes, $manager->getSearchAttributes( true ) );
+			}
+
+			foreach( $this->getResources( $view ) as $resource ) {
+				$resources[] = $resource;
 			}
 
 			$view->prefix = $prefix;
@@ -543,23 +547,23 @@ class Standard
 		if( ( $key = $view->param( 'aggregate' ) ) !== null )
 		{
 			$search = $this->initCriteria( $manager->createSearch(), $view->param() );
-			$view->data = $manager->aggregate( $search, $key );
+			$view->data = $manager->aggregate( $search, $key, $view->param( 'value' ), $view->param( 'type' ) );
 			return $response;
 		}
 
 		$total = 1;
-		$include = ( ( $include = $view->param( 'include' ) ) !== null ? explode( ',', $include ) : array() );
+		$include = ( ( $include = $view->param( 'include' ) ) !== null ? explode( ',', $include ) : [] );
 
 		if( ( $id = $view->param( 'id' ) ) == null )
 		{
 			$search = $this->initCriteria( $manager->createSearch(), $view->param() );
-			$view->data = $manager->searchItems( $search, array(), $total );
+			$view->data = $manager->searchItems( $search, [], $total );
 			$view->childItems = $this->getChildItems( $view->data, $include );
 			$view->listItems = $this->getListItems( $view->data, $include );
 		}
 		else
 		{
-			$view->data = $manager->getItem( $id, array() );
+			$view->data = $manager->getItem( $id, [] );
 			$view->childItems = $this->getChildItems( array( $id => $view->data ), $include );
 			$view->listItems = $this->getListItems( array( $id => $view->data ), $include );
 		}

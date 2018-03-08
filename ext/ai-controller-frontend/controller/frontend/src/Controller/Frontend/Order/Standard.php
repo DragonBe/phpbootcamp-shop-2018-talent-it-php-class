@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -23,34 +23,132 @@ class Standard
 	implements Iface, \Aimeos\Controller\Frontend\Common\Iface
 {
 	/**
-	 * Creates a new order from the given basket.
+	 * Creates and adds a new order for the given order base ID
 	 *
-	 * Saves the given basket to the storage including the addresses, coupons,
-	 * products, services, etc. and creates/stores a new order item for that
-	 * order.
-	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object to be stored
-	 * @return \Aimeos\MShop\Order\Item\Iface Order item that belongs to the stored basket
+	 * @param string $baseId Unique ID of the saved basket
+	 * @param string $type Arbitrary order type (max. eight chars)
+	 * @return \Aimeos\MShop\Order\Item\Iface Created order object
 	 */
-	public function store( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function addItem( $baseId, $type )
+	{
+		$total = 0;
+		$context = $this->getContext();
+		$manager = \Aimeos\MShop\Factory::createManager( $context, 'order' );
+
+		/** controller/frontend/order/limit-seconds
+		 * Order limitation time frame in seconds
+		 *
+		 * Creating new orders is limited to avoid abuse and mitigate denial of
+		 * service attacks. Within the configured time frame, only one order
+		 * item can be created per order base item. All orders for the order
+		 * base item within the last X seconds are counted.  If there's already
+		 * one available, an error message will be shown to the user instead of
+		 * creating the new order item.
+		 *
+		 * @param integer Number of seconds to check order items within
+		 * @since 2017.05
+		 * @category Developer
+		 * @see controller/frontend/basket/limit-count
+		 * @see controller/frontend/basket/limit-seconds
+		 */
+		$seconds = $context->getConfig()->get( 'controller/frontend/order/limit-seconds', 300 );
+
+		$search = $manager->createSearch();
+		$expr = [
+			$search->compare( '==', 'order.baseid', $baseId ),
+			$search->compare( '>=', 'order.ctime', date( 'Y-m-d H:i:s', time() - $seconds ) ),
+		];
+		$search->setConditions( $search->combine( '&&', $expr ) );
+		$search->setSlice( 0, 0 );
+
+		$manager->searchItems( $search, [], $total );
+
+		if( $total > 0 ) {
+			throw new \Aimeos\Controller\Frontend\Order\Exception( sprintf( 'The order has already been created' ) );
+		}
+
+		$item = $manager->createItem()->setBaseId( $baseId )->setType( $type );
+		return $manager->saveItem( $item );
+	}
+
+
+	/**
+	 * Returns the filter for searching items
+	 *
+	 * @return \Aimeos\MW\Criteria\Iface Filter object
+	 */
+	public function createFilter()
+	{
+		return \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order' )->createSearch( true );
+	}
+
+
+	/**
+	 * Returns the order item for the given ID
+	 *
+	 * @param string $id Unique order ID
+	 * @param boolean $default Use default criteria to limit orders
+	 * @return \Aimeos\MShop\Order\Item\Iface Order object
+	 */
+	public function getItem( $id, $default = true )
 	{
 		$context = $this->getContext();
+		$manager = \Aimeos\MShop\Factory::createManager( $context, 'order' );
 
-		$orderManager = \Aimeos\MShop\Factory::createManager( $context, 'order' );
-		$orderBaseManager = \Aimeos\MShop\Factory::createManager( $context, 'order/base' );
+		$search = $manager->createSearch( true );
+		$expr = [
+			$search->compare( '==', 'order.id', $id ),
+			$search->getConditions(),
+		];
+
+		if( $default !== false ) {
+			$expr[] = $search->compare( '==', 'order.editor', $context->getEditor() );
+		}
+
+		$search->setConditions( $search->combine( '&&', $expr ) );
+
+		$items = $manager->searchItems( $search );
+
+		if( ( $item = reset( $items ) ) !== false ) {
+			return $item;
+		}
+
+		throw new \Aimeos\Controller\Frontend\Order\Exception( sprintf( 'No order item for ID "%1$s" found', $id ) );
+	}
 
 
-		$orderBaseManager->begin();
-		$orderBaseManager->store( $basket );
-		$orderBaseManager->commit();
+	/**
+	 * Saves the modified order item
+	 *
+	 * @param \Aimeos\MShop\Order\Item\Iface $item Order object
+	 * @return \Aimeos\MShop\Order\Item\Iface Saved order item
+	 */
+	public function saveItem( \Aimeos\MShop\Order\Item\Iface $item )
+	{
+		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order' );
+		return $manager->saveItem( $item );
+	}
 
-		$orderItem = $orderManager->createItem();
-		$orderItem->setBaseId( $basket->getId() );
-		$orderItem->setType( \Aimeos\MShop\Order\Item\Base::TYPE_WEB );
-		$orderManager->saveItem( $orderItem );
 
+	/**
+	 * Returns the order items based on the given filter that belong to the current user
+	 *
+	 * @param \Aimeos\MW\Criteria\Iface Filter object
+	 * @param integer|null &$total Variable that will contain the total number of available items
+	 * @return \Aimeos\MShop\Order\Item\Iface[] Associative list of IDs as keys and order objects as values
+	 */
+	public function searchItems( \Aimeos\MW\Criteria\Iface $filter, &$total = null )
+	{
+		$context = $this->getContext();
+		$manager = \Aimeos\MShop\Factory::createManager( $context, 'order' );
 
-		return $orderItem;
+		$expr = [
+			$filter->getConditions(),
+			$filter->compare( '==', 'order.base.customerid', $context->getUserId() ),
+		];
+		$filter->setConditions( $filter->combine( '&&', $expr ) );
+
+		return $manager->searchItems( $filter, [], $total );
 	}
 
 
@@ -119,5 +217,36 @@ class Standard
 	public function update( \Aimeos\MShop\Order\Item\Iface $orderItem )
 	{
 		\Aimeos\Controller\Common\Order\Factory::createController( $this->getContext() )->update( $orderItem );
+	}
+
+
+	/**
+	 * Creates a new order from the given basket.
+	 *
+	 * Saves the given basket to the storage including the addresses, coupons,
+	 * products, services, etc. and creates/stores a new order item for that
+	 * order.
+	 *
+	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object to be stored
+	 * @return \Aimeos\MShop\Order\Item\Iface Order item that belongs to the stored basket
+	 * @deprecated 2017.04 Use store() from basket controller instead
+	 */
+	public function store( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	{
+		$context = $this->getContext();
+
+		$orderManager = \Aimeos\MShop\Factory::createManager( $context, 'order' );
+		$orderBaseManager = \Aimeos\MShop\Factory::createManager( $context, 'order/base' );
+
+
+		$orderBaseManager->begin();
+		$orderBaseManager->store( $basket );
+		$orderBaseManager->commit();
+
+		$orderItem = $orderManager->createItem();
+		$orderItem->setBaseId( $basket->getId() );
+		$orderItem->setType( \Aimeos\MShop\Order\Item\Base::TYPE_WEB );
+
+		return $orderManager->saveItem( $orderItem );
 	}
 }

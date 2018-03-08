@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -21,7 +21,7 @@ namespace Aimeos\Controller\ExtJS;
 class JsonRpc
 {
 	private $classprefix = 'Aimeos\\Controller\\ExtJS';
-	private $controllers = array();
+	private $controllers = [];
 	private $cntlPaths;
 	private $context;
 
@@ -47,7 +47,7 @@ class JsonRpc
 	 */
 	public function getJsonItemSchemas()
 	{
-		$list = array();
+		$list = [];
 
 		foreach( $this->getControllers() as $name => $controller ) {
 			$list[$name] = $controller->getItemSchema();
@@ -68,7 +68,7 @@ class JsonRpc
 	 */
 	public function getJsonSearchSchemas()
 	{
-		$list = array();
+		$list = [];
 
 		foreach( $this->getControllers() as $name => $controller ) {
 			$list[$name] = $controller->getSearchSchema();
@@ -90,7 +90,7 @@ class JsonRpc
 	 */
 	public function getJsonSmd( $clientUrl )
 	{
-		$services = array();
+		$services = [];
 		$transport = array( 'envelope' => 'JSON-RPC-2.0', 'transport' => 'POST' );
 
 		foreach( $this->getControllers() as $controller )
@@ -177,7 +177,7 @@ class JsonRpc
 	 */
 	protected function processStream( $content )
 	{
-		$response = array();
+		$response = [];
 
 		try
 		{
@@ -327,7 +327,7 @@ class JsonRpc
 	 */
 	protected function getControllers()
 	{
-		if( $this->controllers === array() )
+		if( $this->controllers === [] )
 		{
 			$subFolder = substr( str_replace( '\\', DIRECTORY_SEPARATOR, $this->getClassPrefix() ), 7 );
 

@@ -6,9 +6,9 @@ namespace Aimeos\Controller\ExtJS\Plugin\Decorator;
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class ExampleTest extends \PHPUnit_Framework_TestCase
+class ExampleTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 
@@ -125,7 +125,7 @@ class ExampleTest extends \PHPUnit_Framework_TestCase
 
 	public function testCall()
 	{
-		$result = $this->object->__call( 'getServiceDescription', array() );
+		$result = $this->object->__call( 'getServiceDescription', [] );
 		$this->assertInternalType( 'array', $result );
 	}
 

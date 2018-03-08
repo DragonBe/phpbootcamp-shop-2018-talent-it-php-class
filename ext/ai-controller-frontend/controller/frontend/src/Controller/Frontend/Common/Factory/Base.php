@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -20,7 +20,7 @@ namespace Aimeos\Controller\Frontend\Common\Factory;
  */
 class Base
 {
-	private static $objects = array();
+	private static $objects = [];
 
 
 	/**
@@ -116,8 +116,8 @@ class Base
 		 * @since 2014.03
 		 * @category Developer
 		 */
-		$decorators = $config->get( 'controller/frontend/common/decorators/default', array() );
-		$excludes = $config->get( 'controller/frontend/' . $domain . '/decorators/excludes', array() );
+		$decorators = $config->get( 'controller/frontend/common/decorators/default', [] );
+		$excludes = $config->get( 'controller/frontend/' . $domain . '/decorators/excludes', [] );
 
 		foreach( $decorators as $key => $name )
 		{
@@ -130,11 +130,11 @@ class Base
 		$controller = self::addDecorators( $context, $controller, $decorators, $classprefix );
 
 		$classprefix = '\\Aimeos\\Controller\\Frontend\\Common\\Decorator\\';
-		$decorators = $config->get( 'controller/frontend/' . $domain . '/decorators/global', array() );
+		$decorators = $config->get( 'controller/frontend/' . $domain . '/decorators/global', [] );
 		$controller = self::addDecorators( $context, $controller, $decorators, $classprefix );
 
 		$classprefix = '\\Aimeos\\Controller\\Frontend\\' . ucfirst( $localClass ) . '\\Decorator\\';
-		$decorators = $config->get( 'controller/frontend/' . $domain . '/decorators/local', array() );
+		$decorators = $config->get( 'controller/frontend/' . $domain . '/decorators/local', [] );
 		$controller = self::addDecorators( $context, $controller, $decorators, $classprefix );
 
 		return $controller;

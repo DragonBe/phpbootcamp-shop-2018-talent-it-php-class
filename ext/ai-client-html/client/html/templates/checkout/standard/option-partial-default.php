@@ -2,11 +2,11 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
-$errors = $this->get( 'errors', array() );
+$errors = $this->get( 'errors', [] );
 
 
 /** client/html/checkout/standard/summary/option/terms/url/target
@@ -78,9 +78,9 @@ $termsAction = $this->config( 'client/html/checkout/standard/summary/option/term
  * @see client/html/checkout/standard/summary/option/terms/url/action
  * @see client/html/url/config
  */
-$termsConfig = $this->config( 'client/html/checkout/standard/summary/option/terms/url/config', array() );
+$termsConfig = $this->config( 'client/html/checkout/standard/summary/option/terms/url/config', [] );
 
-$termsUrl = $this->url( $termsTarget, $termsController, $termsAction, array(), array(), $termsConfig );
+$termsUrl = $this->url( $termsTarget, $termsController, $termsAction, [], [], $termsConfig );
 
 
 /** client/html/checkout/standard/summary/option/terms/privacy/url/target
@@ -152,24 +152,24 @@ $privacyAction = $this->config( 'client/html/checkout/standard/summary/option/te
  * @see client/html/checkout/standard/summary/option/terms/privacy/url/action
  * @see client/html/url/config
  */
-$privacyConfig = $this->config( 'client/html/checkout/standard/summary/option/terms/privacy/url/config', array() );
+$privacyConfig = $this->config( 'client/html/checkout/standard/summary/option/terms/privacy/url/config', [] );
 
-$privacyUrl = $this->url( $privacyTarget, $privacyController, $privacyAction, array(), array(), $privacyConfig );
+$privacyUrl = $this->url( $privacyTarget, $privacyController, $privacyAction, [], [], $privacyConfig );
 
 
 ?>
 <?php if( !isset( $this->customerId ) ) : ?>
 	<div class="checkout-standard-summary-option-account">
-		<h3><?php echo $enc->html( $this->translate( 'client', 'Customer account' ), $enc::TRUST ); ?></h3>
+		<h3><?= $enc->html( $this->translate( 'client', 'Customer account' ), $enc::TRUST ); ?></h3>
 
-		<div class="single <?php echo ( isset( $errors['option']['account'] ) ? 'error' : '' ); ?>">
+		<div class="single <?= ( isset( $errors['option']['account'] ) ? 'error' : '' ); ?>">
 			<input id="option-account" type="checkbox" value="1"
-				name="<?php echo $enc->attr( $this->formparam( array( 'cs_option_account' ) ) ); ?>"
-				<?php echo ( $this->param( 'cs_option_account', 1 ) == 1 ? 'checked="checked"' : '' ); ?>
+				name="<?= $enc->attr( $this->formparam( array( 'cs_option_account' ) ) ); ?>"
+				<?= ( $this->param( 'cs_option_account', 1 ) == 1 ? 'checked="checked"' : '' ); ?>
 			/>
 			<p>
 				<label for="option-account">
-					<?php echo $enc->html( $this->translate( 'client', 'Create a customer account for me' ), $enc::TRUST ); ?>
+					<?= $enc->html( $this->translate( 'client', 'Create a customer account for me' ), $enc::TRUST ); ?>
 				</label>
 			</p>
 		</div>
@@ -177,18 +177,18 @@ $privacyUrl = $this->url( $privacyTarget, $privacyController, $privacyAction, ar
 <?php endif; ?>
 
 <div class="checkout-standard-summary-option-terms">
-	<h3><?php echo $enc->html( $this->translate( 'client', 'Terms and conditions' ), $enc::TRUST ); ?></h3>
+	<h3><?= $enc->html( $this->translate( 'client', 'Terms and conditions' ), $enc::TRUST ); ?></h3>
 
-	<div class="single <?php echo ( isset( $errors['option']['terms'] ) ? 'error' : '' ); ?>">
-		<input type="hidden" name="<?php echo $enc->attr( $this->formparam( array( 'cs_option_terms' ) ) ); ?>" value="1" />
+	<div class="single <?= ( isset( $errors['option']['terms'] ) ? 'error' : '' ); ?>">
+		<input type="hidden" name="<?= $enc->attr( $this->formparam( array( 'cs_option_terms' ) ) ); ?>" value="1" />
 		<input id="option-terms-accept" type="checkbox" value="1"
-			name="<?php echo $enc->attr( $this->formparam( array( 'cs_option_terms_value' ) ) ); ?>"
-			<?php echo ( $this->param( 'cs_option_terms_value', null ) == 1 ? 'checked="checked"' : '' ); ?>
+			name="<?= $enc->attr( $this->formparam( array( 'cs_option_terms_value' ) ) ); ?>"
+			<?= ( $this->param( 'cs_option_terms_value', null ) == 1 ? 'checked="checked"' : '' ); ?>
 		/>
 
 		<p>
 			<label for="option-terms-accept">
-				<?php echo $enc->html( sprintf( $this->translate( 'client',
+				<?= $enc->html( sprintf( $this->translate( 'client',
 					'I accept the <a href="%1$s" target="_blank" title="terms and conditions" alt="terms and conditions">terms and conditions</a> and <a href="%2$s" target="_blank" title="privacy policy" alt="privacy policy">privacy policy</a>' ),
 					$enc->attr( $termsUrl ),
 					$enc->attr( $privacyUrl )

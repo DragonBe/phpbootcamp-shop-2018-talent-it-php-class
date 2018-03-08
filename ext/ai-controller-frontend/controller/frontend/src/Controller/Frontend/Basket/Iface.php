@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -22,7 +22,8 @@ interface Iface
 {
 	/**
 	 * Empties the basket and removing all products, addresses, services, etc.
-	 * @return void
+	 *
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Basket frontend object
 	 */
 	public function clear();
 
@@ -37,8 +38,38 @@ interface Iface
 
 	/**
 	 * Explicitely persists the basket content
+	 *
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Basket frontend object
 	 */
 	public function save();
+
+
+	/**
+	 * Sets the new basket type
+	 *
+	 * @param string $type Basket type
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Basket frontend object
+	 */
+	public function setType( $type );
+
+
+	/**
+	 * Creates a new order base object from the current basket
+	 *
+	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base object including products, addresses and services
+	 */
+	public function store();
+
+
+	/**
+	 * Returns the order base object for the given ID
+	 *
+	 * @param string $id Unique ID of the order base object
+	 * @param integer $parts Constants which parts of the order base object should be loaded
+	 * @param boolean $default True to add default criteria (user logged in), false if not
+	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base object including the given parts
+	 */
+	public function load( $id, $parts = \Aimeos\MShop\Order\Manager\Base\Base::PARTS_ALL, $default = true );
 
 
 	/**
@@ -46,11 +77,7 @@ interface Iface
 	 *
 	 * @param string $prodid ID of the base product to add
 	 * @param integer $quantity Amount of products that should by added
-	 * @param array $options Possible options are: 'stock'=>true|false and 'variant'=>true|false
-	 * 	The 'stock'=>false option allows adding products without being in stock.
-	 * 	The 'variant'=>false option allows adding the selection product to the basket
-	 * 	instead of the specific sub-product if the variant-building attribute IDs
-	 * 	doesn't match a specific sub-product or if the attribute IDs are missing.
+	 * @param array $options Option list (unused at the moment)
 	 * @param array $variantAttributeIds List of variant-building attribute IDs that identify a specific product
 	 * 	in a selection products
 	 * @param array $configAttributeIds  List of attribute IDs that doesn't identify a specific product in a
@@ -62,8 +89,8 @@ interface Iface
 	 * @throws \Aimeos\Controller\Frontend\Basket\Exception If the product isn't available
 	 * @return void
 	 */
-	public function addProduct( $prodid, $quantity = 1, array $options = array(), array $variantAttributeIds = array(),
-		array $configAttributeIds = array(), array $hiddenAttributeIds = array(), array $customAttributeValues = array(),
+	public function addProduct( $prodid, $quantity = 1, array $options = [], array $variantAttributeIds = [],
+		array $configAttributeIds = [], array $hiddenAttributeIds = [], array $customAttributeValues = [],
 		$stocktype = 'default' );
 
 
@@ -84,7 +111,7 @@ interface Iface
 	 * @param array $configAttributeCodes Codes of the product config attributes that should be REMOVED
 	 * @return void
 	 */
-	public function editProduct( $position, $quantity, array $configAttributeCodes = array() );
+	public function editProduct( $position, $quantity, array $configAttributeCodes = [] );
 
 
 	/**
@@ -123,11 +150,11 @@ interface Iface
 	 * Sets the delivery/payment service item based on the service ID.
 	 *
 	 * @param string $type Service type code like 'payment' or 'delivery'
-	 * @param string $id Unique ID of the service item
+	 * @param string $id|null Unique ID of the service item or null to remove it
 	 * @param array $attributes Associative list of key/value pairs containing the attributes selected or
 	 * 	entered by the customer when choosing one of the delivery or payment options
 	 * @throws \Aimeos\Controller\Frontend\Basket\Exception If there is no price to the service item attached
 	 * @return void
 	 */
-	public function setService( $type, $id, array $attributes = array() );
+	public function setService( $type, $id, array $attributes = [] );
 }

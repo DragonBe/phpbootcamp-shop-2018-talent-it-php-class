@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -156,7 +156,7 @@ class Standard
 			 */
 			$container = $this->createContainer( $tmpfile, 'controller/extjs/catalog/import/text/standard/container' );
 
-			$textTypeMap = array();
+			$textTypeMap = [];
 			foreach( $this->getTextTypes( 'catalog' ) as $item ) {
 				$textTypeMap[$item->getCode()] = $item->getId();
 			}
@@ -220,7 +220,7 @@ class Standard
 			$catalogItems = $manager->searchItems( $criteria );
 			$catalogStart += count( $catalogItems );
 
-			$catalogIds = array();
+			$catalogIds = [];
 
 			foreach( $catalogItems as $item ) {
 				$catalogIds[] = $item->getId();
@@ -236,7 +236,7 @@ class Standard
 					$criteria->compare( '==', 'catalog.lists.domain', 'text' ),
 				);
 				$criteria->setConditions( $criteria->combine( '&&', $expr ) );
-				$listItems = $listManager->searchItems( $criteria, array(), $listTotal );
+				$listItems = $listManager->searchItems( $criteria, [], $listTotal );
 				$listStart += count( $catalogItems );
 
 				foreach( $listItems as $item ) {
@@ -268,7 +268,7 @@ class Standard
 					$item->setDomain( 'text' );
 					$item->setRefId( $textId );
 
-					$listManager->saveItem( $item );
+					$listManager->saveItem( $item, false );
 				}
 				catch( \Exception $e )
 				{

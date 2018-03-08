@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Controller\Common\Product\Import\Csv\Processor\Stock;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $endpoint;
@@ -20,7 +20,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		\Aimeos\MShop\Factory::setCache( true );
 
 		$this->context = \TestHelperCntl::getContext();
-		$this->endpoint = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $this->context, array() );
+		$this->endpoint = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $this->context, [] );
 	}
 
 
@@ -142,8 +142,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Stock\Standard( $this->context, $mapping, $this->endpoint );
 		$object->process( $product, $data );
 
-		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Stock\Standard( $this->context, array(), $this->endpoint );
-		$object->process( $product, array() );
+		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Stock\Standard( $this->context, [], $this->endpoint );
+		$object->process( $product, [] );
 
 		$items = $this->getStockItems( $product->getCode() );
 		$this->delete( $product );
@@ -194,7 +194,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$typeManager = $manager->getSubManager( 'type' );
 
 		$typeSearch = $typeManager->createSearch();
-		$typeSearch->setConditions( $typeSearch->compare( '==', 'type.code', 'default' ) );
+		$typeSearch->setConditions( $typeSearch->compare( '==', 'product.type.code', 'default' ) );
 		$typeResult = $typeManager->searchItems( $typeSearch );
 
 		if( ( $typeItem = reset( $typeResult ) ) === false ) {
@@ -205,9 +205,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setTypeid( $typeItem->getId() );
 		$item->setCode( $code );
 
-		$manager->saveItem( $item );
-
-		return $item;
+		return $manager->saveItem( $item );
 	}
 
 
@@ -223,7 +221,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$manager = \Aimeos\MShop\Factory::createManager( $this->context, 'stock' );
 
 		$search = $manager->createSearch();
-		$search->setConditions( $search->compare( '==', 'stock.prodcode', $code ) );
+		$search->setConditions( $search->compare( '==', 'stock.productcode', $code ) );
 
 		return $manager->searchItems( $search );
 	}

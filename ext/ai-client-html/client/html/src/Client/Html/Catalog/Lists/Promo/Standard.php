@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -56,8 +56,8 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/catalog/lists/promo/standard/subparts';
-	private $subPartNames = array();
-	private $tags = array();
+	private $subPartNames = [];
+	private $tags = [];
 	private $expire;
 	private $cache;
 
@@ -70,7 +70,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -130,7 +130,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -289,11 +289,11 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
-			$products = array();
+			$products = [];
 			$context = $this->getContext();
 			$config = $context->getConfig();
 
@@ -323,17 +323,19 @@ class Standard
 				$size = $config->get( 'client/html/catalog/lists/promo/size', 6 );
 				$domains = $config->get( 'client/html/catalog/lists/domains', array( 'media', 'price', 'text' ) );
 
-				$total = null;
+				$level = \Aimeos\MW\Tree\Manager\Base::LEVEL_ONE;
+				$level = $config->get( 'client/html/catalog/lists/levels', $level );
 
-				$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'catalog' );
-				$filter = $controller->createIndexFilterCategory( $catId, 'relevance', '+', 0, $size, 'promotion' );
-				$products = $controller->getIndexItems( $filter, $domains, $total );
+				$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'product' );
+				$filter = $controller->createFilter( 'relevance', '+', 0, $size, 'promotion' );
+				$filter = $controller->addFilterCategory( $filter, $catId, $level, 'relevance', '+', 'promotion' );
+				$products = $controller->searchItems( $filter, $domains );
 
 				$this->addMetaItems( $products, $this->expire, $this->tags );
 
 
-				if( !empty( $products ) && (bool) $config->get( 'client/html/catalog/lists/stock/enable', true ) == true ) {
-					$view->promoProductCodes = $this->getProductCodes( $products );
+				if( !empty( $products ) && (bool) $config->get( 'client/html/catalog/lists/stock/enable', true ) === true ) {
+					$view->promoStockUrl = $this->getStockUrl( $view, $products );
 				}
 
 				$view->promoItems = $products;

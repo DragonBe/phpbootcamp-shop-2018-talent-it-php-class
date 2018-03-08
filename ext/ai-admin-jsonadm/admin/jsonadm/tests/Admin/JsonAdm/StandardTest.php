@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Admin\JsonAdm;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -371,7 +371,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setLabel( 'test' );
 		$item->setId( '-1' );
 
-		$productManagerStub->expects( $this->once() )->method( 'saveItem' );
+		$productManagerStub->expects( $this->once() )->method( 'saveItem' )
+			->will( $this->returnValue( $productManagerStub->createItem() ) );
 		$productManagerStub->expects( $this->atLeastOnce() )->method( 'getItem' )
 			->will( $this->returnValue( $item ) );
 
@@ -409,7 +410,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setLabel( 'test' );
 		$item->setId( '-1' );
 
-		$productManagerStub->expects( $this->exactly( 2 ) )->method( 'saveItem' );
+		$productManagerStub->expects( $this->exactly( 2 ) )->method( 'saveItem' )
+			->will( $this->returnValue( $productManagerStub->createItem() ) );
 		$productManagerStub->expects( $this->atLeastOnce() )->method( 'getItem' )
 			->will( $this->returnValue( $item ) );
 
@@ -515,11 +517,12 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item = new \Aimeos\MShop\Product\Item\Standard();
 		$item->setId( '-1' );
 
-		$productManagerStub->expects( $this->once() )->method( 'createItem' )
+		$productManagerStub->expects( $this->exactly( 2 ) )->method( 'createItem' )
 			->will( $this->returnValue( $item ) );
 		$productManagerStub->expects( $this->any() )->method( 'getItem' )
 			->will( $this->returnValue( $item ) );
-		$productManagerStub->expects( $this->once() )->method( 'saveItem' );
+		$productManagerStub->expects( $this->once() )->method( 'saveItem' )
+			->will( $this->returnValue( $productManagerStub->createItem() ) );
 
 
 		$body = '{"data": {"type": "product", "attributes": {"product.type": "default", "product.label": "test"}}}';
@@ -527,7 +530,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$response = $this->object->post( $request, $this->view->response() );
 		$result = json_decode( (string) $response->getBody(), true );
-
 
 		$this->assertEquals( 201, $response->getStatusCode() );
 		$this->assertEquals( 1, count( $response->getHeader( 'Content-Type' ) ) );
@@ -552,7 +554,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setLabel( 'test' );
 		$item->setId( '-1' );
 
-		$productManagerStub->expects( $this->exactly( 2 ) )->method( 'saveItem' );
+		$productManagerStub->expects( $this->exactly( 2 ) )->method( 'saveItem' )
+			->will( $this->returnValue( $productManagerStub->createItem() ) );
 		$productManagerStub->expects( $this->exactly( 2 ) )->method( 'getItem' )
 			->will( $this->returnValue( $item ) );
 
@@ -587,13 +590,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item = new \Aimeos\MShop\Product\Item\Standard();
 		$item->setId( '-1' );
 
-		$productManagerStub->expects( $this->once() )->method( 'createItem' )
+		$productManagerStub->expects( $this->exactly( 2 ) )->method( 'createItem' )
 			->will( $this->returnValue( $item ) );
 		$productManagerStub->expects( $this->any() )->method( 'getItem' )
 			->will( $this->returnValue( $item ) );
 		$productManagerStub->expects( $this->once() )->method( 'getSubManager' )
 			->will( $this->returnValue( $productManagerListsStub ) );
-		$productManagerStub->expects( $this->once() )->method( 'saveItem' );
+		$productManagerStub->expects( $this->once() )->method( 'saveItem' )
+			->will( $this->returnValue( $productManagerStub->createItem() ) );
 
 		$productManagerListsStub->expects( $this->once() )->method( 'saveItem' );
 
@@ -717,7 +721,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals( 1, count( $response->getHeader( 'Content-Type' ) ) );
 
 		$this->assertNull( $result['meta']['prefix'] );
-		$this->assertEquals( 57, count( $result['meta']['resources'] ) );
+		$this->assertGreaterThan( 59, count( $result['meta']['resources'] ) );
 		$this->assertGreaterThan( 0, count( $result['meta']['attributes'] ) );
 
 		$this->assertArrayNotHasKey( 'errors', $result );
@@ -735,7 +739,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals( 1, count( $response->getHeader( 'Content-Type' ) ) );
 
 		$this->assertEquals( 'prefix', $result['meta']['prefix'] );
-		$this->assertEquals( 57, count( $result['meta']['resources'] ) );
+		$this->assertGreaterThan( 59, count( $result['meta']['resources'] ) );
 		$this->assertGreaterThan( 0, count( $result['meta']['attributes'] ) );
 
 		$this->assertArrayNotHasKey( 'errors', $result );

@@ -1,7 +1,15 @@
 <?php
 
-$data = $this->get( 'data', array() );
-$entries = array();
+/**
+ * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
+ * @copyright Aimeos (aimeos.org), 2016-2017
+ * @package Admin
+ * @subpackage Jsonadm
+ */
+
+
+$data = $this->get( 'data', [] );
+$entries = [];
 
 foreach( $data as $key => $value ) {
 	$entries[] = array( 'id' => $key, 'type' => 'aggregate', 'attributes' => $value );
@@ -10,12 +18,24 @@ foreach( $data as $key => $value ) {
 ?>
 {
 	"meta": {
-		"total": <?php echo count( $data ); ?>
+		"total": <?= count( $data ); ?>
+
+		<?php if( $this->csrf()->name() != '' ) : ?>
+			, "csrf": {
+				"name": "<?= $this->csrf()->name(); ?>",
+				"value": "<?= $this->csrf()->value(); ?>"
+			}
+		<?php endif; ?>
 
 	},
-<?php	if( isset( $this->errors ) ) : ?>
-	"errors": <?php echo $this->partial( $this->config( $this->get( 'partial-errors', 'admin/jsonadm/partials/template-errors' ), 'partials/errors-standard.php' ), array( 'errors' => $this->errors ) ); ?>
-<?php	elseif( isset( $this->data ) ) : ?>
-	"data": <?php echo json_encode( $entries ); ?>
-<?php	endif; ?>
+
+	<?php if( isset( $this->errors ) ) : ?>
+
+		"errors": <?= $this->partial( $this->config( $this->get( 'partial-errors', 'admin/jsonadm/partials/template-errors' ), 'partials/errors-standard.php' ), array( 'errors' => $this->errors ) ); ?>
+
+	<?php elseif( isset( $this->data ) ) : ?>
+
+		"data": <?= json_encode( $entries ); ?>
+
+	<?php endif; ?>
 }

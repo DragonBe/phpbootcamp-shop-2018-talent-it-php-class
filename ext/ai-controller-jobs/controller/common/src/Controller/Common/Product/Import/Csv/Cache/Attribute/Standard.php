@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -32,7 +32,7 @@ class Standard
 	 * @category Developer
 	 */
 
-	private $attributes = array();
+	private $attributes = [];
 
 
 	/**
@@ -95,7 +95,7 @@ class Standard
 		$code = $item->getCode();
 
 		if( !isset( $this->attributes[$code] ) || !is_array( $this->attributes[$code] ) ) {
-			$this->attributes[$code] = array();
+			$this->attributes[$code] = [];
 		}
 
 		$this->attributes[$code][ $item->getType() ] = $item;

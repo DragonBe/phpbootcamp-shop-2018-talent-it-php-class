@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 /** Available data
@@ -21,7 +21,7 @@ $dlConfig = $this->config( 'client/html/account/download/url/config', array( 'ab
 try {
 	$products = $this->summaryBasket->getProducts();
 } catch( Exception $e ) {
-	$products = array();
+	$products = [];
 }
 
 $priceTaxvalue = '0.00';
@@ -74,26 +74,26 @@ $unhide = $this->get( 'summaryShowDownloadAttributes', false );
 
 
 ?>
-<?php echo strip_tags( $this->translate( 'client', 'Order details' ) ); ?>:
+<?= strip_tags( $this->translate( 'client', 'Order details' ) ); ?>:
 <?php foreach( $products as $product ) : ?>
 <?php	$price = $product->getPrice(); ?>
 
-<?php echo strip_tags( $product->getName() ); ?> (<?php echo $product->getProductCode(); ?>)
+<?= strip_tags( $product->getName() ); ?> (<?= $product->getProductCode(); ?>)
 <?php	foreach( array_merge( $product->getAttributes( 'config' ), $product->getAttributes( 'custom' ) ) as $attribute ) : ?>
-- <?php 	echo strip_tags( $this->translate( 'client/code', $attribute->getCode() ) ); ?>: <?php echo strip_tags( ( $attribute->getName() != '' ? $attribute->getName() : $attribute->getValue() ) ); ?>
+- <?php 	echo strip_tags( $this->translate( 'client/code', $attribute->getCode() ) ); ?>: <?= strip_tags( ( $attribute->getName() != '' ? $attribute->getName() : $attribute->getValue() ) ); ?>
 
 <?php	endforeach; ?>
 <?php	foreach( $product->getAttributes( 'hidden' ) as $attribute ) : ?>
 <?php		if( $unhide && $attribute->getCode() === 'download' ) : ?>
-- <?php 		echo strip_tags( $attribute->getName()); ?>: <?php echo $this->url( $dlTarget, $dlController, $dlAction, array( 'dl_id' => $attribute->getId() ), array(), $dlConfig ); ?>
+- <?php 		echo strip_tags( $attribute->getName()); ?>: <?= $this->url( $dlTarget, $dlController, $dlAction, array( 'dl_id' => $attribute->getId() ), [], $dlConfig ); ?>
 
 <?php		endif; ?>
 <?php	endforeach; ?>
-<?php echo strip_tags( $this->translate( 'client', 'Quantity' ) ); ?>: <?php echo $product->getQuantity(); ?>
+<?= strip_tags( $this->translate( 'client', 'Quantity' ) ); ?>: <?= $product->getQuantity(); ?>
 
-<?php echo strip_tags( $this->translate( 'client', 'Price' ) ); ?>: <?php printf( $priceFormat, $this->number( $price->getValue() ), $priceCurrency ); ?>
+<?= strip_tags( $this->translate( 'client', 'Price' ) ); ?>: <?php printf( $priceFormat, $this->number( $price->getValue() ), $priceCurrency ); ?>
 
-<?php echo strip_tags( $this->translate( 'client', 'Sum' ) ); ?>: <?php printf( $priceFormat, $this->number( $price->getValue() * $product->getQuantity() ), $priceCurrency ); ?>
+<?= strip_tags( $this->translate( 'client', 'Sum' ) ); ?>: <?php printf( $priceFormat, $this->number( $price->getValue() * $product->getQuantity() ), $priceCurrency ); ?>
 
 <?php endforeach; ?>
 
@@ -103,10 +103,10 @@ $unhide = $this->get( 'summaryShowDownloadAttributes', false );
 
 
 <?php endif; ?>
-<?php echo strip_tags( $this->translate( 'client', 'Sub-total' ) ); ?>: <?php printf( $priceFormat, $this->number( $priceValue ), $priceCurrency ); ?>
+<?= strip_tags( $this->translate( 'client', 'Sub-total' ) ); ?>: <?php printf( $priceFormat, $this->number( $priceValue ), $priceCurrency ); ?>
 
 <?php if( $priceService - $paymentPriceService > 0 ) : ?>
-<?php echo strip_tags( $this->translate( 'client', '+ Shipping' ) ); ?>: <?php printf( $priceFormat, $this->number( $priceService - $paymentPriceService ), $priceCurrency ); ?>
+<?= strip_tags( $this->translate( 'client', '+ Shipping' ) ); ?>: <?php printf( $priceFormat, $this->number( $priceService - $paymentPriceService ), $priceCurrency ); ?>
 
 <?php endif; ?>
 <?php if( $paymentPriceService > 0 ) : ?>
@@ -117,7 +117,7 @@ $unhide = $this->get( 'summaryShowDownloadAttributes', false );
 <?php	echo strip_tags( $this->translate( 'client', 'Total' ) ); ?>: <?php printf( $priceFormat, $this->number( $priceValue + $priceService ), $priceCurrency ); ?>
 
 <?php endif; ?>
-<?php foreach( $this->get( 'summaryTaxRates', array() ) as $taxRate => $priceItem ) : $taxValue = $priceItem->getTaxValue(); ?>
+<?php foreach( $this->get( 'summaryTaxRates', [] ) as $taxRate => $priceItem ) : $taxValue = $priceItem->getTaxValue(); ?>
 <?php	if( $taxRate > '0.00' && $taxValue > '0.00' ) : $priceTaxvalue += $taxValue; ?>
 <?php		$taxFormat = ( $priceItem->getTaxFlag() ? $this->translate( 'client', 'Incl. %1$s%% VAT' ) : $this->translate( 'client', '+ %1$s%% VAT' ) ); ?>
 <?php		echo strip_tags( sprintf( $taxFormat, $this->number( $taxRate ) ) ); ?>: <?php printf( $priceFormat, $this->number( $taxValue ), $priceCurrency ); ?>
@@ -129,6 +129,6 @@ $unhide = $this->get( 'summaryShowDownloadAttributes', false );
 
 <?php endif; ?>
 <?php if( $priceRebate > '0.00' ) : ?>
-<?php echo strip_tags( $this->translate( 'client', 'Included rebates' ) ); ?>: <?php printf( $priceFormat, $this->number( $priceRebate ), $priceCurrency ); ?>
+<?= strip_tags( $this->translate( 'client', 'Included rebates' ) ); ?>: <?php printf( $priceFormat, $this->number( $priceRebate ), $priceCurrency ); ?>
 
 <?php endif; ?>

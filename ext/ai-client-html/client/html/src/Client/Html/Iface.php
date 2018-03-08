@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -37,7 +37,7 @@ interface Iface
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null );
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null );
 
 	/**
 	 * Returns the HTML code for insertion into the body.
@@ -47,7 +47,7 @@ interface Iface
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null );
+	public function getBody( $uid = '', array &$tags = [], &$expire = null );
 
 	/**
 	 * Returns the view object that will generate the HTML output.

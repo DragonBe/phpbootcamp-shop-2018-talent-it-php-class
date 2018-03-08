@@ -5,9 +5,9 @@ namespace Aimeos\Controller\Common\Product\Import\Csv\Processor\Catalog;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private static $product;
 	private $context;
@@ -32,9 +32,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$item->setTypeId( $typeItem->getId() );
 		$item->setStatus( 1 );
 
-		$manager->saveItem( $item );
-
-		self::$product = $item;
+		self::$product = $manager->saveItem( $item );
 	}
 
 
@@ -50,7 +48,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		\Aimeos\MShop\Factory::setCache( true );
 
 		$this->context = \TestHelperCntl::getContext();
-		$this->endpoint = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $this->context, array() );
+		$this->endpoint = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $this->context, [] );
 	}
 
 
@@ -208,8 +206,8 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Catalog\Standard( $this->context, $mapping, $this->endpoint );
 		$object->process( self::$product, $data );
 
-		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Catalog\Standard( $this->context, array(), $this->endpoint );
-		$object->process( self::$product, array() );
+		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Catalog\Standard( $this->context, [], $this->endpoint );
+		$object->process( self::$product, [] );
 
 		$category = $this->get( 'job_csv_test' );
 		$this->delete( $category );

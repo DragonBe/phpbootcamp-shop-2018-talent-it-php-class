@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -47,41 +47,15 @@ class Standard
 
 		try
 		{
-			$pos = 0;
-			$delete = array();
-			$map = $this->getMappedChunk( $data );
+			$propMap = [];
+			$map = $this->getMappedChunk( $data, $this->getMapping() );
 			$items = $this->getPropertyItems( $product->getId() );
 
-			foreach( $items as $id => $item )
-			{
-				if( isset( $map[$pos] ) )
-				{
-					if( !isset( $map[$pos]['product.property.type'] ) || !isset( $map[$pos]['product.property.value'] ) )
-					{
-						unset( $map[$pos] );
-						continue;
-					}
-
-					if( $map[$pos]['product.property.type'] === $item->getType()
-						&& $map[$pos]['product.property.value'] === $item->getValue()
-						&& ( !isset( $map[$pos]['product.property.languageid'] )
-							|| isset( $map[$pos]['product.property.languageid'] )
-							&& $map[$pos]['product.property.languageid'] === $item->getLanguageId()
-						)
-					) {
-						$pos++;
-						continue;
-					}
-				}
-
-				$items[$id] = null;
-				$delete[] = $id;
-				$pos++;
+			foreach( $items as $item ) {
+				$propMap[ $item->getValue() ][ $item->getType() ] = $item;
 			}
 
-			$manager->deleteItems( $delete );
-
-			foreach( $map as $pos => $list )
+			foreach( $map as $list )
 			{
 				if( $list['product.property.type'] == '' || $list['product.property.value'] == '' ) {
 					continue;
@@ -91,15 +65,23 @@ class Standard
 				$list['product.property.typeid'] = $this->getTypeId( 'product/property/type', 'product', $typecode );
 				$list['product.property.parentid'] = $product->getId();
 
-				if( ( $item = array_shift( $items ) ) === null ) {
+				if( isset( $propMap[ $list['product.property.value'] ][$typecode] ) )
+				{
+					$item = $propMap[ $list['product.property.value'] ][$typecode];
+					unset( $items[ $item->getId() ] );
+				}
+				else
+				{
 					$item = $manager->createItem();
 				}
 
 				$item->fromArray( $list );
-				$manager->saveItem( $item );
+				$manager->saveItem( $item, false );
 			}
 
-			$remaining = $this->getObject()->process( $product, $data );
+			$manager->deleteItems( array_keys( $items ) );
+
+			$data = $this->getObject()->process( $product, $data );
 
 			$manager->commit();
 		}
@@ -109,7 +91,7 @@ class Standard
 			throw $e;
 		}
 
-		return $remaining;
+		return $data;
 	}
 
 

@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 $enc = $this->encoder();
@@ -11,7 +11,7 @@ $target = $this->request()->getTarget();
 $searchTarget = $this->config( 'admin/jqadm/url/search/target' );
 $cntl = $this->config( 'admin/jqadm/url/search/controller', 'Jqadm' );
 $action = $this->config( 'admin/jqadm/url/search/action', 'search' );
-$config = $this->config( 'admin/jqadm/url/search/config', array() );
+$config = $this->config( 'admin/jqadm/url/search/config', [] );
 
 
 /** admin/jsonadm/url/options/target
@@ -82,7 +82,7 @@ $jsonAction = $this->config( 'admin/jsonadm/url/options/action', 'options' );
  * @see admin/jsonadm/url/options/controller
  * @see admin/jsonadm/url/options/action
  */
-$jsonConfig = $this->config( 'admin/jsonadm/url/options/config', array() );
+$jsonConfig = $this->config( 'admin/jsonadm/url/options/config', [] );
 
 
 /** admin/extjs/url/target
@@ -153,53 +153,67 @@ $extAction = $this->config( 'admin/extjs/url/action', 'index' );
  * @see admin/extjs/url/controller
  * @see admin/extjs/url/action
  */
-$extConfig = $this->config( 'admin/extjs/url/config', array() );
+$extConfig = $this->config( 'admin/extjs/url/config', [] );
 
 
-/** admin/jqadm/resources
- * List of available resource clients in the JQAdm interface
+/** admin/jqadm/navbar
+ * List of JQAdm client names shown in the navigation bar of the admin interface
  *
- * The JQAdm admin interface consists of several clients for different resources.
- * This configuration setting lists the names of the resources and their order.
+ * You can add, remove or reorder the links in the navigation bar by
+ * setting a new list of client resource names.
+
+ * In the configuration files of extensions, you should only add entries using
+ * one of these lines:
+ *
+ *  'myclient' => 'myclient',
+ *  'myclient-subclient' => 'myclient/subclient',
+ *
+ * The key of the new client must be unique in the extension configuration so
+ * it's not overwritten by other extensions. Don't use slashes in keys (/)
+ * because they are interpreted as keys of sub-arrays in the configuration.
  *
  * @param array List of resource client names
- * @since 2016.07
+ * @since 2017.10
  * @category Developer
+ * @see admin/jqadm/navbar-limit
  */
-$resourceList = $this->config( 'admin/jqadm/resources', array( 'dashboard', 'product' ) );
+$navlist = $this->config( 'admin/jqadm/navbar', [] );
 
-$site = $this->param( 'site' );
-$extParams = array( 'site' => $site, 'lang' => $this->param( 'lang' ) );
-
-$params = $this->get( 'pageParams', array() );
-$params['resource'] = $this->param( 'resource', 'dashboard' );
-$params['site'] = $this->param( 'site', 'default' );
-$params['lang'] = $this->param( 'lang', null );
-$params['id'] = $this->param( 'id', '' );
-
-
-/** admin/jqadm/partial/error
- * Relative path to the partial template for displaying errors
+/** admin/jqadm/navbar-limit
+ * Number of JQAdm client links in the navigation bar shown by default
  *
- * The template file contains the HTML code and processing instructions
- * to generate the result shown in the administration interface. The
- * configuration string is the path to the template file relative
- * to the templates directory (usually in admin/jqadm/templates).
+ * The navigation bar is divided into the basic and advanced section.
+ * All admin client links in the basic section are always shown
+ * while the links in the advanced section are hidden by default. The
+ * entries in the navigation bar are defined by admin/jqadm/navbar. Using
+ * this setting you can change how many links are always shown.
  *
- * You can overwrite the template file configuration in extensions and
- * provide alternative templates. These alternative templates should be
- * named like the default one but with the string "default" replaced by
- * an unique name. You may use the name of your project for this. If
- * you've implemented an alternative client class as well, "default"
- * should be replaced by the name of the new class.
- *
- * @param string Relative path to the partial creating the HTML code
- * @since 2016.04
+ * @param integer Number of client resource links
+ * @since 2017.10
  * @category Developer
- * @see admin/jqadm/partial/confirm
- * @see admin/jqadm/partial/filter
- * @see admin/jqadm/partial/pagination
+ * @see admin/jqadm/navbar
  */
+$navlimit = $this->config( 'admin/jqadm/navbar-limit', 7 );
+
+
+$navfirst = reset( $navlist );
+if( is_array( $navfirst ) ) {
+	$navfirst = key( $navlist );
+}
+
+$resource = $this->param( 'resource', 'dashboard' );
+$site = $this->param( 'site', 'default' );
+$lang = $this->param( 'lang' );
+
+$params = ['resource' => $resource, 'site' => $site];
+$extParams = ['site' => $site];
+
+if( $lang ) {
+	$params['lang'] = $extParams['lang'] = $lang;
+}
+
+$title = $this->translate( 'admin', '%1$s (Ctrl+Alt+%2$s)' );
+
 
 /** admin/jqadm/partial/confirm
  * Relative path to the partial template for displaying the confirmation dialog
@@ -220,95 +234,234 @@ $params['id'] = $this->param( 'id', '' );
  * @since 2016.04
  * @category Developer
  * @see admin/jqadm/partial/error
- * @see admin/jqadm/partial/filter
- * @see admin/jqadm/partial/pagination
+ * @see admin/jqadm/partial/info
+ */
+
+/** admin/jqadm/partial/error
+ * Relative path to the partial template for displaying errors
+ *
+ * The template file contains the HTML code and processing instructions
+ * to generate the result shown in the administration interface. The
+ * configuration string is the path to the template file relative
+ * to the templates directory (usually in admin/jqadm/templates).
+ *
+ * You can overwrite the template file configuration in extensions and
+ * provide alternative templates. These alternative templates should be
+ * named like the default one but with the string "default" replaced by
+ * an unique name. You may use the name of your project for this. If
+ * you've implemented an alternative client class as well, "default"
+ * should be replaced by the name of the new class.
+ *
+ * @param string Relative path to the partial creating the HTML code
+ * @since 2016.04
+ * @category Developer
+ * @see admin/jqadm/partial/confirm
+ * @see admin/jqadm/partial/info
+ */
+
+/** admin/jqadm/partial/info
+ * Relative path to the partial template for displaying notices
+ *
+ * The template file contains the HTML code and processing instructions
+ * to generate the result shown in the administration interface. The
+ * configuration string is the path to the template file relative
+ * to the templates directory (usually in admin/jqadm/templates).
+ *
+ * You can overwrite the template file configuration in extensions and
+ * provide alternative templates. These alternative templates should be
+ * named like the default one but with the string "default" replaced by
+ * an unique name. You may use the name of your project for this. If
+ * you've implemented an alternative client class as well, "default"
+ * should be replaced by the name of the new class.
+ *
+ * @param string Relative path to the partial creating the HTML code
+ * @since 2017.10
+ * @category Developer
+ * @see admin/jqadm/partial/confirm
+ * @see admin/jqadm/partial/error
  */
 
 ?>
-<div class="aimeos" data-url="<?php echo $enc->attr( $this->url( $jsonTarget, $jsonCntl, $jsonAction, array( 'site' => $site, 'resource' => '', 'id' => '' ), array(), $jsonConfig ) ); ?>">
+<div class="aimeos" lang="<?= $this->param( 'lang' ); ?>" data-url="<?= $enc->attr( $this->url( $jsonTarget, $jsonCntl, $jsonAction, array( 'site' => $site ), [], $jsonConfig ) ); ?>">
 
-	<nav class="navbar navbar-full">
-		<a class="navbar-brand" href="/list">
-			<img src="/images/Maneblusser.jpg" alt="Maneblusser Fashion" title="Maneblusser Fashion" />
-		</a>
+	<nav class="main-sidebar">
+		<div class="sidebar-wrapper">
 
-		<button class="navbar-toggler hidden-sm-up" type="button" data-toggle="collapse" data-target="#collapse-navbar">&#9776;</button>
+			<a class="logo" href="https://aimeos.org/update/?type={type}&version={version}">
+				<img src="https://aimeos.org/check/?type={type}&version={version}&extensions={extensions}" alt="Aimeos update" title="Aimeos update">
+			</a>
 
-		<div class="collapse navbar-toggleable-xs" id="collapse-navbar">
-			<ul class="nav navbar-nav">
+			<ul class="sidebar-menu basic">
 
-<?php if( $this->access( 'admin' ) ) : ?>
-				<li class="nav-item mode active">
-					<a class="nav-link" href="<?php echo $enc->attr( $this->url( $extTarget, $extCntl, $extAction, $extParams, array(), $extConfig ) ); ?>">
-						<?php echo $enc->html( $this->translate( 'admin', 'Expert mode' ) ); ?>
-					</a>
-				</li>
-<?php endif; ?>
+				<?php if( $this->pageSiteTree->getChildren() !== [] && $this->access( $this->config( 'admin/jqadm/resource/site/groups', [] ) ) ) : ?>
+					<li class="site treeview">
+						<a href="#">
+							<i class="icon"></i>
+							<span class="title"><?= $enc->html( $this->site()->label() ); ?></span>
+						</a>
+						<ul class="tree-menu">
+							<li class="menu-header"><strong><?= $enc->html( $this->translate( 'admin', 'Site' ) ); ?></strong></li>
 
-				<li class="nav-item resource">
-					<div class="btn-group">
-						<button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<?php echo $enc->attr( $this->translate( 'admin', $params['resource'] ) ); ?>
-						</button>
-						<div class="dropdown-menu">
-<?php foreach( $resourceList as $code ) : ?>
-							<a class="dropdown-item"
-								href="<?php echo $enc->attr( $this->url( $searchTarget, $cntl, $action, array( 'resource' => $code ) + $params, array(), $config ) ); ?>">
-								<?php echo $enc->html( $this->translate( 'admin', $code ) ); ?>
-							</a>
-<?php endforeach; ?>
-						</div>
-					</div>
-				</li>
+							<?php $siteFcn = function( \Aimeos\MShop\Locale\Item\Site\Iface $site ) use ( &$siteFcn, $enc, $searchTarget, $cntl, $action, $params, $config ) { ?>
 
-				<li class="nav-item language">
-					<div class="btn-group">
-						<button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<?php echo $enc->attr( $this->param( 'lang', $this->translate( 'admin', 'Language' ) ) ); ?>
-						</button>
-						<div class="dropdown-menu">
-<?php foreach( $this->get( 'languagesList', array() ) as $langid ) : ?>
-							<a class="dropdown-item"
-								href="<?php echo $enc->attr( $this->url( $searchTarget, $cntl, $action, array( 'lang' => $langid ) + $params, array(), $config ) ); ?>">
-								<?php echo $enc->html( $langid ); ?>
-							</a>
-<?php endforeach; ?>
-						</div>
-					</div>
-				</li>
+								<li class="site-<?= $enc->attr( $site->getCode() ) ?>">
+									<a href="<?= $enc->attr( $this->url( $searchTarget, $cntl, $action, array( 'site' => $site->getCode() ) + $params, [], $config ) ); ?>">
+										<span class="name"><?= $enc->html( $site->getLabel() ); ?></span>
+									</a>
 
-<?php if( $this->access( 'admin' ) ) : ?>
-<?php	$sites = $this->get( 'sitesList', array() ); ?>
-				<li class="nav-item site">
-					<div class="btn-group">
-						<button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<?php echo $enc->attr( $this->value( $sites, $site, $this->translate( 'admin', 'Site' ) ) ); ?>
-						</button>
-						<div class="dropdown-menu">
-<?php	foreach( $sites as $code => $label ) : ?>
-							<a class="dropdown-item"
-								href="<?php echo $enc->attr( $this->url( $searchTarget, $cntl, $action, array( 'site' => $code ) + $params, array(), $config ) ); ?>">
-								<?php echo $enc->html( $label ); ?>
-							</a>
-<?php	endforeach; ?>
-						</div>
-					</div>
-				</li>
-<?php endif; ?>
+									<?php if( $site->getChildren() !== [] ) : ?>
+										<ul class="menu-sub">
+											<?php foreach( $site->getChildren() as $site ) { $siteFcn( $site ); } ?>
+										</ul>
+									<?php endif; ?>
+								</li>
+
+							<?php }; $siteFcn( $this->pageSiteTree ); ?>
+
+						</ul>
+					</li>
+				<?php endif; ?>
+
+				<?php foreach( array_splice( $navlist, 0, $navlimit ) as $nav => $navitem ) : ?>
+					<?php if( is_array( $navitem ) ) : ?>
+						<?php if( $this->access( $this->config( 'admin/jqadm/resource/' . $nav . '/groups', [] ) ) ) : ?>
+
+							<li class="treeview <?= $enc->attr( $nav ) ?> <?= strncmp( $this->param( 'resource' ), $nav, strlen( $nav ) ) ? '' : 'active' ?>">
+								<span>
+									<i class="icon"></i>
+									<span class="title"><?= $enc->attr( $this->translate( 'admin', $nav ) ); ?></span>
+								</span>
+								<ul class="tree-menu">
+									<li class="menu-header"><strong><?= $enc->html( $this->translate( 'admin', $nav ) ); ?></strong></li>
+
+									<?php foreach( $navitem as $subresource ) : ?>
+										<?php if( $this->access( $this->config( 'admin/jqadm/resource/' . $subresource . '/groups', [] ) ) ) : ?>
+											<li class="<?= str_replace( '/', '-', $subresource); ?>">
+												<a href="<?= $enc->attr( $this->url( $searchTarget, $cntl, $action, ['resource' => $subresource] + $params, [], $config ) ); ?>">
+													<span class="name"><?= $enc->html( $this->translate( 'admin', $subresource ) ); ?></span>
+												</a>
+											</li>
+										<?php endif; ?>
+									<?php endforeach; ?>
+								</ul>
+							</li>
+
+						<?php endif; ?>
+					<?php else : ?>
+						<?php if( $this->access( $this->config( 'admin/jqadm/resource/' . $navitem . '/groups', [] ) ) ) : ?>
+							<?php $key = $this->config( 'admin/jqadm/resource/' . $navitem . '/key' ); ?>
+
+							<li class="<?= $enc->attr( $navitem ); ?> <?= $this->param( 'resource', $navfirst ) === $navitem ? 'active' : '' ?>">
+								<a href="<?= $enc->attr( $this->url( $searchTarget, $cntl, $action, array( 'resource' => $navitem ) + $params, [], $config ) ); ?>"
+									title="<?= $enc->attr( sprintf( $title, $this->translate( 'admin', $navitem ), $key ) ); ?>"
+									data-ctrlkey="<?= $enc->attr( strtolower( $key ) ); ?>">
+									<i class="icon"></i>
+									<span class="title"><?= $enc->html( $this->translate( 'admin', $navitem ) ); ?></span>
+								</a>
+							</li>
+
+						<?php endif; ?>
+					<?php endif; ?>
+				<?php endforeach; ?>
 
 			</ul>
-		</div>
 
+			<div class="separator"><i class="icon more"></i></div>
+
+			<ul class="sidebar-menu advanced">
+
+				<?php foreach( $navlist as $nav => $navitem ) : ?>
+					<?php if( is_array( $navitem ) ) : ?>
+						<?php if( $this->access( $this->config( 'admin/jqadm/resource/' . $nav . '/groups', [] ) ) ) : ?>
+
+							<li class="treeview <?= $enc->attr( $nav ) ?> <?= strncmp( $this->param( 'resource' ), $nav, strlen( $nav ) ) ? '' : 'active' ?>">
+								<span>
+									<i class="icon"></i>
+									<span class="title"><?= $enc->attr( $this->translate( 'admin', $nav ) ); ?></span>
+								</span>
+								<ul class="tree-menu">
+									<li class="menu-header"><strong><?= $enc->html( $this->translate( 'admin', $nav ) ); ?></strong></li>
+
+									<?php foreach( $navitem as $subresource ) : ?>
+										<?php if( $this->access( $this->config( 'admin/jqadm/resource/' . $subresource . '/groups', [] ) ) ) : ?>
+											<li class="<?= str_replace( '/', '-', $subresource); ?>">
+												<a href="<?= $enc->attr( $this->url( $searchTarget, $cntl, $action, ['resource' => $subresource] + $params, [], $config ) ); ?>">
+													<span class="name"><?= $enc->html( $this->translate( 'admin', $subresource ) ); ?></span>
+												</a>
+											</li>
+										<?php endif; ?>
+									<?php endforeach; ?>
+
+								</ul>
+							</li>
+
+						<?php endif; ?>
+					<?php else : ?>
+						<?php if( $this->access( $this->config( 'admin/jqadm/resource/' . $navitem . '/groups', [] ) ) ) : ?>
+
+							<?php $key = $this->config( 'admin/jqadm/resource/' . $navitem . '/key' ); ?>
+							<li class="<?= $enc->attr( $navitem ); ?> <?= $this->param( 'resource', $navfirst ) === $navitem ? 'active' : '' ?>">
+								<a href="<?= $enc->attr( $this->url( $searchTarget, $cntl, $action, array( 'resource' => $navitem ) + $params, [], $config ) ); ?>"
+									title="<?= $enc->attr( sprintf( $title, $this->translate( 'admin', $navitem ), $key ) ); ?>"
+									data-ctrlkey="<?= $enc->attr( strtolower( $key ) ); ?>">
+									<i class="icon"></i>
+									<span class="title"><?= $enc->html( $this->translate( 'admin', $navitem ) ); ?></span>
+								</a>
+							</li>
+
+						<?php endif; ?>
+					<?php endif; ?>
+				<?php endforeach; ?>
+
+				<?php if( $this->access( $this->config( 'admin/jqadm/resource/expert/groups', [] ) ) ) : ?>
+					<li class="expert">
+						<a href="<?= $enc->attr( $this->url( $extTarget, $extCntl, $extAction, $extParams, [], $extConfig ) ); ?>"
+							title="<?= $enc->attr( sprintf( $this->translate( 'admin', $title ), 'Expert', 'E' ) ); ?>"
+							data-ctrlkey="e">
+							<i class="icon"></i>
+							<span class="title"><?= $enc->html( $this->translate( 'admin', 'Expert' ) ); ?></span>
+						</a>
+					</li>
+				<?php endif; ?>
+
+				<?php if( $this->access( $this->config( 'admin/jqadm/resource/language/groups', [] ) ) ) : ?>
+					<li class="language treeview">
+						<span>
+							<i class="icon"></i>
+							<span class="title"><?= $enc->attr( $this->translate( 'client/language', $this->param( 'lang', $this->translate( 'admin', 'Language' ) ) ) ); ?></span>
+						</span>
+						<ul class="tree-menu">
+							<li class="menu-header"><strong><?= $enc->html( $this->translate( 'admin', 'Language' ) ); ?></strong></li>
+							<?php foreach( $this->get( 'pageI18nList', [] ) as $langid ) : ?>
+								<li class="lang-<?= $enc->attr( $langid ) ?>">
+									<a href="<?= $enc->attr( $this->url( $searchTarget, $cntl, $action, array( 'lang' => $langid ) + $params, [], $config ) ); ?>">
+										<span class="name"><?= $enc->html( $this->translate( 'client/language', $langid ) ); ?> (<?= $langid ?>)</span>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</li>
+				<?php endif; ?>
+			</ul>
+
+		</div>
 	</nav>
 
-	<div class="container">
+	<main class="main-content">
 
-<?php echo $this->partial( $this->config( 'admin/jqadm/partial/error', 'common/partials/error-default.php' ), array( 'errors' => $this->get( 'errors', array() ) ) ); ?>
+		<?= $this->partial( $this->config( 'admin/jqadm/partial/error', 'common/partials/error-default.php' ), array( 'errors' => $this->get( 'errors', [] ) ) ); ?>
+		<?= $this->partial( $this->config( 'admin/jqadm/partial/info', 'common/partials/info-default.php' ), array( 'info' => $this->get( 'info', [] ) ) ); ?>
 
-<?php echo $this->block()->get( 'jqadm_content' ); ?>
+		<?= $this->block()->get( 'jqadm_content' ); ?>
 
-	</div>
+	</main>
 
-<?php echo $this->partial( $this->config( 'admin/jqadm/partial/confirm', 'common/partials/confirm-default.php' ) ); ?>
+	<footer class="main-footer">
+		<a href="https://github.com/aimeos/ai-admin-jqadm/issues" target="_blank">
+			<?= $enc->html( $this->translate( 'admin', 'Bug or suggestion?' ) ); ?>
+		</a>
+	</footer>
+
+	<?= $this->partial( $this->config( 'admin/jqadm/partial/confirm', 'common/partials/confirm-default.php' ) ); ?>
 
 </div>

@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -55,7 +55,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/checkout/confirm/order/standard/subparts';
-	private $subPartNames = array();
+	private $subPartNames = [];
 	private $cache;
 
 
@@ -67,7 +67,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->getView();
 		$view = $this->setViewParams( $view, $tags, $expire );
@@ -211,20 +211,20 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
 			if( isset( $view->confirmOrderItem ) )
 			{
-				$context = $this->getContext();
-				$manager = \Aimeos\MShop\Factory::createManager( $context, 'order/base' );
-
 				if( $view->confirmOrderItem->getPaymentStatus() >= $this->getDownloadPaymentStatus() ) {
 					$view->summaryShowDownloadAttributes = true;
 				}
 
-				$view->summaryBasket = $manager->load( $view->confirmOrderItem->getBaseId() );
+				$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'basket' );
+				$parts = \Aimeos\MShop\Order\Manager\Base\Base::PARTS_ALL;
+
+				$view->summaryBasket = $controller->load( $view->confirmOrderItem->getBaseId(), $parts, false );
 				$view->summaryTaxRates = $this->getTaxRates( $view->summaryBasket );
 			}
 

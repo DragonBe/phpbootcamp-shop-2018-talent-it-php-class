@@ -13,7 +13,8 @@
     "php": ">=5.6.4",
     "laravel/framework": "5.4.*",
     "laravel/tinker": "~1.0",
-    "aimeos/aimeos-laravel": "2017.01.*"
+    "aimeos/aimeos-laravel": "~2017.10",
+    "aimeos/ai-payments": "~2017.10"
   },
   "require-dev": {
     "fzaninotto/faker": "~1.4",

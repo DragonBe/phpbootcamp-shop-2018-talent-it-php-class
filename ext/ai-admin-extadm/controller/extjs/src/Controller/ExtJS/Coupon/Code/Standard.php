@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -222,7 +222,7 @@ class Standard
 
 		$type = $config->get( 'controller/extjs/coupon/code/standard/container/type', 'Zip' );
 		$format = $config->get( 'controller/extjs/coupon/code/standard/container/format', 'CSV' );
-		$options = $config->get( 'controller/extjs/coupon/code/standard/container/options', array() );
+		$options = $config->get( 'controller/extjs/coupon/code/standard/container/options', [] );
 
 		$items = ( !is_array( $params->items ) ? array( $params->items ) : $params->items );
 

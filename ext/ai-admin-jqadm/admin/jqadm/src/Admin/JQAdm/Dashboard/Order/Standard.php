@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JQAdm
  */
@@ -122,61 +122,6 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartNames = array( 'latest', 'paymentstatus', 'hour', 'day', 'paymenttype', 'deliverytype' );
-
-
-	/**
-	 * Copies a resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function copy()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be copied' );
-	}
-
-
-	/**
-	 * Creates a new resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function create()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'New resources can not be created' );
-	}
-
-
-	/**
-	 * Deletes a resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function delete()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be deleted' );
-	}
-
-
-	/**
-	 * Returns a single resource
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function get()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be retrieved' );
-	}
-
-
-	/**
-	 * Saves the data
-	 *
-	 * @return string|null admin output to display or null for redirecting to the list
-	 */
-	public function save()
-	{
-		throw new \Aimeos\Admin\JQAdm\Exception( 'The resource can not be modified' );
-	}
 
 
 	/**

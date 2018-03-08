@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -65,7 +65,7 @@ class Standard
 
 		try
 		{
-			$map = $this->getMappedChunk( $data );
+			$map = $this->getMappedChunk( $data, $this->getMapping() );
 			$items = $this->getStockItems( $product->getCode() );
 
 			foreach( $map as $pos => $list )
@@ -95,12 +95,12 @@ class Standard
 				}
 
 				$item->fromArray( $list );
-				$manager->saveItem( $item );
+				$manager->saveItem( $item, false );
 			}
 
 			$manager->deleteItems( array_keys( $items ) );
 
-			$remaining = $this->getObject()->process( $product, $data );
+			$data = $this->getObject()->process( $product, $data );
 
 			$manager->commit();
 		}
@@ -110,7 +110,7 @@ class Standard
 			throw $e;
 		}
 
-		return $remaining;
+		return $data;
 	}
 
 
@@ -125,7 +125,7 @@ class Standard
 		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'stock' );
 
 		$search = $manager->createSearch();
-		$search->setConditions( $search->compare( '==', 'stock.productcoce', $code ) );
+		$search->setConditions( $search->compare( '==', 'stock.productcode', $code ) );
 
 		return $manager->searchItems( $search );
 	}

@@ -5,9 +5,9 @@ namespace Aimeos\Controller\ExtJS\Supplier\Lists;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 
@@ -28,7 +28,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	{
 		$params = (object) array(
 			'site' => 'unittest',
-			'condition' => (object) array( '&&' => array( 0 => (object) array( '==' => (object) array( 'supplier.lists.type.code' => 'default' ) ) ) ),
+			'condition' => (object) array( '&&' => array( 0 => (object) array( '==' => (object) array( 'supplier.lists.type.domain' => 'text' ) ) ) ),
 			'sort' => 'supplier.lists.position',
 			'dir' => 'ASC',
 			'start' => 0,

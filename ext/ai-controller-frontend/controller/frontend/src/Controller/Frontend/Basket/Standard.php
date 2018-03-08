@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -22,8 +22,9 @@ class Standard
 	extends Base
 	implements Iface, \Aimeos\Controller\Frontend\Common\Iface
 {
-	private $basket;
+	private $baskets = [];
 	private $domainManager;
+	private $type = 'default';
 
 
 	/**
@@ -37,19 +38,20 @@ class Standard
 		parent::__construct( $context );
 
 		$this->domainManager = \Aimeos\MShop\Factory::createManager( $context, 'order/base' );
-		$this->basket = $this->domainManager->getSession();
-
-		$this->checkLocale();
 	}
 
 
 	/**
 	 * Empties the basket and removing all products, addresses, services, etc.
+	 *
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Basket frontend object
 	 */
 	public function clear()
 	{
-		$this->basket = $this->domainManager->createItem();
-		$this->domainManager->setSession( $this->basket );
+		$this->baskets[$this->type] = $this->domainManager->createItem();
+		$this->domainManager->setSession( $this->baskets[$this->type], $this->type );
+
+		return $this;
 	}
 
 
@@ -60,18 +62,130 @@ class Standard
 	 */
 	public function get()
 	{
-		return $this->basket;
+		if( !isset( $this->baskets[$this->type] ) )
+		{
+			$this->baskets[$this->type] = $this->domainManager->getSession( $this->type );
+			$this->checkLocale( $this->type );
+		}
+
+		return $this->baskets[$this->type];
 	}
 
 
 	/**
 	 * Explicitely persists the basket content
+	 *
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Basket frontend object
 	 */
 	public function save()
 	{
-		if( $this->basket->isModified() ) {
-			$this->domainManager->setSession( $this->basket );
+		if( isset( $this->baskets[$this->type] ) && $this->baskets[$this->type]->isModified() ) {
+			$this->domainManager->setSession( $this->baskets[$this->type], $this->type );
 		}
+
+		return $this;
+	}
+
+
+	/**
+	 * Sets the new basket type
+	 *
+	 * @param string $type Basket type
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Basket frontend object
+	 */
+	public function setType( $type )
+	{
+		$this->type = $type;
+		return $this;
+	}
+
+
+	/**
+	 * Creates a new order base object from the current basket
+	 *
+	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base object including products, addresses and services
+	 */
+	public function store()
+	{
+		$total = 0;
+		$context = $this->getContext();
+		$config = $context->getConfig();
+
+		/** controller/frontend/basket/limit-count
+		 * Maximum number of orders within the time frame
+		 *
+		 * Creating new orders is limited to avoid abuse and mitigate denial of
+		 * service attacks. The number of orders created within the time frame
+		 * configured by "controller/frontend/basket/limit-seconds" are counted
+		 * before a new order of the same user (either logged in or identified
+		 * by the IP address) is created. If the number of orders is higher than
+		 * the configured value, an error message will be shown to the user
+		 * instead of creating a new order.
+		 *
+		 * @param integer Number of orders allowed within the time frame
+		 * @since 2017.05
+		 * @category Developer
+		 * @see controller/frontend/basket/limit-seconds
+		 */
+		$count = $config->get( 'controller/frontend/basket/limit-count', 5 );
+
+		/** controller/frontend/basket/limit-seconds
+		 * Order limitation time frame in seconds
+		 *
+		 * Creating new orders is limited to avoid abuse and mitigate denial of
+		 * service attacks. Within the configured time frame, only a limited
+		 * number of orders can be created. All orders of the current user
+		 * (either logged in or identified by the IP address) within the last X
+		 * seconds are counted. If the total value is higher then the number
+		 * configured in "controller/frontend/basket/limit-count", an error
+		 * message will be shown to the user instead of creating a new order.
+		 *
+		 * @param integer Number of seconds to check orders within
+		 * @since 2017.05
+		 * @category Developer
+		 * @see controller/frontend/basket/limit-count
+		 */
+		$seconds = $config->get( 'controller/frontend/basket/limit-seconds', 300 );
+
+		$search = $this->domainManager->createSearch();
+		$expr = [
+			$search->compare( '==', 'order.base.editor', $context->getEditor() ),
+			$search->compare( '>=', 'order.base.ctime', date( 'Y-m-d H:i:s', time() - $seconds ) ),
+		];
+		$search->setConditions( $search->combine( '&&', $expr ) );
+		$search->setSlice( 0, 0 );
+
+		$this->domainManager->searchItems( $search, [], $total );
+
+		if( $total > $count )
+		{
+			$msg = $context->getI18n()->dt( 'controller/frontend', 'Temporary order limit reached' );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
+		}
+
+
+		$basket = $this->get()->finish();
+		$basket->setCustomerId( (string) $context->getUserId() );
+
+		$this->domainManager->begin();
+		$this->domainManager->store( $basket );
+		$this->domainManager->commit();
+
+		return $basket;
+	}
+
+
+	/**
+	 * Returns the order base object for the given ID
+	 *
+	 * @param string $id Unique ID of the order base object
+	 * @param integer $parts Constants which parts of the order base object should be loaded
+	 * @param boolean $default True to add default criteria (user logged in), false if not
+	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base object including the given parts
+	 */
+	public function load( $id, $parts = \Aimeos\MShop\Order\Manager\Base\Base::PARTS_ALL, $default = true )
+	{
+		return $this->domainManager->load( $id, $parts, false, $default );
 	}
 
 
@@ -80,11 +194,7 @@ class Standard
 	 *
 	 * @param string $prodid ID of the base product to add
 	 * @param integer $quantity Amount of products that should by added
-	 * @param array $options Possible options are: 'stock'=>true|false and 'variant'=>true|false
-	 * 	The 'stock'=>false option allows adding products without being in stock.
-	 * 	The 'variant'=>false option allows adding the selection product to the basket
-	 * 	instead of the specific sub-product if the variant-building attribute IDs
-	 * 	doesn't match a specific sub-product or if the attribute IDs are missing.
+	 * @param array $options Option list (unused at the moment)
 	 * @param array $variantAttributeIds List of variant-building attribute IDs that identify a specific product
 	 * 	in a selection products
 	 * @param array $configAttributeIds  List of attribute IDs that doesn't identify a specific product in a
@@ -95,48 +205,35 @@ class Standard
 	 * @param string $stocktype Unique code of the stock type to deliver the products from
 	 * @throws \Aimeos\Controller\Frontend\Basket\Exception If the product isn't available
 	 */
-	public function addProduct( $prodid, $quantity = 1, array $options = array(), array $variantAttributeIds = array(),
-		array $configAttributeIds = array(), array $hiddenAttributeIds = array(), array $customAttributeValues = array(),
+	public function addProduct( $prodid, $quantity = 1, array $options = [], array $variantAttributeIds = [],
+		array $configAttributeIds = [], array $hiddenAttributeIds = [], array $customAttributeValues = [],
 		$stocktype = 'default' )
 	{
+		$attributeMap = [
+			'custom' => array_keys( $customAttributeValues ),
+			'config' => $configAttributeIds,
+			'hidden' => $hiddenAttributeIds,
+		];
+		$this->checkListRef( $prodid, 'attribute', $attributeMap );
+
+
 		$context = $this->getContext();
-
-		$productItem = $this->getDomainItem( 'product', 'product.id', $prodid, array( 'media', 'supplier', 'price', 'product', 'text' ) );
-
-		$orderBaseProductItem = \Aimeos\MShop\Factory::createManager( $context, 'order/base/product' )->createItem();
-		$orderBaseProductItem->copyFrom( $productItem );
-		$orderBaseProductItem->setQuantity( $quantity );
-		$orderBaseProductItem->setStockType( $stocktype );
-
-		$attr = array();
+		$productManager = \Aimeos\MShop\Factory::createManager( $context, 'product' );
+		$productItem = $productManager->getItem( $prodid, array( 'media', 'supplier', 'price', 'product', 'text' ), true );
 		$prices = $productItem->getRefItems( 'price', 'default', 'default' );
 
-		switch( $productItem->getType() )
-		{
-			case 'select':
-				$attr = $this->getVariantDetails( $orderBaseProductItem, $productItem, $prices, $variantAttributeIds, $options );
-				break;
-			case 'bundle':
-				$this->addBundleProducts( $orderBaseProductItem, $productItem, $variantAttributeIds, $stocktype );
-				break;
-		}
+		$orderBaseProductItem = \Aimeos\MShop\Factory::createManager( $context, 'order/base/product' )->createItem();
+		$orderBaseProductItem->copyFrom( $productItem )->setQuantity( $quantity )->setStockType( $stocktype );
 
-		$priceManager = \Aimeos\MShop\Factory::createManager( $context, 'price' );
-		$price = $priceManager->getLowestPrice( $prices, $quantity );
+		$attr = $this->getOrderProductAttributes( 'custom', array_keys( $customAttributeValues ), $customAttributeValues );
+		$attr = array_merge( $attr, $this->getOrderProductAttributes( 'config', $configAttributeIds ) );
+		$attr = array_merge( $attr, $this->getOrderProductAttributes( 'hidden', $hiddenAttributeIds ) );
 
-		$attr = array_merge( $attr, $this->createOrderProductAttributes( $price, $prodid, $quantity, $configAttributeIds, 'config' ) );
-		$attr = array_merge( $attr, $this->createOrderProductAttributes( $price, $prodid, $quantity, $hiddenAttributeIds, 'hidden' ) );
-		$attr = array_merge( $attr, $this->createOrderProductAttributes( $price, $prodid, $quantity, array_keys( $customAttributeValues ), 'custom', $customAttributeValues ) );
-
-		// remove product rebate of original price in favor to rebates granted for the order
-		$price->setRebate( '0.00' );
-
-		$orderBaseProductItem->setPrice( $price );
 		$orderBaseProductItem->setAttributes( $attr );
+		$orderBaseProductItem->setPrice( $this->calcPrice( $orderBaseProductItem, $prices, $quantity ) );
 
-		$this->basket->addProduct( $orderBaseProductItem );
-
-		$this->domainManager->setSession( $this->basket );
+		$this->get()->addProduct( $orderBaseProductItem );
+		$this->save();
 	}
 
 
@@ -147,16 +244,16 @@ class Standard
 	 */
 	public function deleteProduct( $position )
 	{
-		$product = $this->basket->getProduct( $position );
+		$product = $this->get()->getProduct( $position );
 
 		if( $product->getFlags() === \Aimeos\MShop\Order\Item\Base\Product\Base::FLAG_IMMUTABLE )
 		{
-			$msg = sprintf( 'Basket item at position "%1$d" cannot be deleted manually', $position );
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
+			$msg = $this->getContext()->getI18n()->dt( 'controller/frontend', 'Basket item at position "%1$d" cannot be deleted manually' );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( $msg, $position ) );
 		}
 
-		$this->basket->deleteProduct( $position );
-		$this->domainManager->setSession( $this->basket );
+		$this->get()->deleteProduct( $position );
+		$this->save();
 	}
 
 
@@ -169,15 +266,15 @@ class Standard
 	 * 	The 'stock'=>false option allows adding products without being in stock.
 	 * @param string[] $configAttributeCodes Codes of the product config attributes that should be REMOVED
 	 */
-	public function editProduct( $position, $quantity, array $options = array(),
-		array $configAttributeCodes = array() )
+	public function editProduct( $position, $quantity, array $options = [],
+		array $configAttributeCodes = [] )
 	{
-		$product = $this->basket->getProduct( $position );
+		$product = $this->get()->getProduct( $position );
 
 		if( $product->getFlags() & \Aimeos\MShop\Order\Item\Base\Product\Base::FLAG_IMMUTABLE )
 		{
-			$msg = sprintf( 'Basket item at position "%1$d" cannot be changed', $position );
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
+			$msg = $this->getContext()->getI18n()->dt( 'controller/frontend', 'Basket item at position "%1$d" cannot be changed' );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( $msg, $position ) );
 		}
 
 		$product->setQuantity( $quantity );
@@ -191,14 +288,13 @@ class Standard
 		}
 		$product->setAttributes( $attributes );
 
-		$productItem = $this->getDomainItem( 'product', 'product.code', $product->getProductCode(), array( 'price', 'text' ) );
-		$prices = $productItem->getRefItems( 'price', 'default' );
-		$product->setPrice( $this->calcPrice( $product, $prices, $quantity ) );
+		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'product' );
+		$productItem = $manager->findItem( $product->getProductCode(), array( 'price', 'text' ) );
+		$product->setPrice( $this->calcPrice( $product, $productItem->getRefItems( 'price', 'default' ), $quantity ) );
 
-		$this->basket->deleteProduct( $position );
-		$this->basket->addProduct( $product, $position );
+		$this->get()->editProduct( $product, $position );
 
-		$this->domainManager->setSession( $this->basket );
+		$this->save();
 	}
 
 
@@ -210,6 +306,34 @@ class Standard
 	 */
 	public function addCoupon( $code )
 	{
+		$context = $this->getContext();
+
+		/** controller/frontend/basket/standard/coupon/allowed
+		 * Number of coupon codes a customer is allowed to enter
+		 *
+		 * This configuration option enables shop owners to limit the number of coupon
+		 * codes that can be added by a customer to his current basket. By default, only
+		 * one coupon code is allowed per order.
+		 *
+		 * Coupon codes are valid until a payed order is placed by the customer. The
+		 * "count" of the codes is decreased afterwards. If codes are not personalized
+		 * the codes can be reused in the next order until their "count" reaches zero.
+		 *
+		 * @param integer Positive number of coupon codes including zero
+		 * @since 2017.08
+		 * @category User
+		 * @category Developer
+		 */
+		$allowed = $context->getConfig()->get( 'client/html/basket/standard/coupon/allowed', 1 ); // @deprecated
+		$allowed = $context->getConfig()->get( 'controller/frontend/basket/standard/coupon/allowed', $allowed );
+
+		if( $allowed <= count( $this->get()->getCoupons() ) )
+		{
+			$msg = $context->getI18n()->dt( 'controller/frontend', 'Number of coupon codes exceeds the limit' );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
+		}
+
+
 		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'coupon' );
 		$codeManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'coupon/code' );
 
@@ -224,8 +348,10 @@ class Standard
 
 		$result = $codeManager->searchItems( $search );
 
-		if( ( $codeItem = reset( $result ) ) === false ) {
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( 'Coupon code "%1$s" is invalid or not available any more', $code ) );
+		if( ( $codeItem = reset( $result ) ) === false )
+		{
+			$msg = sprintf( $context->getI18n()->dt( 'controller/frontend', 'Coupon code "%1$s" is invalid or not available any more' ), $code );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
 		}
 
 
@@ -239,19 +365,23 @@ class Standard
 
 		$result = $manager->searchItems( $search );
 
-		if( ( $item = reset( $result ) ) === false ) {
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( 'Coupon for code "%1$s" is not available any more', $code ) );
+		if( ( $item = reset( $result ) ) === false )
+		{
+			$msg = sprintf( $context->getI18n()->dt( 'controller/frontend', 'Coupon for code "%1$s" is not available any more' ), $code );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
 		}
 
 
-		$provider = $manager->getProvider( $item, $code );
+		$provider = $manager->getProvider( $item, $codeItem->getCode() );
 
-		if( $provider->isAvailable( $this->basket ) !== true ) {
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( 'Requirements for coupon code "%1$s" aren\'t met', $code ) );
+		if( $provider->isAvailable( $this->get() ) !== true )
+		{
+			$msg = sprintf( $context->getI18n()->dt( 'controller/frontend', 'Requirements for coupon code "%1$s" aren\'t met' ), $code );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
 		}
 
-		$provider->addCoupon( $this->basket );
-		$this->domainManager->setSession( $this->basket );
+		$provider->addCoupon( $this->get() );
+		$this->save();
 	}
 
 
@@ -263,7 +393,8 @@ class Standard
 	 */
 	public function deleteCoupon( $code )
 	{
-		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'coupon' );
+		$context = $this->getContext();
+		$manager = \Aimeos\MShop\Factory::createManager( $context, 'coupon' );
 
 		$search = $manager->createSearch();
 		$search->setConditions( $search->compare( '==', 'coupon.code.code', $code ) );
@@ -271,12 +402,14 @@ class Standard
 
 		$result = $manager->searchItems( $search );
 
-		if( ( $item = reset( $result ) ) === false ) {
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( 'Coupon code "%1$s" is invalid', $code ) );
+		if( ( $item = reset( $result ) ) === false )
+		{
+			$msg = $context->getI18n()->dt( 'controller/frontend', 'Coupon code "%1$s" is invalid' );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( $msg, $code ) );
 		}
 
-		$manager->getProvider( $item, $code )->deleteCoupon( $this->basket );
-		$this->domainManager->setSession( $this->basket );
+		$manager->getProvider( $item, $code )->deleteCoupon( $this->get() );
+		$this->save();
 	}
 
 
@@ -290,29 +423,31 @@ class Standard
 	 */
 	public function setAddress( $type, $value )
 	{
-		$address = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order/base/address' )->createItem();
+		$context = $this->getContext();
+		$address = \Aimeos\MShop\Factory::createManager( $context, 'order/base/address' )->createItem();
 		$address->setType( $type );
 
 		if( $value instanceof \Aimeos\MShop\Common\Item\Address\Iface )
 		{
 			$address->copyFrom( $value );
-			$this->basket->setAddress( $address, $type );
+			$this->get()->setAddress( $address, $type );
 		}
 		else if( is_array( $value ) )
 		{
 			$this->setAddressFromArray( $address, $value );
-			$this->basket->setAddress( $address, $type );
+			$this->get()->setAddress( $address, $type );
 		}
 		else if( $value === null )
 		{
-			$this->basket->deleteAddress( $type );
+			$this->get()->deleteAddress( $type );
 		}
 		else
 		{
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( 'Invalid value for address type "%1$s"', $type ) );
+			$msg = $context->getI18n()->dt( 'controller/frontend', 'Invalid value for address type "%1$s"' );
+			throw new \Aimeos\Controller\Frontend\Basket\Exception( sprintf( $msg, $type ) );
 		}
 
-		$this->domainManager->setSession( $this->basket );
+		$this->save();
 	}
 
 
@@ -320,17 +455,24 @@ class Standard
 	 * Sets the delivery/payment service item based on the service ID.
 	 *
 	 * @param string $type Service type code like 'payment' or 'delivery'
-	 * @param string $id Unique ID of the service item
+	 * @param string $id|null Unique ID of the service item or null to remove it
 	 * @param array $attributes Associative list of key/value pairs containing the attributes selected or
 	 * 	entered by the customer when choosing one of the delivery or payment options
 	 * @throws \Aimeos\Controller\Frontend\Basket\Exception If there is no price to the service item attached
 	 */
-	public function setService( $type, $id, array $attributes = array() )
+	public function setService( $type, $id, array $attributes = [] )
 	{
+		if( $id === null )
+		{
+			$this->get()->deleteService( $type );
+			$this->save();
+			return;
+		}
+
 		$context = $this->getContext();
 
 		$serviceManager = \Aimeos\MShop\Factory::createManager( $context, 'service' );
-		$serviceItem = $this->getDomainItem( 'service', 'service.id', $id, array( 'media', 'price', 'text' ) );
+		$serviceItem = $serviceManager->getItem( $id, array( 'media', 'price', 'text' ) );
 
 		$provider = $serviceManager->getProvider( $serviceItem );
 		$result = $provider->checkConfigFE( $attributes );
@@ -338,7 +480,8 @@ class Standard
 
 		if( count( $unknown ) > 0 )
 		{
-			$msg = sprintf( 'Unknown attributes "%1$s"', implode( '","', array_keys( $unknown ) ) );
+			$msg = $context->getI18n()->dt( 'controller/frontend', 'Unknown attributes "%1$s"' );
+			$msg = sprintf( $msg, implode( '","', array_keys( $unknown ) ) );
 			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
 		}
 
@@ -353,208 +496,14 @@ class Standard
 		$orderServiceItem = $orderBaseServiceManager->createItem();
 		$orderServiceItem->copyFrom( $serviceItem );
 
-		$price = $provider->calcPrice( $this->basket );
 		// remove service rebate of original price
-		$price->setRebate( '0.00' );
+		$price = $provider->calcPrice( $this->get() )->setRebate( '0.00' );
 		$orderServiceItem->setPrice( $price );
 
 		$provider->setConfigFE( $orderServiceItem, $attributes );
 
-		$this->basket->setService( $orderServiceItem, $type );
-		$this->domainManager->setSession( $this->basket );
-	}
-
-
-	/**
-	 * Adds the bundled products to the order product item.
-	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Product\Iface $orderBaseProductItem Order product item
-	 * @param \Aimeos\MShop\Product\Item\Iface $productItem Bundle product item
-	 * @param array $variantAttributeIds List of product variant attribute IDs
-	 * @param string $stocktype
-	 */
-	protected function addBundleProducts( \Aimeos\MShop\Order\Item\Base\Product\Iface $orderBaseProductItem,
-		\Aimeos\MShop\Product\Item\Iface $productItem, array $variantAttributeIds, $stocktype )
-	{
-		$quantity = $orderBaseProductItem->getQuantity();
-		$products = $subProductIds = $orderProducts = array();
-		$orderProductManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order/base/product' );
-
-		foreach( $productItem->getRefItems( 'product', null, 'default' ) as $item ) {
-			$subProductIds[] = $item->getId();
-		}
-
-		if( count( $subProductIds ) > 0 )
-		{
-			$productManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'product' );
-
-			$search = $productManager->createSearch( true );
-			$expr = array(
-				$search->compare( '==', 'product.id', $subProductIds ),
-				$search->getConditions(),
-			);
-			$search->setConditions( $search->combine( '&&', $expr ) );
-
-			$products = $productManager->searchItems( $search, array( 'attribute', 'media', 'price', 'text' ) );
-		}
-
-		foreach( $products as $product )
-		{
-			$prices = $product->getRefItems( 'price', 'default', 'default' );
-
-			$orderProduct = $orderProductManager->createItem();
-			$orderProduct->copyFrom( $product );
-			$orderProduct->setStockType( $stocktype );
-			$orderProduct->setPrice( $this->calcPrice( $orderProduct, $prices, $quantity ) );
-
-			$orderProducts[] = $orderProduct;
-		}
-
-		$orderBaseProductItem->setProducts( $orderProducts );
-	}
-
-
-	/**
-	 * Creates the order product attribute items from the given attribute IDs and updates the price item if necessary.
-	 *
-	 * @param \Aimeos\MShop\Price\Item\Iface $price Price item of the ordered product
-	 * @param string $prodid Unique product ID where the given attributes must be attached to
-	 * @param integer $quantity Number of products that should be added to the basket
-	 * @param array $attributeIds List of attributes IDs of the given type
-	 * @param string $type Attribute type
-	 * @param array $attributeValues Associative list of attribute IDs as keys and their codes as values
-	 * @return array List of items implementing \Aimeos\MShop\Order\Item\Product\Attribute\Iface
-	 */
-	protected function createOrderProductAttributes( \Aimeos\MShop\Price\Item\Iface $price, $prodid, $quantity,
-			array $attributeIds, $type, array $attributeValues = array() )
-	{
-		if( empty( $attributeIds ) ) {
-			return array();
-		}
-
-		$attrTypeId = $this->getProductListTypeItem( 'attribute', $type )->getId();
-		$this->checkReferences( $prodid, 'attribute', $attrTypeId, $attributeIds );
-
-		$list = array();
-		$context = $this->getContext();
-
-		$priceManager = \Aimeos\MShop\Factory::createManager( $context, 'price' );
-		$orderProductAttributeManager = \Aimeos\MShop\Factory::createManager( $context, 'order/base/product/attribute' );
-
-		foreach( $this->getAttributes( $attributeIds ) as $id => $attrItem )
-		{
-			$prices = $attrItem->getRefItems( 'price', 'default', 'default' );
-
-			if( !empty( $prices ) ) {
-				$price->addItem( $priceManager->getLowestPrice( $prices, $quantity ) );
-			}
-
-			$item = $orderProductAttributeManager->createItem();
-			$item->copyFrom( $attrItem );
-			$item->setType( $type );
-
-			if( isset( $attributeValues[$id] ) ) {
-				$item->setValue( $attributeValues[$id] );
-			}
-
-			$list[] = $item;
-		}
-
-		return $list;
-	}
-
-
-	/**
-	 * Retrieves the domain item specified by the given key and value.
-	 *
-	 * @param string $domain Product manager search key
-	 * @param string $key Domain manager search key
-	 * @param string $value Unique domain identifier
-	 * @param string[] $ref List of referenced items that should be fetched too
-	 * @return \Aimeos\MShop\Common\Item\Iface Domain item object
-	 * @throws \Aimeos\Controller\Frontend\Basket\Exception
-	 */
-	protected function getDomainItem( $domain, $key, $value, array $ref )
-	{
-		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), $domain );
-
-		$search = $manager->createSearch( true );
-		$expr = array(
-				$search->compare( '==', $key, $value ),
-				$search->getConditions(),
-		);
-		$search->setConditions( $search->combine( '&&', $expr ) );
-
-		$result = $manager->searchItems( $search, $ref );
-
-		if( ( $item = reset( $result ) ) === false )
-		{
-			$msg = sprintf( 'No item for "%1$s" (%2$s) found', $value, $key );
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
-		}
-
-		return $item;
-	}
-
-
-	/**
-	 * Returns the variant attributes and updates the price list if necessary.
-	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Product\Iface $orderBaseProductItem Order product item
-	 * @param \Aimeos\MShop\Product\Item\Iface &$productItem Product item which is replaced if necessary
-	 * @param array &$prices List of product prices that will be updated if necessary
-	 * @param array $variantAttributeIds List of product variant attribute IDs
-	 * @param array $options Associative list of options
-	 * @return \Aimeos\MShop\Order\Item\Base\Product\Attribute\Iface[] List of order product attributes
-	 * @throws \Aimeos\Controller\Frontend\Basket\Exception If no product variant is found
-	 */
-	protected function getVariantDetails( \Aimeos\MShop\Order\Item\Base\Product\Iface $orderBaseProductItem,
-		\Aimeos\MShop\Product\Item\Iface &$productItem, array &$prices, array $variantAttributeIds, array $options )
-	{
-		$attr = array();
-		$productItems = $this->getProductVariants( $productItem, $variantAttributeIds );
-
-		if( count( $productItems ) > 1 )
-		{
-			$msg = sprintf( 'No unique article found for selected attributes and product ID "%1$s"', $productItem->getId() );
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
-		}
-		else if( ( $result = reset( $productItems ) ) !== false ) // count == 1
-		{
-			$productItem = $result;
-			$orderBaseProductItem->setProductCode( $productItem->getCode() );
-
-			$subprices = $productItem->getRefItems( 'price', 'default', 'default' );
-
-			if( !empty( $subprices ) ) {
-				$prices = $subprices;
-			}
-
-			$submedia = $productItem->getRefItems( 'media', 'default', 'default' );
-
-			if( ( $mediaItem = reset( $submedia ) ) !== false ) {
-				$orderBaseProductItem->setMediaUrl( $mediaItem->getPreview() );
-			}
-
-			$orderProductAttrManager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'order/base/product/attribute' );
-			$variantAttributes = $productItem->getRefItems( 'attribute', null, 'variant' );
-
-			foreach( $this->getAttributes( array_keys( $variantAttributes ), array( 'text' ) ) as $attrItem )
-			{
-				$orderAttributeItem = $orderProductAttrManager->createItem();
-				$orderAttributeItem->copyFrom( $attrItem );
-				$orderAttributeItem->setType( 'variant' );
-
-				$attr[] = $orderAttributeItem;
-			}
-		}
-		else if( !isset( $options['variant'] ) || $options['variant'] != false ) // count == 0
-		{
-			$msg = sprintf( 'No article found for selected attributes and product ID "%1$s"', $productItem->getId() );
-			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg );
-		}
-
-		return $attr;
+		$this->get()->setService( $orderServiceItem, $type );
+		$this->save();
 	}
 
 
@@ -576,7 +525,7 @@ class Standard
 
 		if( count( $errors ) > 0 )
 		{
-			$msg = sprintf( 'Invalid address properties, please check your input' );
+			$msg = $this->getContext()->getI18n()->dt( 'controller/frontend', 'Invalid address properties, please check your input' );
 			throw new \Aimeos\Controller\Frontend\Basket\Exception( $msg, 0, null, $errors );
 		}
 	}

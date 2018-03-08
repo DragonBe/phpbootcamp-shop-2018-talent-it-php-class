@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2014-2016
+ * @copyright Aimeos (aimeos.org), 2014-2017
  */
 
 
@@ -38,7 +38,7 @@ class CustomerAddLaravelTestData extends \Aimeos\MW\Setup\Task\CustomerAddTestDa
 		$this->msg( 'Adding Laravel customer test data', 0 );
 		$this->additional->setEditor( 'ai-laravel:unittest' );
 
-		$parentIds = array();
+		$parentIds = [];
 		$ds = DIRECTORY_SEPARATOR;
 		$path = __DIR__ . $ds . 'data' . $ds . 'customer.php';
 

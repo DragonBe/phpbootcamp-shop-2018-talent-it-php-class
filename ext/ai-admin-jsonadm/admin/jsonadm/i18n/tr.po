@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aimeos-core\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-03 12:08+0100\n"
-"PO-Revision-Date: 2016-06-07 09:37+0000\n"
+"POT-Creation-Date: 2017-10-02 17:37+0200\n"
+"PO-Revision-Date: 2017-10-04 12:58+0000\n"
 "Last-Translator: Metal <meteoramic@yahoo.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/aimeos/aimeos-core/language/tr/)\n"
 "MIME-Version: 1.0\n"
@@ -49,6 +49,10 @@ msgstr "Geçersiz fabrika \"%1$s\""
 #, php-format
 msgid "No ID given"
 msgstr "Hiçbir ID verilmemiş"
+
+#, php-format
+msgid "Not allowed to access JQAdm \"%1$s\" client"
+msgstr "JQAdm \"%1$s\" istemcisine erişime izin verilmedi"
 
 msgid "Not implemented, use PATCH instead"
 msgstr "Uygulanmadı, bunun yerine PATCH kullanın"

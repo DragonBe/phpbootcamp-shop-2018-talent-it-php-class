@@ -6,6 +6,24 @@
 		"file": "aimeos-core.css",
 		"isDebug": true,
 		"fileIncludes": [{
+			"text": "jqcombo.css",
+			"path": "themes/default/"
+		},{
+			"text": "jqtree.css",
+			"path": "themes/default/"
+		},{
+			"text": "bootstrap.css",
+			"path": "themes/default/"
+		},{
+			"text": "sidebar.css",
+			"path": "themes/default/"
+		},{
+			"text": "nav.css",
+			"path": "themes/default/"
+		},{
+			"text": "common.css",
+			"path": "themes/default/"
+		},{
 			"text": "admin.css",
 			"path": "themes/default/"
 		},{
@@ -17,10 +35,43 @@
 		"file": "aimeos-core.js",
 		"isDebug": true,
 		"fileIncludes": [{
+			"text": "combo.jquery.js",
+			"path": "themes/"
+		},{
+			"text": "tree.jquery.js",
+			"path": "themes/"
+		},{
 			"text": "admin.js",
 			"path": "themes/"
 		},{
+			"text": "admin-aux.js",
+			"path": "themes/"
+		},{
+			"text": "catalog.js",
+			"path": "themes/"
+		},{
+			"text": "coupon.js",
+			"path": "themes/"
+		},{
 			"text": "dashboard.js",
+			"path": "themes/"
+		},{
+			"text": "customer.js",
+			"path": "themes/"
+		},{
+			"text": "order.js",
+			"path": "themes/"
+		},{
+			"text": "product.js",
+			"path": "themes/"
+		},{
+			"text": "plugin.js",
+			"path": "themes/"
+		},{
+			"text": "service.js",
+			"path": "themes/"
+		},{
+			"text": "supplier.js",
 			"path": "themes/"
 		}]
 	}],

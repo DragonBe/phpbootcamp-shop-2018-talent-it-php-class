@@ -4,7 +4,7 @@
 	"keywords": ["aimeos", "extension", "JQuery admin interface"],
 	"homepage": "https://aimeos.org/",
 	"type": "aimeos-extension",
-	"license": "LGPL-3.0",
+	"license": "LGPL-3.0-or-later",
 	"support": {
 		"source": "https://github.com/aimeos/ai-admin-jqadm",
 		"issues": "https://github.com/aimeos/ai-admin-jqadm/issues",
@@ -16,20 +16,16 @@
 	"require": {
 		"php": ">=5.3.3",
 		"composer/installers": "^1.0",
-		"aimeos/aimeos-core": "~2017.01"
-	},
-	"require-dev": {
-		"satooshi/php-coveralls": "dev-master",
-		"squizlabs/php_codesniffer": "~1.0",
-		"phpunit/phpunit": "~3.7||~4.0||~5.0",
-		"phing/phing": "~2.4"
+		"aimeos/aimeos-core": "~2017.10"
 	},
 	"autoload": {
 		"psr-4": {
-			"Aimeos\\Admin\\JQAdm\\": "admin/jqadm/src/Admin/JQAdm/"
+			"Aimeos\\Admin\\JQAdm\\": "admin/jqadm/src/Admin/JQAdm/",
+			"Aimeos\\MW\\": "lib/custom/src/MW"
 		},
 		"classmap": [
-			"admin/jqadm/src"
+			"admin/jqadm/src",
+			"lib/custom/src"
 		]
 	}
 }

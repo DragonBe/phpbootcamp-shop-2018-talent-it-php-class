@@ -5,21 +5,15 @@ namespace Aimeos\MShop\Customer\Manager\Lists;
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class LaravelTest extends \PHPUnit_Framework_TestCase
+class LaravelTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
 	private $editor = 'ai-laravel:unittest';
 
 
-	/**
-	 * Sets up the fixture.
-	 * This method is called before a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function setUp()
 	{
 		$this->context = \TestHelper::getContext();
@@ -29,12 +23,6 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function tearDown()
 	{
 		unset( $this->object, $this->context );
@@ -96,12 +84,12 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 
 		$item->setId( null );
 		$item->setDomain( 'unittest' );
-		$this->object->saveItem( $item );
+		$resultSaved = $this->object->saveItem( $item );
 		$itemSaved = $this->object->getItem( $item->getId() );
 
 		$itemExp = clone $itemSaved;
 		$itemExp->setDomain( 'unittest2' );
-		$this->object->saveItem( $itemExp );
+		$resultUpd = $this->object->saveItem( $itemExp );
 		$itemUpd = $this->object->getItem( $itemExp->getId() );
 
 		$this->object->deleteItem( $itemSaved->getId() );
@@ -141,6 +129,9 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals( $itemExp->getTimeCreated(), $itemUpd->getTimeCreated() );
 		$this->assertRegExp( '/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $itemUpd->getTimeModified() );
 
+		$this->assertInstanceOf( '\Aimeos\MShop\Common\Item\Iface', $resultSaved );
+		$this->assertInstanceOf( '\Aimeos\MShop\Common\Item\Iface', $resultUpd );
+
 		$this->setExpectedException('\\Aimeos\\MShop\\Exception');
 		$this->object->getItem( $itemSaved->getId() );
 	}
@@ -166,8 +157,8 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 
 		$this->object->moveItem( $last->getId() );
 
-		$this->assertEquals( 0, $newFirst->getPosition() );
-		$this->assertEquals( 1, $newSecond->getPosition() );
+		$this->assertEquals( 1, $newFirst->getPosition() );
+		$this->assertEquals( 2, $newSecond->getPosition() );
 	}
 
 
@@ -234,7 +225,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$total = 0;
 		$search = $this->object->createSearch();
 
-		$expr = array();
+		$expr = [];
 		$expr[] = $search->compare( '!=', 'customer.lists.id', null );
 		$expr[] = $search->compare( '!=', 'customer.lists.siteid', null );
 		$expr[] = $search->compare( '>', 'customer.lists.parentid', 0 );
@@ -244,7 +235,7 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$expr[] = $search->compare( '==', 'customer.lists.datestart', '2010-01-01 00:00:00' );
 		$expr[] = $search->compare( '==', 'customer.lists.dateend', '2100-01-01 00:00:00' );
 		$expr[] = $search->compare( '!=', 'customer.lists.config', null );
-		$expr[] = $search->compare( '>', 'customer.lists.position', 0 );
+		$expr[] = $search->compare( '>', 'customer.lists.position', 1 );
 		$expr[] = $search->compare( '==', 'customer.lists.status', 1 );
 		$expr[] = $search->compare( '>=', 'customer.lists.mtime', '1970-01-01 00:00:00' );
 		$expr[] = $search->compare( '>=', 'customer.lists.ctime', '1970-01-01 00:00:00' );
@@ -261,10 +252,10 @@ class LaravelTest extends \PHPUnit_Framework_TestCase
 		$expr[] = $search->compare( '==', 'customer.lists.type.editor', $this->editor );
 
 		$search->setConditions( $search->combine( '&&', $expr ) );
-		$search->setSlice(0, 2);
-		$results = $this->object->searchItems( $search, array(), $total );
-		$this->assertEquals( 2, count( $results ) );
-		$this->assertEquals( 3, $total );
+		$search->setSlice(0, 1);
+		$results = $this->object->searchItems( $search, [], $total );
+		$this->assertEquals( 1, count( $results ) );
+		$this->assertEquals( 2, $total );
 
 		foreach($results as $itemId => $item) {
 			$this->assertEquals( $itemId, $item->getId() );

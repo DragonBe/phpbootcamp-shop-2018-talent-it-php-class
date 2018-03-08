@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2014-2016
+ * @copyright Aimeos (aimeos.org), 2014-2017
  * @package MW
  * @subpackage Mail
  */
@@ -25,7 +25,7 @@ class Swift implements \Aimeos\MW\Mail\Iface
 	/**
 	 * Initializes the instance of the class.
 	 *
-	 * @param \Closure|Swift_Mailer $object Closure or Swift_Mailer object
+	 * @param \Closure|\Swift_Mailer $object Closure or Swift_Mailer object
 	 */
 	public function __construct( $object )
 	{
@@ -45,7 +45,7 @@ class Swift implements \Aimeos\MW\Mail\Iface
 	 */
 	public function createMessage( $charset = 'UTF-8' )
 	{
-		return new \Aimeos\MW\Mail\Message\Swift( \Swift_Message::newInstance(), $charset );
+		return new \Aimeos\MW\Mail\Message\Swift( new \Swift_Message(), $charset );
 	}
 
 

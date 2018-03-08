@@ -6,9 +6,9 @@ namespace Aimeos\Client\Html\Email\Watch\Html;
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private static $productItems;
 	private static $customerItem;
@@ -41,6 +41,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 			$prices = $product->getRefItems( 'price', 'default', 'default' );
 
 			self::$productItems[$id]['price'] = reset( $prices );
+			self::$productItems[$id]['currency'] = 'EUR';
 			self::$productItems[$id]['item'] = $product;
 		}
 	}

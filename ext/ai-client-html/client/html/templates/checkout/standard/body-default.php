@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
@@ -11,30 +11,36 @@ $enc = $this->encoder();
 $basketTarget = $this->config( 'client/html/basket/standard/url/target' );
 $basketController = $this->config( 'client/html/basket/standard/url/controller', 'basket' );
 $basketAction = $this->config( 'client/html/basket/standard/url/action', 'index' );
-$basketConfig = $this->config( 'client/html/basket/standard/url/config', array() );
+$basketConfig = $this->config( 'client/html/basket/standard/url/config', [] );
 
 $checkoutTarget = $this->config( 'client/html/checkout/standard/url/target' );
 $checkoutController = $this->config( 'client/html/checkout/standard/url/controller', 'checkout' );
 $checkoutAction = $this->config( 'client/html/checkout/standard/url/action', 'index' );
-$checkoutConfig = $this->config( 'client/html/checkout/standard/url/config', array() );
+$checkoutConfig = $this->config( 'client/html/checkout/standard/url/config', [] );
+
+$optTarget = $this->config( 'client/jsonapi/url/target' );
+$optCntl = $this->config( 'client/jsonapi/url/controller', 'jsonapi' );
+$optAction = $this->config( 'client/jsonapi/url/action', 'options' );
+$optConfig = $this->config( 'client/jsonapi/url/config', [] );
+
 
 $link = true;
 $stepActive = $this->get( 'standardStepActive', false );
 
 
 ?>
-<section class="aimeos checkout-standard">
+<section class="aimeos checkout-standard" data-jsonurl="<?= $enc->attr( $this->url( $optTarget, $optCntl, $optAction, [], [], $optConfig ) ); ?>">
 
 	<nav>
 		<ol class="steps">
 
 			<li class="step basket active">
-				<a href="<?php echo $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, array(), array(), $basketConfig ) ); ?>">
-					<?php echo $enc->html( $this->translate( 'client', 'Basket' ), $enc::TRUST ); ?>
+				<a href="<?= $enc->attr( $this->url( $basketTarget, $basketController, $basketAction, [], [], $basketConfig ) ); ?>">
+					<?= $enc->html( $this->translate( 'client', 'Basket' ), $enc::TRUST ); ?>
 				</a>
 			</li>
 
-			<?php foreach( $this->get( 'standardSteps', array() ) as $name ) : ?>
+			<?php foreach( $this->get( 'standardSteps', [] ) as $name ) : ?>
 				<?php
 					$class = '';
 
@@ -52,14 +58,14 @@ $stepActive = $this->get( 'standardStepActive', false );
 					}
 				?>
 
-				<li class="step <?php echo $name . $class; ?>">
+				<li class="step <?= $name . $class; ?>">
 
 					<?php if( $stepActive && $link ) : ?>
-						<a href="<?php echo $enc->attr( $this->url( $checkoutTarget, $checkoutController, $checkoutAction, array( 'c_step' => $name ), array(), $checkoutConfig ) ); ?>">
-							<?php echo $enc->html( $this->translate( 'client', $name ) ); ?>
+						<a href="<?= $enc->attr( $this->url( $checkoutTarget, $checkoutController, $checkoutAction, array( 'c_step' => $name ), [], $checkoutConfig ) ); ?>">
+							<?= $enc->html( $this->translate( 'client', $name ) ); ?>
 						</a>
 					<?php else : ?>
-						<?php echo $enc->html( $this->translate( 'client', $name ) ); ?>
+						<?= $enc->html( $this->translate( 'client', $name ) ); ?>
 					<?php endif; ?>
 				</li>
 
@@ -72,15 +78,15 @@ $stepActive = $this->get( 'standardStepActive', false );
 	<?php if( isset( $this->standardErrorList ) ) : ?>
 		<ul class="error-list">
 			<?php foreach( (array) $this->standardErrorList as $errmsg ) : ?>
-				<li class="error-item"><?php echo $enc->html( $errmsg ); ?></li>
+				<li class="error-item"><?= $enc->html( $errmsg ); ?></li>
 			<?php endforeach; ?>
 		</ul>
 	<?php endif; ?>
 
 
-	<form method="<?php echo $enc->attr( $this->get( 'standardMethod', 'POST' ) ); ?>" action="<?php echo $enc->attr( $this->get( 'standardUrlNext' ) ); ?>">
-		<?php echo $this->csrf()->formfield(); ?>
-		<?php echo $this->get( 'standardBody' ); ?>
+	<form method="<?= $enc->attr( $this->get( 'standardMethod', 'POST' ) ); ?>" action="<?= $enc->attr( $this->get( 'standardUrlNext' ) ); ?>">
+		<?= $this->csrf()->formfield(); ?>
+		<?= $this->get( 'standardBody' ); ?>
 	</form>
 
 </section>

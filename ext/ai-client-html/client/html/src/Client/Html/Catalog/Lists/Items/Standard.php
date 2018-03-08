@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -56,8 +56,8 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/catalog/lists/items/standard/subparts';
-	private $subPartNames = array();
-	private $tags = array();
+	private $subPartNames = [];
+	private $tags = [];
 	private $expire;
 	private $cache;
 
@@ -70,7 +70,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -130,7 +130,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string|null String including HTML tags for the header on error
 	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
+	public function getHeader( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -304,32 +304,38 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
+			$productItems = [];
 			$context = $this->getContext();
 			$config = $context->getConfig();
-			$products = $view->get( 'listProductItems', array() );
+			$products = $view->get( 'listProductItems', [] );
 
 
 			if( $config->get( 'client/html/catalog/lists/basket-add', false ) )
 			{
 				$domains = array( 'media', 'price', 'text', 'attribute', 'product' );
+
+				/** client/html/catalog/domains
+				 * A list of domain names whose items should be available in the catalog view templates
+				 *
+				 * @see client/html/catalog/detail/domains
+				 */
+				$domains = $config->get( 'client/html/catalog/domains', $domains );
+
+
 				$controller = \Aimeos\Controller\Frontend\Factory::createController( $context, 'catalog' );
+				$prodCntl = \Aimeos\Controller\Frontend\Factory::createController( $context, 'product' );
+				$attrCntl = \Aimeos\Controller\Frontend\Factory::createController( $context, 'attribute' );
 
 
-				$productIds = $this->getProductIds( $products );
-				$productManager = $controller->createManager( 'product' );
-				$productItems = $this->getDomainItems( $productManager, 'product.id', $productIds, $domains );
+				$productItems = $prodCntl->getItems( $this->getProductIds( $products ), $domains );
 				$this->addMetaItems( $productItems, $this->expire, $this->tags );
 
-
-				$attrIds = $this->getAttributeIds( $productItems );
-				$attributeManager = $controller->createManager( 'attribute' );
-				$attributeItems = $this->getDomainItems( $attributeManager, 'attribute.id', $attrIds, $domains );
+				$attributeItems = $attrCntl->getItems( $this->getAttributeIds( $productItems + $products ), $domains );
 				$this->addMetaItems( $attributeItems, $this->expire, $this->tags );
-
 
 				$mediaIds = $this->getMediaIds( $productItems );
 				$mediaManager = $controller->createManager( 'media' );
@@ -343,8 +349,30 @@ class Standard
 			}
 
 
-			if( !empty( $products ) && (bool) $config->get( 'client/html/catalog/lists/stock/enable', true ) == true ) {
-				$view->itemsProductCodes = $this->getProductCodes( $products );
+			/** client/html/catalog/lists/stock/enable
+			 * Enables or disables displaying product stock levels in product list views
+			 *
+			 * This configuration option allows shop owners to display product
+			 * stock levels for each product in list views or to disable
+			 * fetching product stock information.
+			 *
+			 * The stock information is fetched via AJAX and inserted via Javascript.
+			 * This allows to cache product items by leaving out such highly
+			 * dynamic content like stock levels which changes with each order.
+			 *
+			 * @param boolean Value of "1" to display stock levels, "0" to disable displaying them
+			 * @since 2014.03
+			 * @category User
+			 * @category Developer
+			 * @see client/html/catalog/detail/stock/enable
+			 * @see client/html/catalog/stock/url/target
+			 * @see client/html/catalog/stock/url/controller
+			 * @see client/html/catalog/stock/url/action
+			 * @see client/html/catalog/stock/url/config
+			 */
+
+			if( !empty( $products ) && (bool) $config->get( 'client/html/catalog/lists/stock/enable', true ) === true ) {
+				$view->itemsStockUrl = $this->getStockUrl( $view, $products + $productItems );
 			}
 
 			$view->itemPosition = ( $this->getProductListPage( $view ) - 1 ) * $this->getProductListSize( $view );
@@ -364,7 +392,7 @@ class Standard
 	 */
 	protected function getAttributeIds( array $productItems )
 	{
-		$attrIds = array();
+		$attrIds = [];
 		$types = array( 'config', 'custom', 'hidden', 'variant' );
 
 		foreach( $productItems as $product ) {
@@ -383,7 +411,7 @@ class Standard
 	 */
 	protected function getMediaIds( array $productItems )
 	{
-		$mediaIds = array();
+		$mediaIds = [];
 
 		foreach( $productItems as $product )
 		{
@@ -404,7 +432,7 @@ class Standard
 	 */
 	protected function getProductIds( array $productItems )
 	{
-		$prodIds = array();
+		$prodIds = [];
 
 		foreach( $productItems as $product )
 		{

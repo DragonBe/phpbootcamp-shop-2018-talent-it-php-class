@@ -2,16 +2,16 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 $enc = $this->encoder();
-$items = $this->get( 'serviceItems', array() );
+$items = $this->get( 'serviceItems', [] );
 
 ?>
 <?php $this->block()->start( 'catalog/detail/service' ); ?>
 <div class="catalog-detail-service">
-	<span class="service-intro"><?php echo $enc->html( $this->translate( 'client', '+ shipping costs' ) ); ?></span>
+	<span class="service-intro"><?= $enc->html( $this->translate( 'client', '+ shipping costs' ) ); ?></span>
 
 	<?php if( !empty( $items ) ) : ?>
 		<ul class="service-list">
@@ -19,15 +19,15 @@ $items = $this->get( 'serviceItems', array() );
 			<?php foreach( $items as $item ) : ?>
 
 				<li class="service-item">
-					<span class="service-name"><?php echo $enc->html( $item->getName() ); ?></span>
+					<span class="service-name"><?= $enc->html( $item->getName() ); ?></span>
 
-					<?php echo $this->partial(
+					<?= $this->partial(
 						$this->config( 'client/html/common/partials/price', 'common/partials/price-default.php' ),
 						array( 'prices' => $item->getRefItems( 'price', null, 'default' ), 'costsItem' => false )
 					); ?>
 
 					<?php foreach( $item->getRefItems( 'text', 'short', 'default' ) as $textItem ) : ?>
-						<span class="service-short"><?php echo $enc->html( $textItem->getContent() ); ?></span>
+						<span class="service-short"><?= $enc->html( $textItem->getContent() ); ?></span>
 					<?php endforeach; ?>
 				</li>
 

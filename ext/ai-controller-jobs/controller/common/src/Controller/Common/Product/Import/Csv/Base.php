@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -20,7 +20,7 @@ namespace Aimeos\Controller\Common\Product\Import\Csv;
 class Base
 	extends \Aimeos\Controller\Jobs\Base
 {
-	private static $types = array();
+	private static $types = [];
 
 
 	/**
@@ -99,7 +99,7 @@ class Base
 	 */
 	protected function getConverterList( array $convmap )
 	{
-		$convlist = array();
+		$convlist = [];
 
 		foreach( $convmap as $idx => $name ) {
 			$convlist[$idx] = \Aimeos\MW\Convert\Factory::createConverter( $name );
@@ -120,7 +120,7 @@ class Base
 	protected function getData( \Aimeos\MW\Container\Content\Iface $content, $maxcnt, $codePos )
 	{
 		$count = 0;
-		$data = array();
+		$data = [];
 
 		while( $content->valid() && $count++ < $maxcnt )
 		{
@@ -149,24 +149,25 @@ class Base
 	 *  	5 => 'media.url', // relative URL of the product image on the server
 	 *  ),
 	 *  'price' => array(
-	 *  	6 => 'price.value', // price with decimals separated by a dot, no thousand separator
-	 *  	7 => 'price.taxrate', // tax rate with decimals separated by a dot
+	 *		6 => 'price.currencyid', // three letter ISO currency code
+	 *  	7 => 'price.value', // price with decimals separated by a dot, no thousand separator
+	 *  	8 => 'price.taxrate', // tax rate with decimals separated by a dot
 	 *  ),
 	 *  'attribute' => array(
-	 *  	8 => 'attribute.type', // e.g. "size", "length", "width", "color", etc.
-	 *  	9 => 'attribute.code', // code of an existing attribute, new ones will be created automatically
+	 *  	9 => 'attribute.type', // e.g. "size", "length", "width", "color", etc.
+	 *  	10 => 'attribute.code', // code of an existing attribute, new ones will be created automatically
 	 *  ),
 	 *  'product' => array(
-	 *  	10 => 'product.code', // e.g. EAN code of another product
-	 *  	11 => 'product.lists.type', // e.g. "suggestion" for suggested product
+	 *  	11 => 'product.code', // e.g. EAN code of another product
+	 *  	12 => 'product.lists.type', // e.g. "suggestion" for suggested product
 	 *  ),
 	 *  'property' => array(
-	 *  	12 => 'product.property.type', // e.g. "package-weight"
-	 *  	13 => 'product.property.value', // arbitrary value for the corresponding type
+	 *  	13 => 'product.property.type', // e.g. "package-weight"
+	 *  	14 => 'product.property.value', // arbitrary value for the corresponding type
 	 *  ),
 	 *  'catalog' => array(
-	 *  	14 => 'catalog.code', // e.g. Unique category code
-	 *  	15 => 'catalog.lists.type', // e.g. "promotion" for top seller products
+	 *  	15 => 'catalog.code', // e.g. Unique category code
+	 *  	16 => 'catalog.lists.type', // e.g. "promotion" for top seller products
 	 *  ),
 	 *
 	 * @return array Associative list of domains as keys ("item" is special for the product itself) and a list of
@@ -191,25 +192,26 @@ class Base
 				8 => 'media.url',
 			),
 			'price' => array(
-				9 => 'price.quantity',
-				10 => 'price.value',
-				11 => 'price.taxrate',
+				9 => 'price.currencyid',
+				10 => 'price.quantity',
+				11 => 'price.value',
+				12 => 'price.taxrate',
 			),
 			'attribute' => array(
-				12 => 'attribute.code',
-				13 => 'attribute.type',
+				13 => 'attribute.code',
+				14 => 'attribute.type',
 			),
 			'product' => array(
-				14 => 'product.code',
-				15 => 'product.lists.type',
+				15 => 'product.code',
+				16 => 'product.lists.type',
 			),
 			'property' => array(
-				16 => 'product.property.value',
-				17 => 'product.property.type',
+				17 => 'product.property.value',
+				18 => 'product.property.type',
 			),
 			'catalog' => array(
-				18 => 'catalog.code',
-				19 => 'catalog.lists.type',
+				19 => 'catalog.code',
+				20 => 'catalog.lists.type',
 			),
 		);
 	}
@@ -218,21 +220,26 @@ class Base
 	/**
 	 * Returns the mapped data from the CSV line
 	 *
+	 * @param array $data List of CSV fields with position as key and domain item key as value (mapped data is removed)
 	 * @param array $mapping List of domain item keys with the CSV field position as key
-	 * @param array $list List of CSV fields with the CSV field position as key
-	 * @return Associative list of domain item keys and the converted values
+	 * @return array List of associative arrays containing the chunked properties
 	 */
-	protected function getMappedData( array $mapping, array $list )
+	protected function getMappedChunk( array &$data, array $mapping )
 	{
-		$map = array();
+		$idx = 0;
+		$map = [];
 
-		foreach( $mapping as $idx => $key )
+		foreach( $mapping as $pos => $key )
 		{
-			if( !isset( $list[$idx] ) ) {
-				break;
+			if( isset( $map[$idx][$key] ) ) {
+				$idx++;
 			}
 
-			$map[$key] = $list[$idx];
+			if( isset( $data[$pos] ) )
+			{
+				$map[$idx][$key] = $data[$pos];
+				unset( $data[$pos] );
+			}
 		}
 
 		return $map;
@@ -250,7 +257,7 @@ class Base
 		$context = $this->getContext();
 		$config = $context->getConfig();
 		$iface = '\\Aimeos\\Controller\\Common\\Product\\Import\\Csv\\Processor\\Iface';
-		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $context, array() );
+		$object = new \Aimeos\Controller\Common\Product\Import\Csv\Processor\Done( $context, [] );
 
 		foreach( $mappings as $type => $mapping )
 		{
@@ -294,7 +301,7 @@ class Base
 	 */
 	protected function getProducts( array $codes, array $domains )
 	{
-		$result = array();
+		$result = [];
 		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'product' );
 
 		$search = $manager->createSearch();

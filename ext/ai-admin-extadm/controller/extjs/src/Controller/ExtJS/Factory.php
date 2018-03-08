@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -21,7 +21,7 @@ namespace Aimeos\Controller\ExtJS;
 class Factory
 {
 	static private $cache = true;
-	static private $controllers = array();
+	static private $controllers = [];
 
 
 	/**
@@ -39,13 +39,13 @@ class Factory
 			if( $path !== null ) {
 				self::$controllers[$id][$path] = null;
 			} else {
-				self::$controllers[$id] = array();
+				self::$controllers[$id] = [];
 			}
 
 			return;
 		}
 
-		self::$controllers = array();
+		self::$controllers = [];
 	}
 
 

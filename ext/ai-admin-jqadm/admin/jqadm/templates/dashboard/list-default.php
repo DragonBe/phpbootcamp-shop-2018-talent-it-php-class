@@ -2,14 +2,25 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
+
+$enc = $this->encoder();
+
 
 ?>
 <?php $this->block()->start( 'jqadm_content' ); ?>
+<nav class="main-navbar">
+	<span class="navbar-brand">
+		<?= $enc->html( $this->translate( 'admin', 'Dashboard' ) ); ?>
+		<span class="navbar-secondary">(<?= $enc->html( $this->site()->label() ); ?>)</span>
+	</span>
+	<div class="btn act-show fa" style="visibility: hidden"></div>
+</nav>
+
 <div class="dashboard">
-<?php echo $this->get( 'listBody' ); ?>
+	<?= $this->get( 'listBody' ); ?>
 </div>
 <?php $this->block()->stop(); ?>
 
-<?php echo $this->render( $this->config( 'admin/jqadm/template/page', 'common/page-default.php' ) ); ?>
+<?= $this->render( $this->config( 'admin/jqadm/template/page', 'common/page-default.php' ) ); ?>

@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Dashboard\Order\Paymentstatus;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $object;
@@ -23,48 +23,14 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$templatePaths = \TestHelperJqadm::getTemplatePaths();
 
 		$this->object = new \Aimeos\Admin\JQAdm\Dashboard\Order\Paymentstatus\Standard( $this->context, $templatePaths );
+		$this->object->setAimeos( \TestHelperJqadm::getAimeos() );
 		$this->object->setView( $this->view );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object );
-	}
-
-
-	public function testCreate()
-	{
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$this->object->create();
-	}
-
-
-	public function testCopy()
-	{
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$this->object->copy();
-	}
-
-
-	public function testDelete()
-	{
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$this->object->delete();
-	}
-
-
-	public function testGet()
-	{
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$this->object->get();
-	}
-
-
-	public function testSave()
-	{
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$this->object->save();
+		unset( $this->object, $this->view, $this->context );
 	}
 
 
@@ -118,7 +84,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	protected function getViewNoRender()
 	{
 		return $this->getMockBuilder( '\Aimeos\MW\View\Standard' )
-			->setConstructorArgs( array( array() ) )
+			->setConstructorArgs( array( [] ) )
 			->setMethods( array( 'render', 'config' ) )
 			->getMock();
 	}

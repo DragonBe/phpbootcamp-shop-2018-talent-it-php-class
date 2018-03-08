@@ -2,14 +2,14 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 
 namespace Aimeos\Admin\JQAdm\Common\Decorator;
 
 
-class BaseTest extends \PHPUnit_Framework_TestCase
+class BaseTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $mock;
@@ -25,20 +25,15 @@ class BaseTest extends \PHPUnit_Framework_TestCase
 		$templatePaths = \TestHelperJqadm::getTemplatePaths();
 		$context = \TestHelperJqadm::getContext();
 
-		$this->object = new \Aimeos\Admin\JQAdm\Common\Decorator\Sites( $this->mock, $context, $templatePaths );
+		$this->object = new \Aimeos\Admin\JQAdm\Common\Decorator\Page( $this->mock, $context, $templatePaths );
+		$this->object->setAimeos( \TestHelperJqadm::getAimeos() );
+		$this->object->setView( \TestHelperJqadm::getView() );
 	}
 
 
 	protected function tearDown()
 	{
 		unset( $this->object, $this->mock );
-	}
-
-
-	public function testCallInvalid()
-	{
-		$this->setExpectedException( '\Aimeos\Admin\JQAdm\Exception' );
-		$this->object->invalidMethod();
 	}
 
 

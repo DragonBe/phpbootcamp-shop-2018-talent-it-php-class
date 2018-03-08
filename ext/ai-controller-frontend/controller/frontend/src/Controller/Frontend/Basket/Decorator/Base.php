@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -17,15 +17,56 @@ namespace Aimeos\Controller\Frontend\Basket\Decorator;
  * @package Controller
  * @subpackage Frontend
  */
-abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
+abstract class Base
+	extends \Aimeos\Controller\Frontend\Basket\Base
+	implements \Aimeos\Controller\Frontend\Common\Decorator\Iface, \Aimeos\Controller\Frontend\Basket\Iface
 {
+	private $controller;
+
+
+	/**
+	 * Initializes the controller decorator.
+	 *
+	 * @param \Aimeos\Controller\Frontend\Iface $controller Controller object
+	 * @param \Aimeos\MShop\Context\Item\Iface $context Context object with required objects
+	 */
+	public function __construct( \Aimeos\Controller\Frontend\Iface $controller, \Aimeos\MShop\Context\Item\Iface $context )
+	{
+		$iface = '\Aimeos\Controller\Frontend\Basket\Iface';
+		if( !( $controller instanceof $iface ) )
+		{
+			$msg = sprintf( 'Class "%1$s" does not implement interface "%2$s"', get_class( $controller ), $iface );
+			throw new \Aimeos\Controller\Frontend\Exception( $msg );
+		}
+
+		$this->controller = $controller;
+
+		parent::__construct( $context );
+	}
+
+
+	/**
+	 * Passes unknown methods to wrapped objects.
+	 *
+	 * @param string $name Name of the method
+	 * @param array $param List of method parameter
+	 * @return mixed Returns the value of the called method
+	 * @throws \Aimeos\Controller\Frontend\Exception If method call failed
+	 */
+	public function __call( $name, array $param )
+	{
+		return @call_user_func_array( array( $this->controller, $name ), $param );
+	}
+
+
 	/**
 	 * Empties the basket and removing all products, addresses, services, etc.
 	 * @return void
 	 */
 	public function clear()
 	{
-		$this->getController()->clear();
+		$this->controller->clear();
+		return $this;
 	}
 
 
@@ -36,7 +77,7 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 */
 	public function get()
 	{
-		return $this->getController()->get();
+		return $this->controller->get();
 	}
 
 
@@ -45,7 +86,46 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 */
 	public function save()
 	{
-		$this->getController()->save();
+		$this->controller->save();
+		return $this;
+	}
+
+
+	/**
+	 * Sets the new basket type
+	 *
+	 * @param string $type Basket type
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Basket frontend object
+	 */
+	public function setType( $type )
+	{
+		$this->controller->setType( $type );
+		return $this;
+	}
+
+
+	/**
+	 * Creates a new order base object from the current basket
+	 *
+	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base object including products, addresses and services
+	 */
+	public function store()
+	{
+		return $this->controller->store();
+	}
+
+
+	/**
+	 * Returns the order base object for the given ID
+	 *
+	 * @param string $id Unique ID of the order base object
+	 * @param integer $parts Constants which parts of the order base object should be loaded
+	 * @param boolean $default True to add default criteria (user logged in), false if not
+	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base object including the given parts
+	 */
+	public function load( $id, $parts = \Aimeos\MShop\Order\Manager\Base\Base::PARTS_ALL, $default = true )
+	{
+		return $this->controller->load( $id, $parts, $default );
 	}
 
 
@@ -70,11 +150,11 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 * @throws \Aimeos\Controller\Frontend\Basket\Exception If the product isn't available
 	 * @return void
 	 */
-	public function addProduct( $prodid, $quantity = 1, array $options = array(), array $variantAttributeIds = array(),
-		array $configAttributeIds = array(), array $hiddenAttributeIds = array(), array $customAttributeValues = array(),
+	public function addProduct( $prodid, $quantity = 1, array $options = [], array $variantAttributeIds = [],
+		array $configAttributeIds = [], array $hiddenAttributeIds = [], array $customAttributeValues = [],
 		$stocktype = 'default' )
 	{
-		$this->getController()->addProduct(
+		$this->controller->addProduct(
 			$prodid, $quantity, $options, $variantAttributeIds, $configAttributeIds,
 			$hiddenAttributeIds, $customAttributeValues, $stocktype
 		);
@@ -89,7 +169,7 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 */
 	public function deleteProduct( $position )
 	{
-		$this->getController()->deleteProduct( $position );
+		$this->controller->deleteProduct( $position );
 	}
 
 
@@ -102,9 +182,9 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 * @param array $configAttributeCodes Codes of the product config attributes that should be REMOVED
 	 * @return void
 	 */
-	public function editProduct( $position, $quantity, array $options = array(), array $configAttributeCodes = array() )
+	public function editProduct( $position, $quantity, array $options = [], array $configAttributeCodes = [] )
 	{
-		$this->getController()->editProduct( $position, $quantity, $options, $configAttributeCodes );
+		$this->controller->editProduct( $position, $quantity, $options, $configAttributeCodes );
 	}
 
 
@@ -117,7 +197,7 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 */
 	public function addCoupon( $code )
 	{
-		$this->getController()->addCoupon( $code );
+		$this->controller->addCoupon( $code );
 	}
 
 
@@ -130,7 +210,7 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 */
 	public function deleteCoupon( $code )
 	{
-		$this->getController()->deleteCoupon( $code );
+		$this->controller->deleteCoupon( $code );
 	}
 
 
@@ -145,7 +225,7 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 */
 	public function setAddress( $type, $value )
 	{
-		$this->getController()->setAddress( $type, $value );
+		$this->controller->setAddress( $type, $value );
 	}
 
 
@@ -159,8 +239,19 @@ abstract class Base extends \Aimeos\Controller\Frontend\Common\Decorator\Base
 	 * @throws \Aimeos\Controller\Frontend\Basket\Exception If there is no price to the service item attached
 	 * @return void
 	 */
-	public function setService( $type, $id, array $attributes = array() )
+	public function setService( $type, $id, array $attributes = [] )
 	{
-		$this->getController()->setService( $type, $id, $attributes );
+		$this->controller->setService( $type, $id, $attributes );
+	}
+
+
+	/**
+	 * Returns the frontend controller
+	 *
+	 * @return \Aimeos\Controller\Frontend\Basket\Iface Frontend controller object
+	 */
+	protected function getController()
+	{
+		return $this->controller;
 	}
 }

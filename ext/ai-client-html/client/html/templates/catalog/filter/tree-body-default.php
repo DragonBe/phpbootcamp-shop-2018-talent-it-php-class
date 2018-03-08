@@ -3,12 +3,12 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
 $params = $this->param();
-$path = $this->get( 'treeCatalogPath', array() );
+$path = $this->get( 'treeCatalogPath', [] );
 $counts = $this->config( 'client/html/catalog/count/enable', true );
 
 $name = '';
@@ -19,7 +19,7 @@ if( ( $node = end( $path ) ) !== false ) {
 $listTarget = $this->config( 'client/html/catalog/lists/url/target' );
 $listController = $this->config( 'client/html/catalog/lists/url/controller', 'catalog' );
 $listAction = $this->config( 'client/html/catalog/lists/url/action', 'list' );
-$listConfig = $this->config( 'client/html/catalog/lists/url/config', array() );
+$listConfig = $this->config( 'client/html/catalog/lists/url/config', [] );
 
 
 /** client/html/catalog/filter/tree/force-search
@@ -55,33 +55,33 @@ $enforce = $this->config( 'client/html/catalog/filter/tree/force-search', false 
 
 ?>
 <?php $this->block()->start( 'catalog/filter/tree' ); ?>
-<section class="catalog-filter-tree <?php echo ( $counts == true ? 'catalog-filter-count' : '' ); ?>">
+<section class="catalog-filter-tree <?= ( $counts == true ? 'catalog-filter-count' : '' ); ?>">
 
 	<?php if( $enforce ) : ?>
 		<input type="hidden"
-			name="<?php echo $enc->attr( $this->formparam( array( 'f_catid' ) ) ); ?>"
-			value="<?php echo $enc->attr( $this->param( 'f_catid' ) ); ?>"
+			name="<?= $enc->attr( $this->formparam( array( 'f_catid' ) ) ); ?>"
+			value="<?= $enc->attr( $this->param( 'f_catid' ) ); ?>"
 		/>
 	<?php endif; ?>
 
-	<h2><?php echo $enc->html( $this->translate( 'client', 'Categories' ), $enc::TRUST ); ?></h2>
+	<h2><?= $enc->html( $this->translate( 'client', 'Categories' ), $enc::TRUST ); ?></h2>
 
 	<?php if( isset( $params['f_catid'] ) ) : unset( $params['f_catid'], $params['f_name'] ); ?>
 		<div class="category-selected">
-			<span class="selected-intro"><?php echo $enc->html( $this->translate( 'client', 'Your choice' ), $enc::TRUST ); ?></span>
-			<a class="selected-category" href="<?php echo $enc->attr( $this->url( $listTarget, $listController, $listAction, $params, array(), $listConfig ) ); ?>">
-				<?php echo $enc->html( $name, $enc::TRUST ); ?>
+			<span class="selected-intro"><?= $enc->html( $this->translate( 'client', 'Your choice' ), $enc::TRUST ); ?></span>
+			<a class="selected-category" href="<?= $enc->attr( $this->url( $listTarget, $listController, $listAction, $params, [], $listConfig ) ); ?>">
+				<?= $enc->html( $name, $enc::TRUST ); ?>
 			</a>
 		</div>
 	<?php endif; ?>
 
 	<?php if( isset( $this->treeCatalogTree ) && $this->treeCatalogTree->getStatus() > 0 ) : ?>
-		<?php echo $this->partial(
+		<?= $this->partial(
 			$this->config( 'client/html/catalog/filter/partials/tree', 'catalog/filter/tree-default.php' ),
-			array( 'nodes' => array( $this->treeCatalogTree ), 'path' => $path, 'params' => $this->get( 'treeFilterParams', array() ) )
+			array( 'nodes' => array( $this->treeCatalogTree ), 'path' => $path, 'params' => $this->get( 'treeFilterParams', [] ) )
 		); ?>
 	<?php endif; ?>
 
 </section>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'catalog/filter/tree' ); ?>
+<?= $this->block()->get( 'catalog/filter/tree' ); ?>

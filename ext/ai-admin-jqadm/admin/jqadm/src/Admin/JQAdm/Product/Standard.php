@@ -2,13 +2,15 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JQAdm
  */
 
 
 namespace Aimeos\Admin\JQAdm\Product;
+
+sprintf( 'product' ); // for translation
 
 
 /**
@@ -144,6 +146,28 @@ class Standard
 	 * @category Developer
 	 */
 
+	/** admin/jqadm/product/option/name
+	 * Name of the option subpart used by the JQAdm product implementation
+	 *
+	 * Use "Myname" if your class is named "\Aimeos\Admin\Jqadm\Product\Option\Myname".
+	 * The name is case-sensitive and you should avoid camel case names like "MyName".
+	 *
+	 * @param string Last part of the JQAdm class name
+	 * @since 2017.03
+	 * @category Developer
+	 */
+
+	/** admin/jqadm/product/related/name
+	 * Name of the related subpart used by the JQAdm product implementation
+	 *
+	 * Use "Myname" if your class is named "\Aimeos\Admin\Jqadm\Product\Related\Myname".
+	 * The name is case-sensitive and you should avoid camel case names like "MyName".
+	 *
+	 * @param string Last part of the JQAdm class name
+	 * @since 2017.03
+	 * @category Developer
+	 */
+
 	/** admin/jqadm/product/physical/name
 	 * Name of the physical subpart used by the JQAdm product implementation
 	 *
@@ -165,13 +189,27 @@ class Standard
 	 * @since 2016.04
 	 * @category Developer
 	 */
-	private $subPartNames = array( 'selection', 'bundle', 'image', 'text', 'price', 'stock', 'category', 'characteristic', 'physical', 'download' );
+
+	/** admin/jqadm/product/special/name
+	 * Name of the special subpart used by the JQAdm product implementation
+	 *
+	 * Use "Myname" if your class is named "\Aimeos\Admin\Jqadm\Product\Special\Myname".
+	 * The name is case-sensitive and you should avoid camel case names like "MyName".
+	 *
+	 * @param string Last part of the JQAdm class name
+	 * @since 2017.06
+	 * @category Developer
+	 */
+	private $subPartNames = [
+		'selection', 'bundle', 'image', 'text', 'price', 'stock', 'category',
+		'characteristic', 'option', 'related', 'physical', 'download', 'special'
+	];
 
 
 	/**
 	 * Copies a resource
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function copy()
 	{
@@ -180,65 +218,43 @@ class Standard
 
 		try
 		{
-			$this->setData( $view );
-
-			if( isset( $view->itemData['product.code'] ) )
-			{
-				$data = $view->itemData;
-				$data['product.id'] = '';
-				$data['product.code'] = $data['product.code'] . '_copy';
-
-				$view->item->setCode( $data['product.code'] );
-				$view->itemData = $data;
+			if( ( $id = $view->param( 'id' ) ) === null ) {
+				throw new \Aimeos\Admin\JQAdm\Exception( sprintf( 'Required parameter "%1$s" is missing', 'id' ) );
 			}
 
+			$manager = \Aimeos\MShop\Factory::createManager( $context, 'product' );
+			$view->item = $manager->getItem( $id, $this->getDomains() );
+
+			$view->itemData = $this->toArray( $view->item, true );
+			$view->itemSubparts = $this->getSubClientNames();
+			$view->itemTypes = $this->getTypeItems();
 			$view->itemBody = '';
 
-			foreach( $this->getSubClients() as $client ) {
+			foreach( $this->getSubClients() as $idx => $client )
+			{
+				$view->tabindex = ++$idx + 1;
 				$view->itemBody .= $client->copy();
 			}
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$error = array( 'product-item' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$error = array( 'product-item' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 
-		/** admin/jqadm/product/template-item
-		 * Relative path to the HTML body template for the product item.
-		 *
-		 * The template file contains the HTML code and processing instructions
-		 * to generate the result shown in the body of the frontend. The
-		 * configuration string is the path to the template file relative
-		 * to the templates directory (usually in admin/jqadm/templates).
-		 *
-		 * You can overwrite the template file configuration in extensions and
-		 * provide alternative templates. These alternative templates should be
-		 * named like the default one but with the string "default" replaced by
-		 * an unique name. You may use the name of your project for this. If
-		 * you've implemented an alternative client class as well, "default"
-		 * should be replaced by the name of the new class.
-		 *
-		 * @param string Relative path to the template creating the HTML code
-		 * @since 2016.04
-		 * @category Developer
-		 */
-		$tplconf = 'admin/jqadm/product/template-item';
-		$default = 'product/item-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Creates a new resource
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function create()
 	{
@@ -247,35 +263,46 @@ class Standard
 
 		try
 		{
-			$this->setData( $view );
+			$data = $view->param( 'item', [] );
+
+			if( !isset( $view->item ) ) {
+				$view->item = \Aimeos\MShop\Factory::createManager( $context, 'product' )->createItem();
+			} else {
+				$data = $this->toArray( $view->item );
+			}
+
+			$data['product.siteid'] = $view->item->getSiteId();
+
+			$view->itemSubparts = $this->getSubClientNames();
+			$view->itemTypes = $this->getTypeItems();
+			$view->itemData = $data;
 			$view->itemBody = '';
 
-			foreach( $this->getSubClients() as $client ) {
+			foreach( $this->getSubClients() as $idx => $client )
+			{
+				$view->tabindex = ++$idx + 1;
 				$view->itemBody .= $client->create();
 			}
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$error = array( 'product-item' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$error = array( 'product-item' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 
-		$tplconf = 'admin/jqadm/product/template-item';
-		$default = 'product/item-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Deletes a resource
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string|null HTML output
 	 */
 	public function delete()
 	{
@@ -287,34 +314,43 @@ class Standard
 
 		try
 		{
+			if( ( $id = $view->param( 'id' ) ) === null ) {
+				throw new \Aimeos\Admin\JQAdm\Exception( sprintf( 'Required parameter "%1$s" is missing', 'id' ) );
+			}
+
+			$view->item = $manager->getItem( $id, $this->getDomains() );
+
 			foreach( $this->getSubClients() as $client ) {
 				$client->delete();
 			}
 
-			$manager->deleteItems( (array) $view->param( 'id' ) );
+			$manager->deleteItem( $id );
 			$manager->commit();
 
+			$this->nextAction( $view, 'search', 'product' );
 			return;
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-			$manager->rollback();
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$error = array( 'product-item' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-			$manager->rollback();
+			$error = array( 'product-item' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
+
+		$manager->rollback();
+
+		return $this->search();
 	}
 
 
 	/**
 	 * Returns a single resource
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function get()
 	{
@@ -323,35 +359,43 @@ class Standard
 
 		try
 		{
-			$this->setData( $view );
+			if( ( $id = $view->param( 'id' ) ) === null ) {
+				throw new \Aimeos\Admin\JQAdm\Exception( sprintf( 'Required parameter "%1$s" is missing', 'id' ) );
+			}
+
+			$manager = \Aimeos\MShop\Factory::createManager( $context, 'product' );
+
+			$view->item = $manager->getItem( $id, $this->getDomains() );
+			$view->itemSubparts = $this->getSubClientNames();
+			$view->itemData = $this->toArray( $view->item );
+			$view->itemTypes = $this->getTypeItems();
 			$view->itemBody = '';
 
-			foreach( $this->getSubClients() as $client ) {
+			foreach( $this->getSubClients() as $idx => $client )
+			{
+				$view->tabindex = ++$idx + 1;
 				$view->itemBody .= $client->get();
 			}
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$error = array( 'product-item' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$error = array( 'product-item' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 
-		$tplconf = 'admin/jqadm/product/template-item';
-		$default = 'product/item-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
+		return $this->render( $view );
 	}
 
 
 	/**
 	 * Saves the data
 	 *
-	 * @return string|null admin output to display or null for redirecting to the list
+	 * @return string HTML output
 	 */
 	public function save()
 	{
@@ -363,12 +407,7 @@ class Standard
 
 		try
 		{
-			$item = $manager->createItem();
-			$item->fromArray( $view->param( 'item', array() ) );
-			$item->setConfig( $this->getItemConfig( $view ) );
-			$manager->saveItem( $item );
-
-			$view->item = $manager->getItem( $item->getId() ); // product.type must be available
+			$view->item = $this->fromArray( $view->param( 'item', [] ) );
 			$view->itemBody = '';
 
 			foreach( $this->getSubClients() as $client ) {
@@ -376,24 +415,26 @@ class Standard
 			}
 
 			$manager->commit();
+
+			$this->nextAction( $view, $view->param( 'next' ), 'product', $view->item->getId() );
 			return;
 		}
 		catch( \Aimeos\Admin\JQAdm\Exception $e )
 		{
-			// fall through to create()
+			// fall through to create
 		}
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-			$manager->rollback();
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$error = array( 'product-item' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
-			$manager->rollback();
+			$error = array( 'product-item' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
+
+		$manager->rollback();
 
 		return $this->create();
 	}
@@ -402,7 +443,7 @@ class Standard
 	/**
 	 * Returns a list of resource according to the conditions
 	 *
-	 * @return string admin output to display
+	 * @return string HTML output
 	 */
 	public function search()
 	{
@@ -412,12 +453,14 @@ class Standard
 		try
 		{
 			$total = 0;
+			$params = $this->storeSearchParams( $view->param(), 'product' );
 			$manager = \Aimeos\MShop\Factory::createManager( $context, 'product' );
-			$search = $this->initCriteria( $manager->createSearch(), $view->param() );
+			$search = $this->initCriteria( $manager->createSearch(), $params );
 
-			$view->pageParams = $this->getClientParams();
-			$view->items = $manager->searchItems( $search, array(), $total );
+			$view->items = $manager->searchItems( $search, [], $total );
+			$view->filterAttributes = $manager->getSearchAttributes( true );
 			$view->filterOperators = $search->getOperators();
+			$view->itemTypes = $this->getTypeItems();
 			$view->total = $total;
 			$view->itemBody = '';
 
@@ -428,12 +471,12 @@ class Standard
 		catch( \Aimeos\MShop\Exception $e )
 		{
 			$error = array( 'product-item' => $context->getI18n()->dt( 'mshop', $e->getMessage() ) );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 		catch( \Exception $e )
 		{
-			$error = array( 'product-item' => $e->getMessage() );
-			$view->errors = $view->get( 'errors', array() ) + $error;
+			$error = array( 'product-item' => $e->getMessage() . ', ' . $e->getFile() . ':' . $e->getLine() );
+			$view->errors = $view->get( 'errors', [] ) + $error;
 		}
 
 		/** admin/jqadm/product/template-list
@@ -549,25 +592,12 @@ class Standard
 
 
 	/**
-	 * Returns the mapped input parameter or the existing items as expected by the template
+	 * Returns the domain names whose items should be fetched too
 	 *
-	 * @param \Aimeos\MW\View\Iface $view View object with helpers and assigned parameters
-	 * @return array Multi-dimensional associative array
+	 * @return string[] List of domain names
 	 */
-	protected function setData( \Aimeos\MW\View\Iface $view )
+	protected function getDomains()
 	{
-		$context = $this->getContext();
-		$manager = \Aimeos\MShop\Factory::createManager( $context, 'product' );
-
-		$view->pageParams = $this->getClientParams();
-		$view->itemData = (array) $view->param( 'item', array() );
-		$view->itemTypes = $this->getTypeItems();
-		$view->item = $manager->createItem();
-
-		if( !empty( $view->itemData ) || ( $id = $view->param( 'id' ) ) === null ) {
-			return;
-		}
-
 		/** admin/jqadm/product/domains
 		 * List of domain items that should be fetched along with the product
 		 *
@@ -580,41 +610,8 @@ class Standard
 		 * @category Developer
 		 */
 		$domains = array( 'attribute', 'media', 'price', 'product', 'text' );
-		$domains = $context->getConfig()->get( 'admin/jqadm/product/domains', $domains );
-		$item = $manager->getItem( $id, $domains );
 
-		$data = $item->toArray();
-		$data['config'] = array( 'key' => array(), 'val' => array() );
-
-		foreach( $item->getConfig() as $key => $value )
-		{
-			$data['config']['key'][] = $key;
-			$data['config']['val'][] = $value;
-		}
-
-		$view->itemData = $data;
-		$view->item = $item;
-	}
-
-
-	/**
-	 * Maps the item configuration from parameters to a list of key/value pairs
-	 *
-	 * @param \Aimeos\MW\View\Iface $view View object with helpers and assigned parameters
-	 * @return array Associative list of key/value pairs
-	 */
-	protected function getItemConfig( \Aimeos\MW\View\Iface $view )
-	{
-		$config = array();
-
-		foreach( (array) $view->param( 'item/config/key' ) as $idx => $key )
-		{
-			if( trim( $key ) !== '' ) {
-				$config[$key] = $view->param( 'item/config/val/' . $idx );
-			}
-		}
-
-		return $config;
+		return $this->getContext()->getConfig()->get( 'admin/jqadm/product/domains', $domains );
 	}
 
 
@@ -625,8 +622,7 @@ class Standard
 	 */
 	protected function getSubClientNames()
 	{
-		$result = $this->getContext()->getConfig()->get( $this->subPartPath, $this->subPartNames );
-		return $result;
+		return $this->getContext()->getConfig()->get( $this->subPartPath, $this->subPartNames );
 	}
 
 
@@ -643,5 +639,99 @@ class Standard
 		$search->setSortations( array( $search->sort( '+', 'product.type.label' ) ) );
 
 		return $typeManager->searchItems( $search );
+	}
+
+
+	/**
+	 * Creates new and updates existing items using the data array
+	 *
+	 * @param string[] Data array
+	 * @return \Aimeos\MShop\Product\Item\Iface New product item object
+	 */
+	protected function fromArray( array $data )
+	{
+		$conf = [];
+
+		if( isset( $data['config']['key'] ) )
+		{
+			foreach( (array) $data['config']['key'] as $idx => $key )
+			{
+				if( trim( $key ) !== '' && isset( $data['config']['val'][$idx] ) ) {
+					$conf[$key] = $data['config']['val'][$idx];
+				}
+			}
+		}
+
+		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'product' );
+
+		$item = $manager->createItem();
+		$item->fromArray( $data );
+		$item->setConfig( $conf );
+
+		$item = $manager->saveItem( $item );
+
+		return $manager->getItem( $item->getId() ); // product.type must be available;
+	}
+
+
+	/**
+	 * Constructs the data array for the view from the given item
+	 *
+	 * @param \Aimeos\MShop\Product\Item\Iface $item Product item object
+	 * @return string[] Multi-dimensional associative list of item data
+	 */
+	protected function toArray( \Aimeos\MShop\Product\Item\Iface $item, $copy = false )
+	{
+		$data = $item->toArray( true );
+		$data['config'] = [];
+
+		if( $copy === true )
+		{
+			$data['product.siteid'] = $this->getContext()->getLocale()->getSiteId();
+			$data['product.code'] = $data['product.code'] . '_copy';
+			$data['product.id'] = '';
+		}
+
+		foreach( $item->getConfig() as $key => $value )
+		{
+			$data['config']['key'][] = $key;
+			$data['config']['val'][] = $value;
+		}
+
+		return $data;
+	}
+
+
+	/**
+	 * Returns the rendered template including the view data
+	 *
+	 * @param \Aimeos\MW\View\Iface $view View object with data assigned
+	 * @return string HTML output
+	 */
+	protected function render( \Aimeos\MW\View\Iface $view )
+	{
+		/** admin/jqadm/product/template-item
+		 * Relative path to the HTML body template for the product item.
+		 *
+		 * The template file contains the HTML code and processing instructions
+		 * to generate the result shown in the body of the frontend. The
+		 * configuration string is the path to the template file relative
+		 * to the templates directory (usually in admin/jqadm/templates).
+		 *
+		 * You can overwrite the template file configuration in extensions and
+		 * provide alternative templates. These alternative templates should be
+		 * named like the default one but with the string "default" replaced by
+		 * an unique name. You may use the name of your project for this. If
+		 * you've implemented an alternative client class as well, "default"
+		 * should be replaced by the name of the new class.
+		 *
+		 * @param string Relative path to the template creating the HTML code
+		 * @since 2016.04
+		 * @category Developer
+		 */
+		$tplconf = 'admin/jqadm/product/template-item';
+		$default = 'product/item-default.php';
+
+		return $view->render( $view->config( $tplconf, $default ) );
 	}
 }

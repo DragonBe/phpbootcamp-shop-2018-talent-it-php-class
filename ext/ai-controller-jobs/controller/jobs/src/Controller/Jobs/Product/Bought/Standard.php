@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Jobs
  */
@@ -161,7 +161,7 @@ class Standard
 		$search->setConditions( $search->compare( '>', 'order.base.ctime', $date ) );
 		$search->setSlice( 0, 0 );
 		$totalOrders = 0;
-		$baseManager->searchItems( $search, array(), $totalOrders );
+		$baseManager->searchItems( $search, [], $totalOrders );
 
 		$baseProductManager = \Aimeos\MShop\Factory::createManager( $context, 'order/base/product' );
 		$search = $baseProductManager->createSearch();
@@ -207,7 +207,7 @@ class Standard
 	 */
 	protected function getSuggestions( $id, $prodIds, $count, $total, $maxItems, $minSupport, $minConfidence, $date )
 	{
-		$refIds = array();
+		$refIds = [];
 		$context = $this->getContext();
 
 		$catalogListManager = \Aimeos\MShop\Factory::createManager( $context, 'catalog/lists' );
@@ -240,7 +240,7 @@ class Standard
 
 		unset( $relativeCounts[$id] );
 		$supportA = $count / $total;
-		$products = array();
+		$products = [];
 
 		foreach( $relativeCounts as $prodId => $relCnt )
 		{
@@ -287,7 +287,7 @@ class Standard
 			$item->setRefId( $refid );
 			$item->setStatus( 1 );
 
-			$manager->saveItem( $item );
+			$manager->saveItem( $item, false );
 		}
 	}
 

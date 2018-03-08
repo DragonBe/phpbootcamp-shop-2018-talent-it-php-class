@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Frontend
  */
@@ -35,15 +35,15 @@ abstract class Base
 
 
 	/**
-	 * Catches unknown methods
+	 * Catch unknown methods
 	 *
 	 * @param string $name Name of the method
 	 * @param array $param List of method parameter
-	 * @return boolean Returns always false
+	 * @throws \Aimeos\Controller\Frontend\Exception If method call failed
 	 */
 	public function __call( $name, array $param )
 	{
-		return false;
+		throw new \Aimeos\Controller\Frontend\Exception( sprintf( 'Unable to call method "%1$s"', $name ) );
 	}
 
 

@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $addresses = $this->summaryBasket->getAddresses();
@@ -130,10 +130,10 @@ $services = $this->summaryBasket->getServices();
 		$this->config( 'client/html/email/common/summary/detail/text', 'email/common/text-summary-detail-partial-default.php' ),
 		array(
 			'summaryBasket' => $this->summaryBasket,
-			'summaryTaxRates' => $this->get( 'summaryTaxRates', array() ),
+			'summaryTaxRates' => $this->get( 'summaryTaxRates', [] ),
 			'summaryShowDownloadAttributes' => $this->get( 'summaryShowDownloadAttributes', false ),
 		)
 	);
 ?>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'email/common/text/summary' ); ?>
+<?= $this->block()->get( 'email/common/text/summary' ); ?>

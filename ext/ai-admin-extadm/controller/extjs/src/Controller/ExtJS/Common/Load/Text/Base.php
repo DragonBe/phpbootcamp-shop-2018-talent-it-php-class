@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2011
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage ExtJS
  */
@@ -22,8 +22,8 @@ namespace Aimeos\Controller\ExtJS\Common\Load\Text;
 abstract class Base
 {
 	private $context;
-	private $textListTypes = array();
-	private $textTypes = array();
+	private $textListTypes = [];
+	private $textTypes = [];
 	private $name;
 
 
@@ -49,7 +49,7 @@ abstract class Base
 	{
 		return array(
 			'name' => $this->name,
-			'properties' => array(),
+			'properties' => [],
 		);
 	}
 
@@ -62,7 +62,7 @@ abstract class Base
 	public function getSearchSchema()
 	{
 		return array(
-			'criteria' => array(),
+			'criteria' => [],
 		);
 	}
 
@@ -110,7 +110,7 @@ abstract class Base
 		$search->setSortations( array( $search->sort( '+', $domain . '.id' ) ) );
 
 		$start = 0;
-		$itemIdMap = $itemCodeMap = array();
+		$itemIdMap = $itemCodeMap = [];
 
 		do
 		{
@@ -175,7 +175,7 @@ abstract class Base
 					$item->setDomain( 'text' );
 					$item->setRefId( $textId );
 
-					$listManager->saveItem( $item );
+					$listManager->saveItem( $item, false );
 				}
 				catch( \Exception $e ) {
 					$this->getContext()->getLogger()->log( 'text reference: ' . $e->getMessage(), \Aimeos\MW\Logger\Base::ERR, 'import' );
@@ -198,7 +198,7 @@ abstract class Base
 			return $this->textListTypes[$domain];
 		}
 
-		$this->textListTypes[$domain] = array();
+		$this->textListTypes[$domain] = [];
 
 		$typeManager = $manager->getSubManager( 'lists' )->getSubManager( 'type' );
 
@@ -238,7 +238,7 @@ abstract class Base
 			return $this->textTypes[$domain];
 		}
 
-		$this->textTypes[$domain] = array();
+		$this->textTypes[$domain] = [];
 
 		$textManager = \Aimeos\MShop\Text\Manager\Factory::createManager( $this->getContext() );
 		$manager = $textManager->getSubManager( 'type' );
@@ -289,7 +289,7 @@ abstract class Base
 			}
 		}
 
-		$localeItem = new \Aimeos\MShop\Locale\Item\Standard( array(), $siteItem );
+		$localeItem = new \Aimeos\MShop\Locale\Item\Standard( [], $siteItem );
 		$localeItem->setLanguageId( $locale->getLanguageId() );
 		$localeItem->setCurrencyId( $locale->getCurrencyId() );
 
@@ -340,7 +340,7 @@ abstract class Base
 	protected function importTextsFromContent( \Aimeos\MW\Container\Content\Iface $contentItem, array $textTypeMap, $domain )
 	{
 		$count = 0;
-		$codeIdMap = array();
+		$codeIdMap = [];
 		$context = $this->getContext();
 		$textManager = \Aimeos\MShop\Text\Manager\Factory::createManager( $context );
 		$manager = \Aimeos\MShop\Factory::createManager( $context, $domain );
@@ -354,7 +354,7 @@ abstract class Base
 			if( ++$count == 1000 )
 			{
 				$this->importReferences( $manager, $codeIdMap, $domain );
-				$codeIdMap = array();
+				$codeIdMap = [];
 				$count = 0;
 			}
 
@@ -437,7 +437,7 @@ abstract class Base
 			$item->setContent( $value );
 			$item->setStatus( 1 );
 
-			$textManager->saveItem( $item );
+			$item = $textManager->saveItem( $item );
 
 			$codeIdMap[$row[2]][$item->getId()] = $row[3];
 		}
@@ -459,7 +459,7 @@ abstract class Base
 
 		$type = $config->get( $key . '/type', 'Zip' );
 		$format = $config->get( $key . '/format', 'CSV' );
-		$options = $config->get( $key . '/options', array() );
+		$options = $config->get( $key . '/options', [] );
 
 		return \Aimeos\MW\Container\Factory::getContainer( $resource, $type, $format, $options );
 	}

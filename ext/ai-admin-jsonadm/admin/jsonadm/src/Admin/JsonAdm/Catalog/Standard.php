@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Admin
  * @subpackage JsonAdm
  */
@@ -142,12 +142,12 @@ class Standard
 	 */
 	protected function getChildItems( array $items, array $include )
 	{
-		$list = array();
+		$list = [];
 
 		if( in_array( 'catalog', $include ) )
 		{
 			foreach( $items as $item ) {
-				$list = array_merge( $list, $item->getChildren() );
+				$list = array_merge( $list, [$item], $this->getChildItems( $item->getChildren(), $include ) );
 			}
 		}
 
@@ -173,21 +173,26 @@ class Standard
 			return $response;
 		}
 
-		$include = ( ( $include = $view->param( 'include' ) ) !== null ? explode( ',', $include ) : array() );
+		$include = ( ( $include = $view->param( 'include' ) ) !== null ? explode( ',', $include ) : [] );
 		$search = $this->initCriteria( $manager->createSearch(), $view->param() );
 		$total = 1;
 
 		if( ( $id = $view->param( 'id' ) ) == null )
 		{
-			$view->data = $manager->searchItems( $search, array(), $total );
+			$view->data = $manager->searchItems( $search, [], $total );
 			$view->listItems = $this->getListItems( $view->data, $include );
-			$view->childItems = $this->getChildItems( $view->data, $include );
+			$view->childItems = [];
 		}
 		else
 		{
-			$view->data = $manager->getTree( $id, array(), \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST, $search );
+			$level = \Aimeos\MW\Tree\Manager\Base::LEVEL_ONE;
+			if( in_array( 'catalog', $include ) ) {
+				$level = \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST;
+			}
+
+			$view->data = $manager->getTree( $id, $include, $level, $search );
 			$view->listItems = $this->getListItems( array( $id => $view->data ), $include );
-			$view->childItems = $this->getChildItems( array( $view->data ), $include );
+			$view->childItems = $this->getChildItems( $view->data->getChildren(), $include );
 		}
 
 		$view->refItems = $this->getRefItems( $view->listItems );
@@ -235,7 +240,7 @@ class Standard
 		{
 			$item = $manager->getItem( $entry->id );
 			$item = $this->addItemData( $manager, $item, $entry, $item->getResourceType() );
-			$manager->saveItem( $item );
+			$item = $manager->saveItem( $item );
 
 			if( isset( $entry->parentid ) && $targetId !== null ) {
 				$manager->moveItem( $item->getId(), $entry->parentid, $targetId, $refId );

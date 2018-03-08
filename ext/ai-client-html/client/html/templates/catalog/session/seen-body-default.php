@@ -3,11 +3,11 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 $enc = $this->encoder();
-$seenList = $this->get( 'seenItems', array() );
+$seenList = $this->get( 'seenItems', [] );
 
 /** client/html/catalog/session/seen/count/enable
  * Displays the number of last seen products in the header of the last seen list
@@ -30,20 +30,20 @@ $count = $this->config( 'client/html/catalog/session/seen/count/enable', 1 );
 <section class="catalog-session-seen">
 
 	<h2 class="header">
-		<?php echo $this->translate( 'client', 'Last seen' ); ?>
+		<?= $this->translate( 'client', 'Last seen' ); ?>
 		<?php if( $count ) : ?>
-			<span class="count"><?php echo count( $seenList ); ?></span>
+			<span class="count"><?= count( $seenList ); ?></span>
 		<?php endif; ?>
 	</h2>
 
 	<ul class="seen-items">
 		<?php foreach( $seenList as $seen ) : ?>
 			<li class="seen-item">
-				<?php echo $seen; ?>
+				<?= $seen; ?>
 			</li>
 		<?php endforeach; ?>
 	</ul>
 
 </section>
 <?php $this->block()->stop(); ?>
-<?php echo $this->block()->get( 'catalog/session/seen' ); ?>
+<?= $this->block()->get( 'catalog/session/seen' ); ?>

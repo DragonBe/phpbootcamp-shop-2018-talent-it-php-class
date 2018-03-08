@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
@@ -13,7 +13,7 @@ namespace Aimeos\Controller\ExtJS\Common\Factory;
 /**
  * Test class for \Aimeos\Controller\ExtJS\Common\Factory\BaseTest.
  */
-class BaseTest extends \PHPUnit_Framework_TestCase
+class BaseTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 
@@ -29,9 +29,9 @@ class BaseTest extends \PHPUnit_Framework_TestCase
 		$this->context = \TestHelperExtjs::getContext();
 		$config = $this->context->getConfig();
 
-		$config->set( 'controller/extjs/common/decorators/default', array() );
-		$config->set( 'controller/extjs/admin/log/decorators/global', array() );
-		$config->set( 'controller/extjs/admin/log/decorators/local', array() );
+		$config->set( 'controller/extjs/common/decorators/default', [] );
+		$config->set( 'controller/extjs/admin/log/decorators/global', [] );
+		$config->set( 'controller/extjs/admin/log/decorators/local', [] );
 
 	}
 

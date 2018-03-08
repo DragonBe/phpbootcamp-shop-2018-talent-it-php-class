@@ -1,25 +1,21 @@
 <?php
 
+/**
+ * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
+ * @copyright Aimeos (aimeos.org), 2015-2017
+ */
+
+
 namespace Aimeos\Controller\Jobs\Product\Import\Csv;
 
 
-/**
- * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
- */
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
 	private $aimeos;
 
 
-	/**
-	 * Sets up the fixture, for example, opens a network connection.
-	 * This method is called before a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function setUp()
 	{
 		\Aimeos\MShop\Factory::setCache( true );
@@ -35,12 +31,6 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 *
-	 * @access protected
-	 */
 	protected function tearDown()
 	{
 		\Aimeos\MShop\Factory::setCache( false );
@@ -123,7 +113,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$delete = array( 'media', 'price', 'text' );
 
 		$config = $this->context->getConfig();
-		$mapping = $config->set( 'controller/jobs/product/import/csv/mapping', array() );
+		$mapping = $config->set( 'controller/jobs/product/import/csv/mapping', [] );
 		$mapping['item'] = array( 0 => 'product.label', 1 => 'product.code' );
 
 		$config->set( 'controller/jobs/product/import/csv/mapping', $mapping );
@@ -164,7 +154,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->object->run();
 
-		$this->delete( $prodcodes, array( 'text', 'media' ), array() );
+		$this->delete( $prodcodes, array( 'text', 'media' ), [] );
 	}
 
 

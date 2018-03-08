@@ -3,14 +3,14 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 
 namespace Aimeos\Client\Html\Checkout\Standard\Summary;
 
 
-class StandardTest extends \PHPUnit_Framework_TestCase
+class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
@@ -70,7 +70,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertContains( 'Example company', $output );
 		$this->assertContains( 'unitpaymentlabel', $output );
-		$this->assertContains( 'unitlabel', $output );
+		$this->assertContains( 'Unittest service name', $output );
 	}
 
 
@@ -172,7 +172,7 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 
 		$this->object->process();
 		$this->assertEquals( 'summary', $view->get( 'standardStepActive' ) );
-		$this->assertArrayHasKey( 'option', $view->get( 'summaryErrorCodes', array() ) );
+		$this->assertArrayHasKey( 'option', $view->get( 'summaryErrorCodes', [] ) );
 	}
 
 
@@ -197,15 +197,15 @@ class StandardTest extends \PHPUnit_Framework_TestCase
 		$productManager = \Aimeos\MShop\Product\Manager\Factory::createManager( $this->context );
 		$product = $productManager->findItem( 'CNE' );
 
-		$controller->addProduct( $product->getId(), 2, array(), array(), array(), array(), array(), 'default' );
+		$controller->addProduct( $product->getId(), 2, [], [], [], [], [], 'default' );
 
 
 		$serviceManager = \Aimeos\MShop\Service\Manager\Factory::createManager( $this->context );
 
-		$service = $serviceManager->findItem( 'unitpaymentcode', array(), 'service', 'payment' );
+		$service = $serviceManager->findItem( 'unitpaymentcode', [], 'service', 'payment' );
 		$controller->setService( \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_PAYMENT, $service->getId() );
 
-		$service = $serviceManager->findItem( 'unitcode', array(), 'service', 'delivery' );
+		$service = $serviceManager->findItem( 'unitcode', [], 'service', 'delivery' );
 		$controller->setService( \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY, $service->getId() );
 
 

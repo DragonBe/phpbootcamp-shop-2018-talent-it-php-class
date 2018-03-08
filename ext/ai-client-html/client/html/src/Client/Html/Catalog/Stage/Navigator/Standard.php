@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2014
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -56,7 +56,7 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/catalog/stage/navigator/standard/subparts';
-	private $subPartNames = array();
+	private $subPartNames = [];
 	private $view;
 
 
@@ -68,7 +68,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -100,52 +100,6 @@ class Standard
 		 */
 		$tplconf = 'client/html/catalog/stage/navigator/standard/template-body';
 		$default = 'catalog/stage/navigator-body-default.php';
-
-		return $view->render( $view->config( $tplconf, $default ) );
-	}
-
-
-	/**
-	 * Returns the HTML string for insertion into the header.
-	 *
-	 * @param string $uid Unique identifier for the output if the content is placed more than once on the same page
-	 * @param array &$tags Result array for the list of tags that are associated to the output
-	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
-	 * @return string|null String including HTML tags for the header on error
-	 */
-	public function getHeader( $uid = '', array &$tags = array(), &$expire = null )
-	{
-		$view = $this->setViewParams( $this->getView(), $tags, $expire );
-
-		$html = '';
-		foreach( $this->getSubClients() as $subclient ) {
-			$html .= $subclient->setView( $view )->getHeader( $uid, $tags, $expire );
-		}
-		$view->navigatorHeader = $html;
-
-		/** client/html/catalog/stage/navigator/standard/template-header
-		 * Relative path to the HTML header template of the catalog stage navigator client.
-		 *
-		 * The template file contains the HTML code and processing instructions
-		 * to generate the HTML code that is inserted into the HTML page header
-		 * of the rendered page in the frontend. The configuration string is the
-		 * path to the template file relative to the templates directory (usually
-		 * in client/html/templates).
-		 *
-		 * You can overwrite the template file configuration in extensions and
-		 * provide alternative templates. These alternative templates should be
-		 * named like the default one but with the string "standard" replaced by
-		 * an unique name. You may use the name of your project for this. If
-		 * you've implemented an alternative client class as well, "standard"
-		 * should be replaced by the name of the new class.
-		 *
-		 * @param string Relative path to the template creating code for the HTML page head
-		 * @since 2014.03
-		 * @category Developer
-		 * @see client/html/catalog/stage/navigator/standard/template-body
-		 */
-		$tplconf = 'client/html/catalog/stage/navigator/standard/template-header';
-		$default = 'catalog/stage/navigator-header-default.php';
 
 		return $view->render( $view->config( $tplconf, $default ) );
 	}
@@ -252,19 +206,6 @@ class Standard
 
 
 	/**
-	 * Modifies the cached header content to replace content based on sessions or cookies.
-	 *
-	 * @param string $content Cached content
-	 * @param string $uid Unique identifier for the output if the content is placed more than once on the same page
-	 * @return string Modified body content
-	 */
-	public function modifyHeader( $content, $uid )
-	{
-		return $this->replaceSection( $content, $this->getHeader( $uid ), 'catalog.stage.navigator' );
-	}
-
-
-	/**
 	 * Returns the list of sub-client names configured for the client.
 	 *
 	 * @return array List of HTML client names
@@ -283,7 +224,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->view ) )
 		{
@@ -297,7 +238,7 @@ class Standard
 
 				$context = $this->getContext();
 				$site = $context->getLocale()->getSite()->getCode();
-				$params = $context->getSession()->get( 'aimeos/catalog/lists/params/last/' . $site, array() );
+				$params = $context->getSession()->get( 'aimeos/catalog/lists/params/last/' . $site, [] );
 
 				$filter = $this->getProductListFilterByParam( $params );
 				$filter->setSlice( $start, $size );
@@ -314,7 +255,7 @@ class Standard
 					$target = $view->config( 'client/html/catalog/detail/url/target' );
 					$controller = $view->config( 'client/html/catalog/detail/url/controller', 'catalog' );
 					$action = $view->config( 'client/html/catalog/detail/url/action', 'detail' );
-					$config = $view->config( 'client/html/catalog/detail/url/config', array() );
+					$config = $view->config( 'client/html/catalog/detail/url/config', [] );
 
 					if( $listPos > 0 && ( $product = reset( $products ) ) !== false )
 					{
@@ -323,7 +264,7 @@ class Standard
 							'd_name' => $enc->url( $product->getName( 'url ' ) ),
 							'd_pos' => $pos - 1
 						);
-						$view->navigationPrev = $view->url( $target, $controller, $action, $param, array(), $config );
+						$view->navigationPrev = $view->url( $target, $controller, $action, $param, [], $config );
 					}
 
 					if( $listPos < $count - 1 && ( $product = end( $products ) ) !== false )
@@ -333,7 +274,7 @@ class Standard
 							'd_name' => $enc->url( $product->getName( 'url' ) ),
 							'd_pos' => $pos + 1
 						);
-						$view->navigationNext = $view->url( $target, $controller, $action, $param, array(), $config );
+						$view->navigationNext = $view->url( $target, $controller, $action, $param, [], $config );
 					}
 				}
 			}

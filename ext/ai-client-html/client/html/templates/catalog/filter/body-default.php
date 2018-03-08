@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2012
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  */
 
 /** client/html/catalog/lists/url/target
@@ -75,9 +75,15 @@ $listAction = $this->config( 'client/html/catalog/lists/url/action', 'list' );
  * @see client/html/catalog/lists/url/action
  * @see client/html/url/config
  */
-$listConfig = $this->config( 'client/html/catalog/lists/url/config', array() );
+$listConfig = $this->config( 'client/html/catalog/lists/url/config', [] );
 
-$listParams = array();
+$optTarget = $this->config( 'client/jsonapi/url/target' );
+$optCntl = $this->config( 'client/jsonapi/url/controller', 'jsonapi' );
+$optAction = $this->config( 'client/jsonapi/url/action', 'options' );
+$optConfig = $this->config( 'client/jsonapi/url/config', [] );
+
+
+$listParams = [];
 $params = $this->param();
 
 foreach( array( 'f_sort' ) as $name ) {
@@ -88,26 +94,26 @@ $enc = $this->encoder();
 
 
 ?>
-<section class="aimeos catalog-filter">
+<section class="aimeos catalog-filter" data-jsonurl="<?= $enc->attr( $this->url( $optTarget, $optCntl, $optAction, [], [], $optConfig ) ); ?>">
 
 	<?php if( isset( $this->filterErrorList ) ) : ?>
 		<ul class="error-list">
 			<?php foreach( (array) $this->filterErrorList as $errmsg ) : ?>
-				<li class="error-item"><?php echo $enc->html( $errmsg ); ?></li>
+				<li class="error-item"><?= $enc->html( $errmsg ); ?></li>
 			<?php endforeach; ?>
 		</ul>
 	<?php endif; ?>
 
 	<nav>
-		<h1><?php echo $enc->html( $this->translate( 'client', 'Filter' ), $enc::TRUST ); ?></h1>
-		<form method="POST" action="<?php echo $enc->attr( $this->url( $listTarget, $listController, $listAction, $listParams, array(), $listConfig ) ); ?>">
+		<h1><?= $enc->html( $this->translate( 'client', 'Filter' ), $enc::TRUST ); ?></h1>
+		<form method="POST" action="<?= $enc->attr( $this->url( $listTarget, $listController, $listAction, $listParams, [], $listConfig ) ); ?>">
 			<!-- catalog.filter.csrf -->
-			<?php echo $this->csrf()->formfield(); ?>
+			<?= $this->csrf()->formfield(); ?>
 			<!-- catalog.filter.csrf -->
 
-			<?php echo $this->block()->get( 'catalog/filter/search' ); ?>
-			<?php echo $this->block()->get( 'catalog/filter/tree' ); ?>
-			<?php echo $this->block()->get( 'catalog/filter/attribute' ); ?>
+			<?= $this->block()->get( 'catalog/filter/search' ); ?>
+			<?= $this->block()->get( 'catalog/filter/tree' ); ?>
+			<?= $this->block()->get( 'catalog/filter/attribute' ); ?>
 
 		</form>
 	</nav>

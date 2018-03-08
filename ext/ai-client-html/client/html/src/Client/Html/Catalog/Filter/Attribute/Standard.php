@@ -3,7 +3,7 @@
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
  * @copyright Metaways Infosystems GmbH, 2013
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Client
  * @subpackage Html
  */
@@ -56,8 +56,8 @@ class Standard
 	 * @category Developer
 	 */
 	private $subPartPath = 'client/html/catalog/filter/attribute/standard/subparts';
-	private $subPartNames = array();
-	private $tags = array();
+	private $subPartNames = [];
+	private $tags = [];
 	private $expire;
 	private $cache;
 
@@ -70,7 +70,7 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return string HTML code
 	 */
-	public function getBody( $uid = '', array &$tags = array(), &$expire = null )
+	public function getBody( $uid = '', array &$tags = [], &$expire = null )
 	{
 		$view = $this->setViewParams( $this->getView(), $tags, $expire );
 
@@ -213,12 +213,11 @@ class Standard
 	 * @param string|null &$expire Result variable for the expiration date of the output (null for no expiry)
 	 * @return \Aimeos\MW\View\Iface Modified view object
 	 */
-	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = array(), &$expire = null )
+	protected function setViewParams( \Aimeos\MW\View\Iface $view, array &$tags = [], &$expire = null )
 	{
 		if( !isset( $this->cache ) )
 		{
-			$attrMap = array();
-			$controller = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'catalog' );
+			$attrMap = [];
 
 			/** client/html/catalog/filter/attribute/types
 			 * List of attribute types that should be displayed in this order in the catalog filter
@@ -239,25 +238,18 @@ class Standard
 			 * @category User
 			 * @category Developer
 			 * @see client/html/catalog/filter/attribute/domains
+			 * @see client/html/catalog/filter/attribute/types-oneof
+			 * @see client/html/catalog/filter/attribute/types-option
 			 */
-			$attrTypes = $view->config( 'client/html/catalog/filter/attribute/types', array() );
+			$attrTypes = $view->config( 'client/html/catalog/filter/attribute/types', [] );
+			$attrTypes = ( !is_array( $attrTypes ) ? explode( ',', $attrTypes ) : $attrTypes );
 
-			$manager = $controller->createManager( 'attribute' );
-			$search = $manager->createSearch( true );
+			$cntl = \Aimeos\Controller\Frontend\Factory::createController( $this->getContext(), 'attribute' );
 
-			$expr = array();
-			if( !empty( $attrTypes ) ) {
-				$expr[] = $search->compare( '==', 'attribute.type.code', $attrTypes );
-			}
+			$filter = $cntl->createFilter();
+			$filter = $cntl->addFilterTypes( $filter, $attrTypes );
+			$filter->setSlice( 0, 0x7fffffff );
 
-			$expr[] = $search->compare( '==', 'attribute.domain', 'product' );
-			$expr[] = $search->getConditions();
-
-			$sort = array( $search->sort( '+', 'attribute.position' ) );
-
-			$search->setConditions( $search->combine( '&&', $expr ) );
-			$search->setSortations( $sort );
-			$search->setSlice( 0, 0x7fffffff );
 
 			/** client/html/catalog/filter/attribute/domains
 			 * List of domain names whose items should be fetched with the filter attributes
@@ -277,7 +269,7 @@ class Standard
 			 */
 			$domains = $view->config( 'client/html/catalog/filter/attribute/domains', array( 'text', 'media' ) );
 
-			$attributes = $manager->searchItems( $search, $domains );
+			$attributes = $cntl->searchItems( $filter, $domains );
 
 			foreach( $attributes as $id => $item ) {
 				$attrMap[$item->getType()][$id] = $item;
@@ -285,7 +277,7 @@ class Standard
 
 			if( !empty( $attrTypes ) )
 			{
-				$sortedMap = array();
+				$sortedMap = [];
 
 				foreach( $attrTypes as $type )
 				{

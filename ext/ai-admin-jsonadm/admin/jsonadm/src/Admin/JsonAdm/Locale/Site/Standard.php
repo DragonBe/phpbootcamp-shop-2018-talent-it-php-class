@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  * @package Admin
  * @subpackage JsonAdm
  */
@@ -134,28 +134,6 @@ class Standard
 
 
 	/**
-	 * Returns the items with parent/child relationships
-	 *
-	 * @param array $items List of items implementing \Aimeos\MShop\Common\Item\Iface
-	 * @param array $include List of resource types that should be fetched
-	 * @return array List of items implementing \Aimeos\MShop\Common\Item\Iface
-	 */
-	protected function getChildItems( array $items, array $include )
-	{
-		$list = array();
-
-		if( in_array( 'locale/site', $include ) )
-		{
-			foreach( $items as $item ) {
-				$list = array_merge( $list, $item->getChildren() );
-			}
-		}
-
-		return $list;
-	}
-
-
-	/**
 	 * Retrieves the item or items and adds the data to the view
 	 *
 	 * @param \Aimeos\MW\View\Iface $view View instance
@@ -166,31 +144,18 @@ class Standard
 	protected function getItems( \Aimeos\MW\View\Iface $view, ServerRequestInterface $request, ResponseInterface $response )
 	{
 		$manager = \Aimeos\MShop\Factory::createManager( $this->getContext(), 'locale/site' );
-
-		if( ( $key = $view->param( 'aggregate' ) ) !== null )
-		{
-			$search = $this->initCriteria( $manager->createSearch(), $view->param() );
-			$view->data = $manager->aggregate( $search, $key );
-			return $response;
-		}
-
-		$include = ( ( $include = $view->param( 'include' ) ) !== null ? explode( ',', $include ) : array() );
 		$search = $this->initCriteria( $manager->createSearch(), $view->param() );
 		$total = 1;
 
-		if( ( $id = $view->param( 'id' ) ) == null )
-		{
-			$view->data = $manager->searchItems( $search, array(), $total );
-			$view->childItems = $this->getChildItems( $view->data, $include );
-		}
-		else
-		{
-			$view->data = $manager->getTree( $id, array(), \Aimeos\MW\Tree\Manager\Base::LEVEL_LIST, $search );
-			$view->childItems = $this->getChildItems( array( $view->data ), $include );
+		if( ( $id = $view->param( 'id' ) ) == null ) {
+			$view->data = $manager->searchItems( $search, [], $total );
+		} else {
+			$view->data = $manager->getTree( $id, [], \Aimeos\MW\Tree\Manager\Base::LEVEL_ONE, $search );
 		}
 
-		$view->listItems = array();
-		$view->refItems = array();
+		$view->childItems = [];
+		$view->listItems = [];
+		$view->refItems = [];
 		$view->total = $total;
 
 		return $response;
@@ -206,24 +171,17 @@ class Standard
 	 */
 	protected function saveEntry( \Aimeos\MShop\Common\Manager\Iface $manager, \stdClass $entry )
 	{
-		$targetId = ( isset( $entry->targetid ) ? $entry->targetid : null );
-		$refId = ( isset( $entry->refid ) ? $entry->refid : null );
-
 		if( isset( $entry->id ) )
 		{
 			$item = $manager->getItem( $entry->id );
 			$item = $this->addItemData( $manager, $item, $entry, $item->getResourceType() );
-			$manager->saveItem( $item );
-
-			if( isset( $entry->parentid ) && $targetId !== null ) {
-				$manager->moveItem( $item->getId(), $entry->parentid, $targetId, $refId );
-			}
+			$item = $manager->saveItem( $item );
 		}
 		else
 		{
 			$item = $manager->createItem();
 			$item = $this->addItemData( $manager, $item, $entry, $item->getResourceType() );
-			$manager->insertItem( $item, $targetId, $refId );
+			$manager->insertItem( $item );
 		}
 
 		if( isset( $entry->relationships ) ) {

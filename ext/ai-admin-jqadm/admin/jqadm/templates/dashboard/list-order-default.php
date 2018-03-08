@@ -2,12 +2,12 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2016
+ * @copyright Aimeos (aimeos.org), 2016-2017
  */
 
 $enc = $this->encoder();
 
 ?>
-<div class="dashboard-order">
-<?php echo $this->get( 'orderBody' ); ?>
+<div class="dashboard-order row">
+	<?= $this->get( 'orderBody' ); ?>
 </div>

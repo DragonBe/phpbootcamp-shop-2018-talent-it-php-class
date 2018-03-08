@@ -2,7 +2,7 @@
 
 /**
  * @license LGPLv3, http://opensource.org/licenses/LGPL-3.0
- * @copyright Aimeos (aimeos.org), 2015-2016
+ * @copyright Aimeos (aimeos.org), 2015-2017
  * @package Controller
  * @subpackage Common
  */
@@ -88,8 +88,16 @@ class Standard
 
 		try
 		{
-			$map = $this->getMappedChunk( $data );
-			$listItems = $product->getListItems( 'media' );
+			$delete = $listMap = [];
+			$map = $this->getMappedChunk( $data, $this->getMapping() );
+			$listItems = $product->getListItems( 'media', $this->listTypes );
+
+			foreach( $listItems as $listItem )
+			{
+				if( ( $refItem = $listItem->getRefItem() ) !== null ) {
+					$listMap[ $refItem->getUrl() ][ $refItem->getType() ][ $listItem->getType() ] = $listItem;
+				}
+			}
 
 			foreach( $map as $pos => $list )
 			{
@@ -101,26 +109,26 @@ class Standard
 				$type = $this->getValue( $list, 'media.type', 'default' );
 				$typecode = $this->getValue( $list, 'product.lists.type', 'default' );
 
-				if( ( $langid = $this->getValue( $list, 'media.languageid', null ) ) === '' ) {
-					$langid = null;
-				}
-
 				foreach( $urls as $url )
 				{
-					if( ( $listItem = array_shift( $listItems ) ) !== null ) {
+					if( isset( $listMap[$url][$type][$typecode] ) )
+					{
+						$listItem = $listMap[$url][$type][$typecode];
 						$refItem = $listItem->getRefItem();
-					} else {
+						unset( $listItems[ $listItem->getId() ] );
+					}
+					else
+					{
 						$listItem = $listManager->createItem();
 						$refItem = $manager->createItem();
 					}
 
 					$list['media.typeid'] = $this->getTypeId( 'media/type', 'product', $type );
-					$list['media.languageid'] = $langid;
 					$list['media.domain'] = 'product';
 					$list['media.url'] = $url;
 
 					$refItem->fromArray( $this->addItemDefaults( $list ) );
-					$manager->saveItem( $refItem );
+					$refItem = $manager->saveItem( $refItem );
 
 					$list['product.lists.typeid'] = $this->getTypeId( 'product/lists/type', 'media', $typecode );
 					$list['product.lists.parentid'] = $product->getId();
@@ -128,17 +136,18 @@ class Standard
 					$list['product.lists.domain'] = 'media';
 
 					$listItem->fromArray( $this->addListItemDefaults( $list, $pos++ ) );
-					$listManager->saveItem( $listItem );
+					$listManager->saveItem( $listItem, false );
 				}
 			}
 
-			foreach( $listItems as $listItem )
-			{
-				$manager->deleteItem( $listItem->getRefItem()->getId() );
-				$listManager->deleteItem( $listItem->getId() );
+			foreach( $listItems as $listItem ) {
+				$delete[] = $listItem->getRefId();
 			}
 
-			$remaining = $this->getObject()->process( $product, $data );
+			$manager->deleteItems( $delete );
+			$listManager->deleteItems( array_keys( $listItems ) );
+
+			$data = $this->getObject()->process( $product, $data );
 
 			$manager->commit();
 		}
@@ -148,7 +157,7 @@ class Standard
 			throw $e;
 		}
 
-		return $remaining;
+		return $data;
 	}
 
 
