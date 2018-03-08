@@ -1215,6 +1215,9 @@ html.no-js .catalog-filter-attribute:hover .attribute-lists {
 .catalog-detail-social .social-button-facebook:before {
 	content: "\f082";
 }
+.catalog-detail-social .social-button-instagram:before {
+	content: "\f16d";
+}
 
 .catalog-detail-social .social-button-gplus:before {
 	content: "\f0d5";

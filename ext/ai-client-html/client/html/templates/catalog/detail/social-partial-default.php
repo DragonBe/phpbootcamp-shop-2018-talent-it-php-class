@@ -37,7 +37,7 @@ $enc = $this->encoder();
  * @see client/html/catalog/detail/social/url/twitter
  * @see client/html/catalog/detail/social/url/pinterest
  */
-$list = $this->config( 'client/html/catalog/detail/social/list', array( 'facebook', 'gplus', 'twitter', 'pinterest' ) );
+$list = $this->config( 'client/html/catalog/detail/social/list', array( 'facebook', 'gplus', 'twitter', 'pinterest', 'instagram' ) );
 
 $urls = array(
 	/** client/html/catalog/detail/social/url/facebook
@@ -123,6 +123,8 @@ $urls = array(
 	 * @see client/html/catalog/detail/social/list
 	 */
 	'pinterest' => 'https://pinterest.com/pin/create/button/?url=%1$s&description=%2$s&media=%3$s',
+
+	'instagram' => 'https://www.instagram.com/?url=%1$s&description=%2$s&media=%3$s',
 );
 
 $detailTarget = $this->config( 'client/html/catalog/detail/url/target' );
