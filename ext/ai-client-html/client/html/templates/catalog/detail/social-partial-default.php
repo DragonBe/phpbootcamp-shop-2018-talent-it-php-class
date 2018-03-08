@@ -124,7 +124,7 @@ $urls = array(
 	 */
 	'pinterest' => 'https://pinterest.com/pin/create/button/?url=%1$s&description=%2$s&media=%3$s',
 
-	'instagram' => 'https://www.instagram.com/p/BgD6MYyB9bC/',
+	'instagram' => 'https://www.instagram.com/p/BfyUmwPnw1M/',
 );
 
 $detailTarget = $this->config( 'client/html/catalog/detail/url/target' );
