@@ -228,8 +228,8 @@ $params['id'] = $this->param( 'id', '' );
 <div class="aimeos" data-url="<?php echo $enc->attr( $this->url( $jsonTarget, $jsonCntl, $jsonAction, array( 'site' => $site, 'resource' => '', 'id' => '' ), array(), $jsonConfig ) ); ?>">
 
 	<nav class="navbar navbar-full">
-		<a class="navbar-brand" href="/list">
-			<img src="/images/Maneblusser.jpg" alt="Maneblusser Fashion" title="Maneblusser Fashion" />
+                <a class="navbar-brand" href="/list">
+ 			<img src="/images/Maneblusser.jpg" alt="Maneblusser Fashion" title="Maneblusser Fashion" />
 		</a>
 
 		<button class="navbar-toggler hidden-sm-up" type="button" data-toggle="collapse" data-target="#collapse-navbar">&#9776;</button>
